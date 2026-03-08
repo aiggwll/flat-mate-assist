@@ -11,6 +11,7 @@ import PropertyDetailPage from "./pages/PropertyDetailPage";
 import PaymentsPage from "./pages/PaymentsPage";
 import ChatPage from "./pages/ChatPage";
 import DamagesPage from "./pages/DamagesPage";
+import DocumentsPage from "./pages/DocumentsPage";
 import MarketplacePage from "./pages/MarketplacePage";
 import NotFound from "./pages/NotFound";
 
