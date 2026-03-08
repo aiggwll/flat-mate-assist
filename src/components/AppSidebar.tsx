@@ -6,6 +6,7 @@ import {
   CreditCard,
   AlertTriangle,
   Store,
+  FileText,
   LogOut,
 } from "lucide-react";
 
@@ -13,6 +14,7 @@ const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/properties", label: "Immobilien", icon: Building2 },
   { to: "/payments", label: "Zahlungen", icon: CreditCard },
+  { to: "/documents", label: "Dokumente", icon: FileText },
   { to: "/chat", label: "Nachrichten", icon: MessageSquare, badge: 2 },
   { to: "/damages", label: "Schäden", icon: AlertTriangle },
   { to: "/marketplace", label: "Marktplatz", icon: Store },
