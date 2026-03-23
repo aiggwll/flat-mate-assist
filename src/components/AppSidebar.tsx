@@ -4,7 +4,6 @@ import {
   Building2,
   MessageSquare,
   CreditCard,
-  AlertTriangle,
   Store,
   ClipboardCheck,
   FileText,
