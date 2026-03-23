@@ -6,6 +6,7 @@ import {
   CreditCard,
   AlertTriangle,
   Store,
+  ClipboardCheck,
   FileText,
   LogOut,
 } from "lucide-react";
