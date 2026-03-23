@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Building2, MapPin, Home, Plus } from "lucide-react";
+import { Building2, MapPin, Home, Plus, Calendar, Layers, Ruler, AlertTriangle, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
