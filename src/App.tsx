@@ -12,6 +12,7 @@ import PaymentsPage from "./pages/PaymentsPage";
 import ChatPage from "./pages/ChatPage";
 import DamagesPage from "./pages/DamagesPage";
 import DocumentsPage from "./pages/DocumentsPage";
+import TasksPage from "./pages/TasksPage";
 import MarketplacePage from "./pages/MarketplacePage";
 import NotFound from "./pages/NotFound";
 
