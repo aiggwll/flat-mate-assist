@@ -17,7 +17,6 @@ const navItems = [
   { to: "/payments", label: "Zahlungen", icon: CreditCard },
   { to: "/documents", label: "Dokumente", icon: FileText },
   { to: "/chat", label: "Nachrichten", icon: MessageSquare, badge: 2 },
-  { to: "/damages", label: "Schäden", icon: AlertTriangle },
   { to: "/tasks", label: "Aufgaben", icon: ClipboardCheck },
   { to: "/marketplace", label: "Marktplatz", icon: Store },
 ];
