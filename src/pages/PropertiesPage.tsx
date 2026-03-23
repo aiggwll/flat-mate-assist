@@ -53,10 +53,15 @@ const PropertiesPage = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {properties.map((p) => {
           const occupiedUnits = p.units.filter(u => u.tenant).length;
+          const vacantUnits = p.units.length - occupiedUnits;
           const totalRent = p.units.reduce((sum, u) => sum + u.rent, 0);
+          const totalArea = p.units.reduce((sum, u) => sum + u.size, 0);
+          const openDamages = p.units.reduce((sum, u) => sum + u.damages.filter(d => d.status !== "erledigt").length, 0);
+          const totalDocs = p.units.reduce((sum, u) => sum + u.documents.length, 0);
+
           return (
             <Link
               key={p.id}
@@ -64,22 +69,56 @@ const PropertiesPage = () => {
               className="bg-card rounded-xl border hover:border-accent/50 hover:shadow-md transition-all p-5 group"
             >
               <div className="flex items-start justify-between mb-3">
-                <div className="h-10 w-10 rounded-lg bg-primary/5 flex items-center justify-center text-primary group-hover:bg-accent/10 group-hover:text-accent transition-colors">
-                  <Building2 className="h-5 w-5" />
+                <div className="flex items-center gap-3">
+                  <div className="h-11 w-11 rounded-lg bg-primary/5 flex items-center justify-center text-primary group-hover:bg-accent/10 group-hover:text-accent transition-colors">
+                    <Building2 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-semibold text-foreground">{p.address}</h3>
+                    <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
+                      <MapPin className="h-3 w-3" />
+                      <span className="text-xs">{p.zipCode} {p.city}</span>
+                    </div>
+                  </div>
                 </div>
-                <span className="text-xs text-muted-foreground">Bj. {p.yearBuilt}</span>
+                <span className="text-sm font-bold text-accent">{totalRent.toLocaleString("de-DE")} €/M</span>
               </div>
-              <h3 className="font-heading font-semibold text-foreground">{p.address}</h3>
-              <div className="flex items-center gap-1 text-muted-foreground mt-1">
-                <MapPin className="h-3 w-3" />
-                <span className="text-xs">{p.zipCode} {p.city}</span>
-              </div>
-              <div className="flex items-center justify-between mt-4 pt-3 border-t">
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Home className="h-3.5 w-3.5" />
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-3 border-t">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="h-3.5 w-3.5 shrink-0" />
+                  <span>Bj. {p.yearBuilt}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Layers className="h-3.5 w-3.5 shrink-0" />
+                  <span>{p.units.length} Wohnungen</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Ruler className="h-3.5 w-3.5 shrink-0" />
+                  <span>{totalArea} m²</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Home className="h-3.5 w-3.5 shrink-0" />
                   <span>{occupiedUnits}/{p.units.length} vermietet</span>
                 </div>
-                <span className="text-sm font-semibold text-accent">{totalRent.toLocaleString("de-DE")} €/M</span>
+              </div>
+
+              <div className="flex items-center gap-4 mt-3 pt-3 border-t">
+                {vacantUnits > 0 && (
+                  <span className="text-xs font-medium text-warning bg-warning/10 px-2 py-0.5 rounded-full">
+                    {vacantUnits} Leerstand
+                  </span>
+                )}
+                {openDamages > 0 && (
+                  <div className="flex items-center gap-1 text-xs text-destructive">
+                    <AlertTriangle className="h-3 w-3" />
+                    <span>{openDamages} offene Schäden</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <FileText className="h-3 w-3" />
+                  <span>{totalDocs} Dokumente</span>
+                </div>
               </div>
             </Link>
           );
