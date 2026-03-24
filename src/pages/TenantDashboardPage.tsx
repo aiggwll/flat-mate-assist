@@ -76,6 +76,7 @@ const TenantDashboardPage = () => {
   const [rooms, setRooms] = useState<string[]>(defaultRooms);
   const [roomVideos, setRoomVideos] = useState<Record<string, { file: File; uploaded: boolean } | null>>({});
   const [extraRoomCount, setExtraRoomCount] = useState(1);
+  const [recordingRoom, setRecordingRoom] = useState<string | null>(null);
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
