@@ -1,4 +1,5 @@
 import { useState } from "react";
+import CameraRecorder from "@/components/CameraRecorder";
 import { useSearchParams, NavLink } from "react-router-dom";
 import { properties, messages as allMessages } from "@/lib/dummy-data";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -75,6 +76,7 @@ const TenantDashboardPage = () => {
   const [rooms, setRooms] = useState<string[]>(defaultRooms);
   const [roomVideos, setRoomVideos] = useState<Record<string, { file: File; uploaded: boolean } | null>>({});
   const [extraRoomCount, setExtraRoomCount] = useState(1);
+  const [recordingRoom, setRecordingRoom] = useState<string | null>(null);
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
@@ -450,17 +452,13 @@ const TenantDashboardPage = () => {
                               onChange={(e) => handleRoomVideoUpload(room, e.target.files)}
                             />
                           </label>
-                          <label className="flex-1 flex flex-col items-center justify-center cursor-pointer py-6 border-2 border-dashed border-accent/40 rounded-lg hover:border-accent bg-accent/5 transition-colors">
+                          <button
+                            onClick={() => setRecordingRoom(room)}
+                            className="flex-1 flex flex-col items-center justify-center py-6 border-2 border-dashed border-accent/40 rounded-lg hover:border-accent bg-accent/5 transition-colors"
+                          >
                             <Camera className="h-5 w-5 text-accent mb-1" />
                             <span className="text-[10px] text-accent font-medium">Aufnehmen</span>
-                            <input
-                              type="file"
-                              accept="video/*"
-                              capture="environment"
-                              className="hidden"
-                              onChange={(e) => handleRoomVideoUpload(room, e.target.files)}
-                            />
-                          </label>
+                          </button>
                         </div>
                       ) : !entry.uploaded ? (
                         <div className="text-center space-y-2">
@@ -506,6 +504,17 @@ const TenantDashboardPage = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {recordingRoom && (
+        <CameraRecorder
+          roomName={recordingRoom}
+          onClose={() => setRecordingRoom(null)}
+          onRecorded={(file) => {
+            setRoomVideos((prev) => ({ ...prev, [recordingRoom]: { file, uploaded: false } }));
+            setRecordingRoom(null);
+          }}
+        />
+      )}
     </div>
   );
 };
