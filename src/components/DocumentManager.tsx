@@ -196,7 +196,7 @@ const DocumentManager = ({ role }: DocumentManagerProps) => {
             {docs.length} Dokumente · {sortedYears.length > 0 ? `${sortedYears[sortedYears.length - 1]}–${sortedYears[0]}` : "–"}
           </p>
         </div>
-        {(canUpload || role === "tenant") && (
+        {canUpload && (
           <Button onClick={() => setUploadOpen(true)} size="sm" className="gap-2">
             <Upload className="h-4 w-4" />
             Hochladen
