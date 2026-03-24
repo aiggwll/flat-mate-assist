@@ -237,13 +237,58 @@ const DocumentManager = ({ role }: DocumentManagerProps) => {
         </select>
       </div>
 
-      {/* Document tree */}
+      {/* Document view */}
       {sortedYears.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <FileText className="h-10 w-10 mb-3 opacity-30" />
           <p className="text-sm">Keine Dokumente gefunden.</p>
         </div>
+      ) : role === "tenant" ? (
+        /* Tenant: simplified flat list grouped by category label */
+        <div className="space-y-4">
+          {(["Verträge", "Protokolle", "Rechnungen"] as const).map((cat) => {
+            const catLabel = cat === "Verträge" ? "Mietvertrag" : cat === "Protokolle" ? "Übergabeprotokoll" : "Nebenkostenabrechnung";
+            const catDocs = filtered.filter((d) => d.category === cat);
+            if (catDocs.length === 0) return null;
+            return (
+              <div key={cat}>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 px-1">{catLabel}</p>
+                <div className="border rounded-lg divide-y">
+                  {catDocs.map((doc) => (
+                    <div key={doc.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/10 transition-colors group">
+                      <div className="h-8 w-8 rounded-md bg-muted/50 flex items-center justify-center shrink-0">
+                        <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-foreground truncate">{doc.name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-muted-foreground">{doc.fileType}</span>
+                          <span className="text-xs text-muted-foreground">·</span>
+                          <span className="text-xs text-muted-foreground">{new Date(doc.uploadedAt).toLocaleDateString("de-DE")}</span>
+                          {doc.status && (
+                            <Badge variant={statusVariant(doc.status)} className="text-[10px] h-5 px-1.5">
+                              {statusLabel[doc.status]}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                          <Eye className="h-3.5 w-3.5" />
+                        </button>
+                        <button className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                          <Download className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       ) : (
+        /* Owner: full accordion structure */
         <Accordion type="multiple" defaultValue={[sortedYears[0]]} className="space-y-2">
           {sortedYears.map((year) => (
             <AccordionItem key={year} value={year} className="border rounded-lg overflow-hidden">
