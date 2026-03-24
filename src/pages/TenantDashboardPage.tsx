@@ -116,16 +116,26 @@ const TenantDashboardPage = () => {
     setDamageOpen(false);
   };
 
-  const handleVideoUpload = (files: FileList | null) => {
+  const handleRoomVideoUpload = (room: string, files: FileList | null) => {
     if (!files || files.length === 0) return;
-    setVideoFile(files[0]);
+    setRoomVideos((prev) => ({ ...prev, [room]: { file: files[0], uploaded: false } }));
   };
 
-  const handleVideoSubmit = () => {
-    if (!videoFile) return;
-    setVideoUploaded(true);
-    setTimeout(() => setVideoUploaded(false), 3000);
-    setVideoFile(null);
+  const handleRoomVideoSubmit = (room: string) => {
+    setRoomVideos((prev) => ({
+      ...prev,
+      [room]: prev[room] ? { ...prev[room]!, uploaded: true } : null,
+    }));
+  };
+
+  const handleRemoveRoomVideo = (room: string) => {
+    setRoomVideos((prev) => ({ ...prev, [room]: null }));
+  };
+
+  const handleAddRoom = () => {
+    const newRoom = `Zimmer ${extraRoomCount + 1}`;
+    setRooms((prev) => [...prev, newRoom]);
+    setExtraRoomCount((c) => c + 1);
   };
 
   const statusColor = (s: string) => {
