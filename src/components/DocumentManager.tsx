@@ -75,6 +75,9 @@ const initialDocs: Doc[] = [
   { id: "d9", name: "Heizungsrechnung_Wartung.pdf", year: "2026", category: "Instandhaltung", uploadedAt: "2026-02-10", fileType: "PDF", size: "92 KB", status: "", description: "" },
 ];
 
+// Categories visible to tenants
+const TENANT_CATEGORIES: Category[] = ["Verträge", "Protokolle", "Rechnungen"];
+
 interface DocumentManagerProps {
   role: "owner" | "tenant";
 }
