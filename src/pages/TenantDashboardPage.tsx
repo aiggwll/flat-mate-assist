@@ -425,33 +425,12 @@ const TenantDashboardPage = () => {
               </p>
 
               {/* Tips Card */}
-              <Card className="p-6 border border-border/50 bg-card">
-                <p className="text-sm font-semibold text-foreground tracking-tight mb-4">Worauf Sie achten sollten</p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {[
-                    { icon: Smartphone, text: "Handy ruhig halten – Verwacklungen vermeiden" },
-                    { icon: Footprints, text: "Langsam durch jeden Raum gehen" },
-                    { icon: ScanLine, text: "Kamera gleichmäßig und ruhig führen" },
-                    { icon: MonitorSmartphone, text: "Im Querformat filmen" },
-                    { icon: Lightbulb, text: "Für gute Beleuchtung sorgen" },
-                    { icon: Maximize, text: "Jeden Raum vollständig zeigen, inkl. Ecken" },
-                    { icon: Focus, text: "Wichtige Bereiche fokussieren: Ecken, Fenster, Böden" },
-                    { icon: ShieldAlert, text: "Schäden oder Auffälligkeiten deutlich zeigen" },
-                    { icon: VolumeX, text: "Laute Hintergrundgeräusche vermeiden" },
-                    { icon: Timer, text: "Video-Länge pro Raum: 1–3 Minuten" },
-                  ].map((tip, i) => {
-                    const Icon = tip.icon;
-                    return (
-                      <div key={i} className="flex items-center gap-3 py-1.5">
-                        <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                          <Icon className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-snug">{tip.text}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </Card>
+              <div className="rounded-lg border border-border/50 px-5 py-4">
+                <p className="text-xs font-medium text-foreground mb-2">Worauf Sie achten sollten</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Filmen Sie im Querformat, langsam und mit ruhiger Hand. Sorgen Sie für gute Beleuchtung und zeigen Sie jeden Raum vollständig – inkl. Ecken, Fenster und Böden. Schäden oder Auffälligkeiten bitte deutlich festhalten. Vermeiden Sie Hintergrundgeräusche. Pro Raum genügen 1–3 Minuten.
+                </p>
+              </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 {rooms.map((room) => {
