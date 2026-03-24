@@ -72,12 +72,16 @@ const TenantDashboardPage = () => {
   const [damagePhotos, setDamagePhotos] = useState<{ file: File; preview: string }[]>([]);
   const [damages, setDamages] = useState(unit?.damages || []);
 
-  // 360° upload state per room
+  // 360° upload state
   const defaultRooms = ["Küche", "Badezimmer", "Fenster", "Zimmer 1", "Wohnzimmer", "Flur"];
-  const [rooms, setRooms] = useState<string[]>(defaultRooms);
-  const [roomVideos, setRoomVideos] = useState<Record<string, { file: File; uploaded: boolean } | null>>({});
-  const [extraRoomCount, setExtraRoomCount] = useState(1);
+  const [customRooms, setCustomRooms] = useState<string[]>([]);
+  const [allRoomOptions, setAllRoomOptions] = useState<string[]>([...defaultRooms]);
+  const [roomVideos, setRoomVideos] = useState<Record<string, { file: File; uploaded: boolean }>>({});
   const [recordingRoom, setRecordingRoom] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState("");
+  const [newCustomRoom, setNewCustomRoom] = useState("");
+  const [showAddCustom, setShowAddCustom] = useState(false);
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
