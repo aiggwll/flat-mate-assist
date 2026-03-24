@@ -133,26 +133,41 @@ const TenantDashboardPage = () => {
     setDamageOpen(false);
   };
 
-  const handleRoomVideoUpload = (room: string, files: FileList | null) => {
+  const handleVideoFileSelect = (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    setRoomVideos((prev) => ({ ...prev, [room]: { file: files[0], uploaded: false } }));
+    setPendingFile(files[0]);
+    setSelectedRoom("");
+  };
+
+  const handleAssignRoom = () => {
+    if (!pendingFile || !selectedRoom) return;
+    setRoomVideos((prev) => ({ ...prev, [selectedRoom]: { file: pendingFile, uploaded: false } }));
+    setPendingFile(null);
+    setSelectedRoom("");
   };
 
   const handleRoomVideoSubmit = (room: string) => {
     setRoomVideos((prev) => ({
       ...prev,
-      [room]: prev[room] ? { ...prev[room]!, uploaded: true } : null,
+      [room]: prev[room] ? { ...prev[room]!, uploaded: true } : prev[room],
     }));
   };
 
   const handleRemoveRoomVideo = (room: string) => {
-    setRoomVideos((prev) => ({ ...prev, [room]: null }));
+    setRoomVideos((prev) => {
+      const copy = { ...prev };
+      delete copy[room];
+      return copy;
+    });
   };
 
-  const handleAddRoom = () => {
-    const newRoom = `Zimmer ${extraRoomCount + 1}`;
-    setRooms((prev) => [...prev, newRoom]);
-    setExtraRoomCount((c) => c + 1);
+  const handleAddCustomRoom = () => {
+    const name = newCustomRoom.trim();
+    if (!name || allRoomOptions.includes(name)) return;
+    setAllRoomOptions((prev) => [...prev, name]);
+    setCustomRooms((prev) => [...prev, name]);
+    setNewCustomRoom("");
+    setShowAddCustom(false);
   };
 
   const statusColor = (s: string) => {
