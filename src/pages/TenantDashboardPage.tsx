@@ -159,6 +159,7 @@ const TenantDashboardPage = () => {
     if (!name || allRoomOptions.includes(name)) return;
     setAllRoomOptions((prev) => [...prev, name]);
     setCustomRooms((prev) => [...prev, name]);
+    setSelectedRoom(name);
     setNewCustomRoom("");
     setShowAddCustom(false);
   };
