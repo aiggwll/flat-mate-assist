@@ -60,9 +60,11 @@ const TenantDashboardPage = () => {
   const [damagePhotos, setDamagePhotos] = useState<{ file: File; preview: string }[]>([]);
   const [damages, setDamages] = useState(unit?.damages || []);
 
-  // 360° upload state
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [videoUploaded, setVideoUploaded] = useState(false);
+  // 360° upload state per room
+  const defaultRooms = ["Küche", "Badezimmer", "Fenster", "Zimmer 1", "Wohnzimmer", "Flur"];
+  const [rooms, setRooms] = useState<string[]>(defaultRooms);
+  const [roomVideos, setRoomVideos] = useState<Record<string, { file: File; uploaded: boolean } | null>>({});
+  const [extraRoomCount, setExtraRoomCount] = useState(1);
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
@@ -114,16 +116,26 @@ const TenantDashboardPage = () => {
     setDamageOpen(false);
   };
 
-  const handleVideoUpload = (files: FileList | null) => {
+  const handleRoomVideoUpload = (room: string, files: FileList | null) => {
     if (!files || files.length === 0) return;
-    setVideoFile(files[0]);
+    setRoomVideos((prev) => ({ ...prev, [room]: { file: files[0], uploaded: false } }));
   };
 
-  const handleVideoSubmit = () => {
-    if (!videoFile) return;
-    setVideoUploaded(true);
-    setTimeout(() => setVideoUploaded(false), 3000);
-    setVideoFile(null);
+  const handleRoomVideoSubmit = (room: string) => {
+    setRoomVideos((prev) => ({
+      ...prev,
+      [room]: prev[room] ? { ...prev[room]!, uploaded: true } : null,
+    }));
+  };
+
+  const handleRemoveRoomVideo = (room: string) => {
+    setRoomVideos((prev) => ({ ...prev, [room]: null }));
+  };
+
+  const handleAddRoom = () => {
+    const newRoom = `Zimmer ${extraRoomCount + 1}`;
+    setRooms((prev) => [...prev, newRoom]);
+    setExtraRoomCount((c) => c + 1);
   };
 
   const statusColor = (s: string) => {
@@ -399,58 +411,66 @@ const TenantDashboardPage = () => {
             <div className="space-y-4">
               <h3 className="font-heading font-semibold text-foreground">360° Wohnungszustand</h3>
               <p className="text-sm text-muted-foreground">
-                Laden Sie ein 360°-Video oder -Rundgang Ihrer Wohnung hoch, um den aktuellen Zustand zu dokumentieren.
+                Laden Sie für jeden Raum ein 360°-Video oder Foto hoch, um den aktuellen Zustand zu dokumentieren.
               </p>
 
-              <Card className="p-8">
-                {!videoFile ? (
-                  <label className="flex flex-col items-center justify-center cursor-pointer py-8">
-                    <div className="h-16 w-16 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-4">
-                      <Upload className="h-8 w-8" />
-                    </div>
-                    <p className="text-sm font-medium text-foreground mb-1">
-                      Video oder 360°-Datei hochladen
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      MP4, MOV oder 360°-Formate · Max. 500 MB
-                    </p>
-                    <input
-                      type="file"
-                      accept="video/*,.mp4,.mov"
-                      className="hidden"
-                      onChange={(e) => handleVideoUpload(e.target.files)}
-                    />
-                  </label>
-                ) : (
-                  <div className="text-center space-y-4">
-                    <div className="h-16 w-16 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mx-auto">
-                      <Video className="h-8 w-8" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{videoFile.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(videoFile.size / 1024 / 1024).toFixed(1)} MB
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-center gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setVideoFile(null)}>
-                        Abbrechen
-                      </Button>
-                      <Button size="sm" onClick={handleVideoSubmit}>
-                        Hochladen
-                      </Button>
-                    </div>
-                  </div>
-                )}
+              <div className="grid gap-4 sm:grid-cols-2">
+                {rooms.map((room) => {
+                  const entry = roomVideos[room];
+                  return (
+                    <Card key={room} className="p-4">
+                      <p className="text-sm font-medium text-foreground mb-3">{room}</p>
+                      {!entry ? (
+                        <label className="flex flex-col items-center justify-center cursor-pointer py-6 border-2 border-dashed border-muted-foreground/30 rounded-lg hover:border-accent transition-colors">
+                          <Upload className="h-6 w-6 text-muted-foreground mb-1" />
+                          <span className="text-xs text-muted-foreground">Video / Foto hochladen</span>
+                          <input
+                            type="file"
+                            accept="video/*,image/*,.mp4,.mov"
+                            className="hidden"
+                            onChange={(e) => handleRoomVideoUpload(room, e.target.files)}
+                          />
+                        </label>
+                      ) : !entry.uploaded ? (
+                        <div className="text-center space-y-2">
+                          <div className="h-10 w-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent mx-auto">
+                            <Video className="h-5 w-5" />
+                          </div>
+                          <p className="text-xs text-foreground truncate">{entry.file.name}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {(entry.file.size / 1024 / 1024).toFixed(1)} MB
+                          </p>
+                          <div className="flex items-center justify-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => handleRemoveRoomVideo(room)}>
+                              <X className="h-3 w-3 mr-1" /> Entfernen
+                            </Button>
+                            <Button size="sm" onClick={() => handleRoomVideoSubmit(room)}>
+                              Hochladen
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-3 rounded-lg bg-accent/10 border border-accent/20 text-center">
+                          <p className="text-xs text-accent font-medium">✓ Hochgeladen</p>
+                          <p className="text-[10px] text-muted-foreground mt-1 truncate">{entry.file.name}</p>
+                          <Button variant="ghost" size="sm" className="mt-2 text-xs" onClick={() => handleRemoveRoomVideo(room)}>
+                            Ersetzen
+                          </Button>
+                        </div>
+                      )}
+                    </Card>
+                  );
+                })}
 
-                {videoUploaded && (
-                  <div className="mt-4 p-3 rounded-lg bg-accent/10 border border-accent/20 text-center">
-                    <p className="text-sm text-accent font-medium">
-                      ✓ Video erfolgreich hochgeladen
-                    </p>
-                  </div>
-                )}
-              </Card>
+                {/* Add room button */}
+                <button
+                  onClick={handleAddRoom}
+                  className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-muted-foreground/30 rounded-lg hover:border-accent hover:bg-accent/5 transition-colors cursor-pointer min-h-[140px]"
+                >
+                  <Plus className="h-6 w-6 text-muted-foreground mb-1" />
+                  <span className="text-xs text-muted-foreground">Weiteres Zimmer</span>
+                </button>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
