@@ -141,16 +141,9 @@ const TenantDashboardPage = () => {
 
   const handleAssignRoom = () => {
     if (!pendingFile || !selectedRoom) return;
-    setRoomVideos((prev) => ({ ...prev, [selectedRoom]: { file: pendingFile, uploaded: false } }));
+    setRoomVideos((prev) => ({ ...prev, [selectedRoom]: { file: pendingFile, uploaded: true } }));
     setPendingFile(null);
     setSelectedRoom("");
-  };
-
-  const handleRoomVideoSubmit = (room: string) => {
-    setRoomVideos((prev) => ({
-      ...prev,
-      [room]: prev[room] ? { ...prev[room]!, uploaded: true } : prev[room],
-    }));
   };
 
   const handleRemoveRoomVideo = (room: string) => {
@@ -166,11 +159,6 @@ const TenantDashboardPage = () => {
     if (!name || allRoomOptions.includes(name)) return;
     setAllRoomOptions((prev) => [...prev, name]);
     setCustomRooms((prev) => [...prev, name]);
-    if (pendingFile) {
-      setRoomVideos((prev) => ({ ...prev, [name]: { file: pendingFile, uploaded: false } }));
-      setPendingFile(null);
-    }
-    setSelectedRoom("");
     setNewCustomRoom("");
     setShowAddCustom(false);
   };
