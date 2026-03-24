@@ -1,5 +1,6 @@
 import { Building2, Home, CreditCard, MessageSquare, AlertTriangle, TrendingUp } from "lucide-react";
 import StatCard from "@/components/StatCard";
+import InviteTenantDialog from "@/components/InviteTenantDialog";
 import { properties, messages, payments } from "@/lib/dummy-data";
 import { Link } from "react-router-dom";
 
