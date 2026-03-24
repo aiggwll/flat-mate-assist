@@ -554,10 +554,10 @@ const TenantDashboardPage = () => {
 
       {recordingRoom && (
         <CameraRecorder
-          roomName={recordingRoom}
+          roomName={recordingRoom === "__recording__" ? "Aufnahme" : recordingRoom}
           onClose={() => setRecordingRoom(null)}
           onRecorded={(file) => {
-            setRoomVideos((prev) => ({ ...prev, [recordingRoom]: { file, uploaded: false } }));
+            setPendingFile(file);
             setRecordingRoom(null);
           }}
         />
