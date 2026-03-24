@@ -75,6 +75,9 @@ const initialDocs: Doc[] = [
   { id: "d9", name: "Heizungsrechnung_Wartung.pdf", year: "2026", category: "Instandhaltung", uploadedAt: "2026-02-10", fileType: "PDF", size: "92 KB", status: "", description: "" },
 ];
 
+// Categories visible to tenants
+const TENANT_CATEGORIES: Category[] = ["Verträge", "Protokolle", "Rechnungen"];
+
 interface DocumentManagerProps {
   role: "owner" | "tenant";
 }
@@ -112,7 +115,10 @@ const DocumentManager = ({ role }: DocumentManagerProps) => {
   const years = [...new Set(docs.map((d) => d.year))].sort((a, b) => b.localeCompare(a));
   const allYears = [...new Set([...years, "2026", "2025", "2024"])].sort((a, b) => b.localeCompare(a));
 
+  const visibleCategories = role === "tenant" ? TENANT_CATEGORIES : CATEGORIES;
+
   const filtered = docs.filter((d) => {
+    if (role === "tenant" && !TENANT_CATEGORIES.includes(d.category)) return false;
     const matchSearch =
       d.name.toLowerCase().includes(search.toLowerCase()) ||
       d.category.toLowerCase().includes(search.toLowerCase());
@@ -190,7 +196,7 @@ const DocumentManager = ({ role }: DocumentManagerProps) => {
             {docs.length} Dokumente · {sortedYears.length > 0 ? `${sortedYears[sortedYears.length - 1]}–${sortedYears[0]}` : "–"}
           </p>
         </div>
-        {(canUpload || role === "tenant") && (
+        {canUpload && (
           <Button onClick={() => setUploadOpen(true)} size="sm" className="gap-2">
             <Upload className="h-4 w-4" />
             Hochladen
@@ -200,44 +206,95 @@ const DocumentManager = ({ role }: DocumentManagerProps) => {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-2.5">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Dokument suchen…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9 text-sm"
-          />
-        </div>
-        <select
-          value={filterYear}
-          onChange={(e) => setFilterYear(e.target.value)}
-          className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
-        >
-          <option value="all">Alle Jahre</option>
-          {allYears.map((y) => (
-            <option key={y} value={y}>{y}</option>
-          ))}
-        </select>
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
-        >
-          <option value="all">Alle Kategorien</option>
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
+        {role === "owner" && (
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Dokument suchen…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 h-9 text-sm"
+            />
+          </div>
+        )}
+        {role === "owner" && (
+          <>
+            <select
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+            >
+              <option value="all">Alle Jahre</option>
+              {allYears.map((y) => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+            >
+              <option value="all">Alle Kategorien</option>
+              {visibleCategories.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </>
+        )}
       </div>
 
-      {/* Document tree */}
+      {/* Document view */}
       {sortedYears.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <FileText className="h-10 w-10 mb-3 opacity-30" />
           <p className="text-sm">Keine Dokumente gefunden.</p>
         </div>
+      ) : role === "tenant" ? (
+        /* Tenant: simplified flat list grouped by category label */
+        <div className="space-y-4">
+          {(["Verträge", "Protokolle", "Rechnungen"] as const).map((cat) => {
+            const catLabel = cat === "Verträge" ? "Mietvertrag" : cat === "Protokolle" ? "Übergabeprotokoll" : "Nebenkostenabrechnung";
+            const catDocs = filtered.filter((d) => d.category === cat);
+            if (catDocs.length === 0) return null;
+            return (
+              <div key={cat}>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 px-1">{catLabel}</p>
+                <div className="border rounded-lg divide-y">
+                  {catDocs.map((doc) => (
+                    <div key={doc.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/10 transition-colors group">
+                      <div className="h-8 w-8 rounded-md bg-muted/50 flex items-center justify-center shrink-0">
+                        <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-foreground truncate">{doc.name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-muted-foreground">{doc.fileType}</span>
+                          <span className="text-xs text-muted-foreground">·</span>
+                          <span className="text-xs text-muted-foreground">{new Date(doc.uploadedAt).toLocaleDateString("de-DE")}</span>
+                          {doc.status && (
+                            <Badge variant={statusVariant(doc.status)} className="text-[10px] h-5 px-1.5">
+                              {statusLabel[doc.status]}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                          <Eye className="h-3.5 w-3.5" />
+                        </button>
+                        <button className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                          <Download className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       ) : (
+        /* Owner: full accordion structure */
         <Accordion type="multiple" defaultValue={[sortedYears[0]]} className="space-y-2">
           {sortedYears.map((year) => (
             <AccordionItem key={year} value={year} className="border rounded-lg overflow-hidden">
