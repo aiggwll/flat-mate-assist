@@ -452,17 +452,13 @@ const TenantDashboardPage = () => {
                               onChange={(e) => handleRoomVideoUpload(room, e.target.files)}
                             />
                           </label>
-                          <label className="flex-1 flex flex-col items-center justify-center cursor-pointer py-6 border-2 border-dashed border-accent/40 rounded-lg hover:border-accent bg-accent/5 transition-colors">
+                          <button
+                            onClick={() => setRecordingRoom(room)}
+                            className="flex-1 flex flex-col items-center justify-center py-6 border-2 border-dashed border-accent/40 rounded-lg hover:border-accent bg-accent/5 transition-colors"
+                          >
                             <Camera className="h-5 w-5 text-accent mb-1" />
                             <span className="text-[10px] text-accent font-medium">Aufnehmen</span>
-                            <input
-                              type="file"
-                              accept="video/*"
-                              capture="environment"
-                              className="hidden"
-                              onChange={(e) => handleRoomVideoUpload(room, e.target.files)}
-                            />
-                          </label>
+                          </button>
                         </div>
                       ) : !entry.uploaded ? (
                         <div className="text-center space-y-2">
