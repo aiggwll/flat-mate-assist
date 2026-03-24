@@ -504,6 +504,17 @@ const TenantDashboardPage = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {recordingRoom && (
+        <CameraRecorder
+          roomName={recordingRoom}
+          onClose={() => setRecordingRoom(null)}
+          onRecorded={(file) => {
+            setRoomVideos((prev) => ({ ...prev, [recordingRoom]: { file, uploaded: false } }));
+            setRecordingRoom(null);
+          }}
+        />
+      )}
     </div>
   );
 };
