@@ -1,17 +1,28 @@
-import { Building2, AlertTriangle, ArrowRight, CircleDot } from "lucide-react";
+import { useState } from "react";
+import { Building2, AlertTriangle, ArrowRight, TrendingUp, Info, X } from "lucide-react";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
 import { properties, messages, payments } from "@/lib/dummy-data";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const DashboardPage = () => {
   const totalUnits = properties.reduce((sum, p) => sum + p.units.length, 0);
-  const occupiedUnits = properties.reduce((sum, p) => sum + p.units.filter(u => u.tenant).length, 0);
   const totalDamages = properties.reduce((sum, p) => sum + p.units.reduce((s, u) => s + u.damages.filter(d => d.status !== "erledigt").length, 0), 0);
   const totalMonthlyRent = properties.reduce((sum, p) => sum + p.units.filter(u => u.tenant).reduce((s, u) => s + u.rent, 0), 0);
   const unpaidPayments = payments.filter(p => !p.paid);
   const unreadMessages = messages.filter(m => !m.read);
-  const occupancyRate = totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0;
+
+  // Simulated rent increase eligibility (based on dummy move-in dates > 15 months ago)
+  const rentIncreaseUnits = properties.flatMap(p =>
+    p.units.filter(u => {
+      if (!u.tenant) return false;
+      const months = (Date.now() - new Date(u.tenant.moveInDate).getTime()) / (1000 * 60 * 60 * 24 * 30);
+      return months >= 15;
+    }).map(u => ({ property: p, unit: u }))
+  );
+
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
 
   return (
     <div className="space-y-8">
@@ -26,17 +37,12 @@ const DashboardPage = () => {
         <InviteTenantDialog />
       </div>
 
-      {/* Key numbers – single hero row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Key numbers */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-card rounded-xl border p-5">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">Mieteinnahmen</p>
           <p className="text-2xl font-heading font-bold text-accent mt-1">{totalMonthlyRent.toLocaleString("de-DE")} €</p>
           <p className="text-xs text-muted-foreground mt-0.5">pro Monat</p>
-        </div>
-        <div className="bg-card rounded-xl border p-5">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">Auslastung</p>
-          <p className="text-2xl font-heading font-bold text-foreground mt-1">{occupancyRate}%</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{occupiedUnits} von {totalUnits} vermietet</p>
         </div>
         <div className="bg-card rounded-xl border p-5">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">Offene Zahlungen</p>
@@ -49,6 +55,58 @@ const DashboardPage = () => {
           <p className="text-xs text-muted-foreground mt-0.5">in {properties.filter(p => p.units.some(u => u.damages.some(d => d.status !== "erledigt"))).length} Immobilien</p>
         </div>
       </div>
+
+      {/* Rent increase hint */}
+      {rentIncreaseUnits.length > 0 && (
+        <div className="bg-accent/5 border border-accent/20 rounded-xl p-5 space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="h-8 w-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
+                <TrendingUp className="h-4 w-4 text-accent" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">Mieterhöhung möglich</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Bei {rentIncreaseUnits.length} {rentIncreaseUnits.length === 1 ? "Wohnung" : "Wohnungen"} könnte eine Mietanpassung geprüft werden.
+                </p>
+              </div>
+            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button onClick={() => setShowDisclaimer(!showDisclaimer)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0 mt-0.5">
+                  <Info className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="max-w-xs text-xs">
+                Hinweis anzeigen / ausblenden
+              </TooltipContent>
+            </Tooltip>
+          </div>
+
+          {showDisclaimer && (
+            <div className="bg-card rounded-lg border px-4 py-3">
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Diese Angaben dienen ausschließlich der unverbindlichen Information und stellen keine Rechtsberatung dar. WillProp übernimmt keine Haftung für die Richtigkeit, Vollständigkeit oder Aktualität der angezeigten Daten. Bitte prüfen Sie Mieterhöhungen stets unter Berücksichtigung der geltenden gesetzlichen Regelungen (insb. §558 BGB) oder konsultieren Sie einen Fachanwalt.
+              </p>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            {rentIncreaseUnits.map(({ property: p, unit: u }) => (
+              <Link key={u.id} to={`/properties/${p.id}`} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-accent/5 transition-colors">
+                <div>
+                  <p className="text-sm text-foreground">{p.address} · Whg. {u.number}</p>
+                  <p className="text-xs text-muted-foreground">{u.tenant?.name} · seit {new Date(u.tenant!.moveInDate).toLocaleDateString("de-DE")}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-medium text-foreground">{u.rent.toLocaleString("de-DE")} €</p>
+                  <p className="text-xs text-accent">prüfen</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Properties quick overview */}
       <div>
