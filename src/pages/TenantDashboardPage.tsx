@@ -411,13 +411,11 @@ const TenantDashboardPage = () => {
 
           {/* 360° Video Tab */}
           <TabsContent value="video360">
-            <div className="space-y-8">
-              <div>
-                <h3 className="font-heading font-semibold text-foreground">360° Wohnungszustand</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Legen Sie Räume an, nehmen Sie Videos auf und weisen Sie diese den Räumen zu.
-                </p>
-              </div>
+            <div className="space-y-6">
+              <h3 className="font-heading font-semibold text-foreground">360° Wohnungszustand</h3>
+              <p className="text-sm text-muted-foreground">
+                Nehmen Sie ein Video auf oder laden Sie eines hoch, und weisen Sie es anschließend einem Raum zu.
+              </p>
 
               {/* Tips */}
               <div className="rounded-lg border border-border/50 px-5 py-4">
@@ -427,104 +425,91 @@ const TenantDashboardPage = () => {
                 </p>
               </div>
 
-              {/* Room Management */}
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-foreground">Raumverwaltung</p>
-                <div className="flex flex-wrap gap-2">
-                  {allRoomOptions.map((room) => (
-                    <div key={room} className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm text-foreground bg-muted/50">
-                      <span>{room}</span>
-                      {roomVideos[room] && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-accent" title="Video zugewiesen" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-                {!showAddCustom ? (
-                  <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowAddCustom(true)}>
-                    <Plus className="h-3.5 w-3.5" />
-                    Neuen Raum hinzufügen
-                  </Button>
-                ) : (
-                  <div className="flex items-center gap-2 max-w-sm">
-                    <Input
-                      value={newCustomRoom}
-                      onChange={(e) => setNewCustomRoom(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleAddCustomRoom()}
-                      placeholder="Raumname eingeben…"
-                      className="h-9 text-sm flex-1"
-                      autoFocus
+              {/* Upload / Record area */}
+              {!pendingFile ? (
+                <div className="flex gap-3">
+                  <label className="flex-1 flex flex-col items-center justify-center cursor-pointer py-8 border-2 border-dashed border-muted-foreground/30 rounded-lg hover:border-accent transition-colors">
+                    <Upload className="h-6 w-6 text-muted-foreground mb-2" />
+                    <span className="text-sm text-muted-foreground">Video hochladen</span>
+                    <input
+                      type="file"
+                      accept="video/*,image/*,.mp4,.mov"
+                      className="hidden"
+                      onChange={(e) => handleVideoFileSelect(e.target.files)}
                     />
-                    <Button size="sm" onClick={handleAddCustomRoom} disabled={!newCustomRoom.trim()}>OK</Button>
-                    <Button size="sm" variant="ghost" onClick={() => { setShowAddCustom(false); setNewCustomRoom(""); }}>
-                      <X className="h-3.5 w-3.5" />
+                  </label>
+                  <button
+                    onClick={() => setRecordingRoom("__recording__")}
+                    className="flex-1 flex flex-col items-center justify-center py-8 border-2 border-dashed border-accent/40 rounded-lg hover:border-accent bg-accent/5 transition-colors"
+                  >
+                    <Camera className="h-6 w-6 text-accent mb-2" />
+                    <span className="text-sm text-accent font-medium">Video aufnehmen</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="border rounded-lg p-5 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                      <Video className="h-5 w-5 text-accent" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-foreground truncate">{pendingFile.name}</p>
+                      <p className="text-xs text-muted-foreground">{(pendingFile.size / 1024 / 1024).toFixed(1)} MB</p>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => setPendingFile(null)}>
+                      <X className="h-4 w-4" />
                     </Button>
                   </div>
-                )}
-              </div>
 
-              {/* Upload / Record */}
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-foreground">Video aufnehmen oder hochladen</p>
-                {!pendingFile ? (
-                  <div className="flex gap-3">
-                    <label className="flex-1 flex flex-col items-center justify-center cursor-pointer py-8 border-2 border-dashed border-muted-foreground/30 rounded-lg hover:border-accent transition-colors">
-                      <Upload className="h-6 w-6 text-muted-foreground mb-2" />
-                      <span className="text-sm text-muted-foreground">Video hochladen</span>
-                      <input
-                        type="file"
-                        accept="video/*,image/*,.mp4,.mov"
-                        className="hidden"
-                        onChange={(e) => handleVideoFileSelect(e.target.files)}
-                      />
-                    </label>
-                    <button
-                      onClick={() => setRecordingRoom("__recording__")}
-                      className="flex-1 flex flex-col items-center justify-center py-8 border-2 border-dashed border-accent/40 rounded-lg hover:border-accent bg-accent/5 transition-colors"
-                    >
-                      <Camera className="h-6 w-6 text-accent mb-2" />
-                      <span className="text-sm text-accent font-medium">Video aufnehmen</span>
-                    </button>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Raum zuweisen</label>
+                    <Select value={selectedRoom} onValueChange={setSelectedRoom}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Raum auswählen…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allRoomOptions.map((room) => (
+                          <SelectItem key={room} value={room}>{room}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                ) : (
-                  <div className="border rounded-lg p-5 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                        <Video className="h-5 w-5 text-accent" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-foreground truncate">{pendingFile.name}</p>
-                        <p className="text-xs text-muted-foreground">{(pendingFile.size / 1024 / 1024).toFixed(1)} MB</p>
-                      </div>
-                      <Button variant="ghost" size="sm" onClick={() => setPendingFile(null)}>
-                        <X className="h-4 w-4" />
+
+                  {/* Add custom room inline */}
+                  {!showAddCustom ? (
+                    <button
+                      onClick={() => setShowAddCustom(true)}
+                      className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Eigenen Raum hinzufügen
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={newCustomRoom}
+                        onChange={(e) => setNewCustomRoom(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleAddCustomRoom()}
+                        placeholder="Raumname eingeben…"
+                        className="h-8 text-sm flex-1"
+                        autoFocus
+                      />
+                      <Button size="sm" variant="outline" className="h-8" onClick={handleAddCustomRoom}>OK</Button>
+                      <Button size="sm" variant="ghost" className="h-8" onClick={() => { setShowAddCustom(false); setNewCustomRoom(""); }}>
+                        <X className="h-3 w-3" />
                       </Button>
                     </div>
+                  )}
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">Raum zuweisen</label>
-                      <Select value={selectedRoom} onValueChange={setSelectedRoom}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Raum auswählen…" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {allRoomOptions.map((room) => (
-                            <SelectItem key={room} value={room}>{room}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <Button onClick={handleAssignRoom} disabled={!selectedRoom} className="w-full">
-                      Zuweisen & Hochladen
-                    </Button>
-                  </div>
-                )}
-              </div>
+                  <Button onClick={handleAssignRoom} disabled={!selectedRoom} className="w-full">
+                    Zuweisen & Hochladen
+                  </Button>
+                </div>
+              )}
 
               {/* Uploaded videos list */}
               {Object.keys(roomVideos).length > 0 && (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <p className="text-sm font-medium text-foreground">Hochgeladene Videos</p>
                   <div className="border rounded-lg divide-y">
                     {Object.entries(roomVideos).map(([room, entry]) => (
