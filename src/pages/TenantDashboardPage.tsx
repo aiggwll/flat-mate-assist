@@ -1,4 +1,5 @@
 import { useState } from "react";
+import CameraRecorder from "@/components/CameraRecorder";
 import { useSearchParams, NavLink } from "react-router-dom";
 import { properties, messages as allMessages } from "@/lib/dummy-data";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
