@@ -34,6 +34,16 @@ import {
   LogOut,
   Video,
   Upload,
+  Smartphone,
+  Footprints,
+  ScanLine,
+  MonitorSmartphone,
+  Lightbulb,
+  Maximize,
+  Focus,
+  ShieldAlert,
+  VolumeX,
+  Timer,
 } from "lucide-react";
 
 const TenantDashboardPage = () => {
@@ -415,26 +425,31 @@ const TenantDashboardPage = () => {
               </p>
 
               {/* Tips Card */}
-              <Card className="p-5 bg-accent/5 border-accent/20">
-                <p className="text-sm font-semibold text-foreground mb-3">📋 Worauf Sie achten sollten:</p>
-                <div className="grid gap-2 sm:grid-cols-2">
+              <Card className="p-6 border border-border/50 bg-card">
+                <p className="text-sm font-semibold text-foreground tracking-tight mb-4">Worauf Sie achten sollten</p>
+                <div className="grid gap-3 sm:grid-cols-2">
                   {[
-                    { icon: "🤳", text: "Halte dein Handy ruhig (vermeide Verwacklungen)" },
-                    { icon: "🚶", text: "Gehe langsam durch jeden Raum" },
-                    { icon: "🎥", text: "Führe die Kamera gleichmäßig und ohne hektische Bewegungen" },
-                    { icon: "📱", text: "Filme im Querformat" },
-                    { icon: "💡", text: "Achte auf gute Beleuchtung (Licht einschalten)" },
-                    { icon: "🔍", text: "Zeige jeden Raum vollständig (inkl. Ecken)" },
-                    { icon: "📐", text: "Fokussiere wichtige Bereiche: Ecken, Fenster, Böden" },
-                    { icon: "⚠️", text: "Zeige Schäden oder Auffälligkeiten deutlich" },
-                    { icon: "🔇", text: "Vermeide laute Hintergrundgeräusche" },
-                    { icon: "⏱️", text: "Video-Länge pro Raum: 1–3 Minuten" },
-                  ].map((tip, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="text-base shrink-0">{tip.icon}</span>
-                      <p className="text-xs text-muted-foreground">{tip.text}</p>
-                    </div>
-                  ))}
+                    { icon: Smartphone, text: "Handy ruhig halten – Verwacklungen vermeiden" },
+                    { icon: Footprints, text: "Langsam durch jeden Raum gehen" },
+                    { icon: ScanLine, text: "Kamera gleichmäßig und ruhig führen" },
+                    { icon: MonitorSmartphone, text: "Im Querformat filmen" },
+                    { icon: Lightbulb, text: "Für gute Beleuchtung sorgen" },
+                    { icon: Maximize, text: "Jeden Raum vollständig zeigen, inkl. Ecken" },
+                    { icon: Focus, text: "Wichtige Bereiche fokussieren: Ecken, Fenster, Böden" },
+                    { icon: ShieldAlert, text: "Schäden oder Auffälligkeiten deutlich zeigen" },
+                    { icon: VolumeX, text: "Laute Hintergrundgeräusche vermeiden" },
+                    { icon: Timer, text: "Video-Länge pro Raum: 1–3 Minuten" },
+                  ].map((tip, i) => {
+                    const Icon = tip.icon;
+                    return (
+                      <div key={i} className="flex items-center gap-3 py-1.5">
+                        <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                          <Icon className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-snug">{tip.text}</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </Card>
 
