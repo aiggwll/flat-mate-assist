@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Building2, AlertTriangle, ArrowRight, TrendingUp, Info, X } from "lucide-react";
+import { Building2, AlertTriangle, ArrowRight, TrendingUp, Info, Video, Camera } from "lucide-react";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
 import { properties, messages, payments } from "@/lib/dummy-data";
 import { Link } from "react-router-dom";
