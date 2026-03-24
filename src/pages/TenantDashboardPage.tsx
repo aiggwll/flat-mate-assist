@@ -392,30 +392,7 @@ const TenantDashboardPage = () => {
 
           {/* Documents Tab */}
           <TabsContent value="documents">
-            <div className="space-y-4">
-              <h3 className="font-heading font-semibold text-foreground">Ihre Dokumente</h3>
-              {unit?.documents && unit.documents.length > 0 ? (
-                <div className="space-y-2">
-                  {unit.documents.map((doc) => (
-                    <Card key={doc.id} className="p-4 flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                        <FileText className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{doc.name}</p>
-                        <p className="text-xs text-muted-foreground">{doc.type} · {doc.uploadedAt}</p>
-                      </div>
-                      <Button variant="outline" size="sm">Ansehen</Button>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <Card className="p-8 text-center">
-                  <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">Keine Dokumente vorhanden.</p>
-                </Card>
-              )}
-            </div>
+            <DocumentManager role="tenant" />
           </TabsContent>
 
           {/* 360° Video Tab */}
