@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Building2, AlertTriangle, ArrowRight, TrendingUp, Info, X } from "lucide-react";
+import { Building2, AlertTriangle, ArrowRight, TrendingUp, Info, Video, Camera } from "lucide-react";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
 import { properties, messages, payments } from "@/lib/dummy-data";
 import { Link } from "react-router-dom";
@@ -12,6 +12,14 @@ const DashboardPage = () => {
   const totalMonthlyRent = properties.reduce((sum, p) => sum + p.units.filter(u => u.tenant).reduce((s, u) => s + u.rent, 0), 0);
   const unpaidPayments = payments.filter(p => !p.paid);
   const unreadMessages = messages.filter(m => !m.read);
+
+  // Simulated recent media uploads from tenants
+  const recentMediaUploads = [
+    { id: "mu1", tenantName: "Anna Müller", property: "Musterstraße 12", room: "Küche", type: "video" as const, date: "2026-03-23" },
+    { id: "mu2", tenantName: "Anna Müller", property: "Musterstraße 12", room: "Badezimmer", type: "video" as const, date: "2026-03-23" },
+    { id: "mu3", tenantName: "Thomas Schmidt", property: "Hauptstraße 5", room: "Wohnzimmer", type: "photo" as const, date: "2026-03-22" },
+    { id: "mu4", tenantName: "Thomas Schmidt", property: "Hauptstraße 5", room: "Flur", type: "video" as const, date: "2026-03-21" },
+  ];
 
   // Simulated rent increase eligibility (based on dummy move-in dates > 15 months ago)
   const rentIncreaseUnits = properties.flatMap(p =>
@@ -200,6 +208,45 @@ const DashboardPage = () => {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Media uploads from tenants */}
+      <div className="bg-card rounded-xl border p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-heading font-semibold text-foreground text-sm">
+            Videobegehungen & Uploads
+            {recentMediaUploads.length > 0 && (
+              <Badge variant="secondary" className="ml-2 bg-accent/10 text-accent border-0 text-[10px]">{recentMediaUploads.length}</Badge>
+            )}
+          </h2>
+        </div>
+        {recentMediaUploads.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-4 text-center">Keine neuen Uploads</p>
+        ) : (
+          <div className="space-y-0 divide-y">
+            {recentMediaUploads.map(upload => (
+              <div key={upload.id} className="flex items-center gap-3 py-2.5">
+                <div className="h-8 w-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                  {upload.type === "video" ? (
+                    <Video className="h-4 w-4 text-accent" />
+                  ) : (
+                    <Camera className="h-4 w-4 text-accent" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground">{upload.tenantName}</p>
+                  <p className="text-xs text-muted-foreground">{upload.property} · {upload.room}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <Badge variant="secondary" className="bg-muted text-muted-foreground border-0 text-[10px]">
+                    {upload.type === "video" ? "Video" : "Foto"}
+                  </Badge>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(upload.date).toLocaleDateString("de-DE")}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
