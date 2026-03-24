@@ -231,7 +231,7 @@ const DocumentManager = ({ role }: DocumentManagerProps) => {
           className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
         >
           <option value="all">Alle Kategorien</option>
-          {CATEGORIES.map((c) => (
+          {visibleCategories.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
