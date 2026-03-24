@@ -115,7 +115,10 @@ const DocumentManager = ({ role }: DocumentManagerProps) => {
   const years = [...new Set(docs.map((d) => d.year))].sort((a, b) => b.localeCompare(a));
   const allYears = [...new Set([...years, "2026", "2025", "2024"])].sort((a, b) => b.localeCompare(a));
 
+  const visibleCategories = role === "tenant" ? TENANT_CATEGORIES : CATEGORIES;
+
   const filtered = docs.filter((d) => {
+    if (role === "tenant" && !TENANT_CATEGORIES.includes(d.category)) return false;
     const matchSearch =
       d.name.toLowerCase().includes(search.toLowerCase()) ||
       d.category.toLowerCase().includes(search.toLowerCase());
