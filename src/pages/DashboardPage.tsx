@@ -13,6 +13,14 @@ const DashboardPage = () => {
   const unpaidPayments = payments.filter(p => !p.paid);
   const unreadMessages = messages.filter(m => !m.read);
 
+  // Simulated recent media uploads from tenants
+  const recentMediaUploads = [
+    { id: "mu1", tenantName: "Anna Müller", property: "Musterstraße 12", room: "Küche", type: "video" as const, date: "2026-03-23" },
+    { id: "mu2", tenantName: "Anna Müller", property: "Musterstraße 12", room: "Badezimmer", type: "video" as const, date: "2026-03-23" },
+    { id: "mu3", tenantName: "Thomas Schmidt", property: "Hauptstraße 5", room: "Wohnzimmer", type: "photo" as const, date: "2026-03-22" },
+    { id: "mu4", tenantName: "Thomas Schmidt", property: "Hauptstraße 5", room: "Flur", type: "video" as const, date: "2026-03-21" },
+  ];
+
   // Simulated rent increase eligibility (based on dummy move-in dates > 15 months ago)
   const rentIncreaseUnits = properties.flatMap(p =>
     p.units.filter(u => {
