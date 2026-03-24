@@ -132,7 +132,8 @@ const PropertyDetailPage = () => {
 
             return (
               <div key={unit.id} className="bg-card rounded-xl border p-5 space-y-0">
-                <div className="flex items-start justify-between">
+                {/* Header */}
+                <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-heading font-semibold text-foreground">Whg. {unit.number}</h3>
                     <p className="text-sm text-muted-foreground">{unit.size} m² · {unit.rent.toLocaleString("de-DE")} €/Monat</p>
@@ -144,62 +145,21 @@ const PropertyDetailPage = () => {
                   )}
                 </div>
 
+                {/* Tenant */}
                 {unit.tenant && (
-                  <div className="mt-3 pt-3 border-t flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
-                      {unit.tenant.name.split(" ").map(n => n[0]).join("")}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{unit.tenant.name}</p>
-                      <p className="text-xs text-muted-foreground">Einzug: {new Date(unit.tenant.moveInDate).toLocaleDateString("de-DE")}</p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-3 pt-3 border-t flex items-center gap-4">
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <FileText className="h-3.5 w-3.5" />
-                    <span>{unit.documents.length} Dokumente</span>
-                  </div>
-                  {openDamages.length > 0 && (
-                    <div className="flex items-center gap-1.5 text-xs text-destructive">
-                      <AlertTriangle className="h-3.5 w-3.5" />
-                      <span>{openDamages.length} offene Schäden</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Damages section inline */}
-                {allDamages.length > 0 && (
-                  <div className="mt-4 pt-4 border-t space-y-2">
-                    <h4 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                      <AlertTriangle className="h-3.5 w-3.5" />
-                      Schadenmeldungen
-                    </h4>
-                    {allDamages.map(damage => (
-                      <div key={damage.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                        <span className="text-lg">{categoryIcon[damage.category] ?? "🔧"}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="text-sm font-medium text-foreground">{damage.title}</p>
-                            <Badge className={statusColor[damage.status]}>{damage.status}</Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-0.5">{damage.description}</p>
-                          {damage.photos && damage.photos.length > 0 && (
-                            <div className="flex gap-1.5 mt-2">
-                              {damage.photos.map((src, i) => (
-                                <div key={i} className="h-12 w-12 rounded-md overflow-hidden border">
-                                  <img src={src} alt={`Foto ${i + 1}`} className="h-full w-full object-cover" />
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(damage.reportedAt).toLocaleDateString("de-DE")} · {damage.reportedBy}
-                          </p>
-                        </div>
+                  <div className="mt-3 pt-3 border-t flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
+                        {unit.tenant.name.split(" ").map(n => n[0]).join("")}
                       </div>
-                    ))}
+                      <p className="text-sm font-medium text-foreground">{unit.tenant.name}</p>
+                    </div>
+                    {openDamages.length > 0 && (
+                      <div className="flex items-center gap-1.5 text-xs text-destructive">
+                        <AlertTriangle className="h-3.5 w-3.5" />
+                        <span>{openDamages.length} offene Schäden</span>
+                      </div>
+                    )}
                   </div>
                 )}
 
