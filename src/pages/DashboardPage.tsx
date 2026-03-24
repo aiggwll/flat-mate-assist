@@ -15,8 +15,13 @@ const DashboardPage = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-heading font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground text-sm mt-1">Willkommen zurück, Max.</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-heading font-bold text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground text-sm mt-1">Willkommen zurück, Max.</p>
+          </div>
+          <InviteTenantDialog />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
