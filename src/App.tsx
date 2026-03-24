@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
+import TenantDashboardPage from "./pages/TenantDashboardPage";
 import PropertiesPage from "./pages/PropertiesPage";
 import PropertyDetailPage from "./pages/PropertyDetailPage";
 import PaymentsPage from "./pages/PaymentsPage";
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/marketplace" element={<MarketplacePage />} />
           </Route>
+          <Route path="/tenant-dashboard" element={<TenantDashboardPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
