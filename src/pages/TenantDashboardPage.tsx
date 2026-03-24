@@ -408,11 +408,35 @@ const TenantDashboardPage = () => {
 
           {/* 360° Video Tab */}
           <TabsContent value="video360">
-            <div className="space-y-4">
+            <div className="space-y-6">
               <h3 className="font-heading font-semibold text-foreground">360° Wohnungszustand</h3>
               <p className="text-sm text-muted-foreground">
                 Laden Sie für jeden Raum ein 360°-Video oder Foto hoch, um den aktuellen Zustand zu dokumentieren.
               </p>
+
+              {/* Tips Card */}
+              <Card className="p-5 bg-accent/5 border-accent/20">
+                <p className="text-sm font-semibold text-foreground mb-3">📋 Worauf Sie achten sollten:</p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {[
+                    { icon: "🤳", text: "Halte dein Handy ruhig (vermeide Verwacklungen)" },
+                    { icon: "🚶", text: "Gehe langsam durch jeden Raum" },
+                    { icon: "🎥", text: "Führe die Kamera gleichmäßig und ohne hektische Bewegungen" },
+                    { icon: "📱", text: "Filme im Querformat" },
+                    { icon: "💡", text: "Achte auf gute Beleuchtung (Licht einschalten)" },
+                    { icon: "🔍", text: "Zeige jeden Raum vollständig (inkl. Ecken)" },
+                    { icon: "📐", text: "Fokussiere wichtige Bereiche: Ecken, Fenster, Böden" },
+                    { icon: "⚠️", text: "Zeige Schäden oder Auffälligkeiten deutlich" },
+                    { icon: "🔇", text: "Vermeide laute Hintergrundgeräusche" },
+                    { icon: "⏱️", text: "Video-Länge pro Raum: 1–3 Minuten" },
+                  ].map((tip, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="text-base shrink-0">{tip.icon}</span>
+                      <p className="text-xs text-muted-foreground">{tip.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 {rooms.map((room) => {
