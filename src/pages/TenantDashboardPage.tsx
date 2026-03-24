@@ -166,6 +166,11 @@ const TenantDashboardPage = () => {
     if (!name || allRoomOptions.includes(name)) return;
     setAllRoomOptions((prev) => [...prev, name]);
     setCustomRooms((prev) => [...prev, name]);
+    if (pendingFile) {
+      setRoomVideos((prev) => ({ ...prev, [name]: { file: pendingFile, uploaded: false } }));
+      setPendingFile(null);
+    }
+    setSelectedRoom("");
     setNewCustomRoom("");
     setShowAddCustom(false);
   };
