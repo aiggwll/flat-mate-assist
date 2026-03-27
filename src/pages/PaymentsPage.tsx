@@ -10,20 +10,40 @@ const PaymentsPage = () => {
     setPaymentState(prev => prev.map(p => p.id === id ? { ...p, paid: true } : p));
   };
 
+  const totalExpected = paymentState.reduce((s, p) => s + p.amount, 0);
+  const totalReceived = paymentState.filter(p => p.paid).reduce((s, p) => s + p.amount, 0);
+  const openCount = paymentState.filter(p => !p.paid).length;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-heading font-bold text-foreground">Zahlungen</h1>
-        <p className="text-muted-foreground text-sm mt-1">Mieteingang für März 2026</p>
+        <h1 className="text-xl md:text-2xl font-heading font-bold text-foreground">Zahlungen</h1>
+        <p className="text-muted-foreground text-sm mt-0.5">März 2026</p>
       </div>
 
-      <div className="bg-card rounded-xl border overflow-hidden">
+      {/* Summary Cards - mobile optimized */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-card rounded-xl border p-3 md:p-4">
+          <p className="text-[11px] text-muted-foreground">Erwartet</p>
+          <p className="text-base md:text-lg font-bold text-foreground mt-0.5">{totalExpected.toLocaleString("de-DE")} €</p>
+        </div>
+        <div className="bg-card rounded-xl border p-3 md:p-4">
+          <p className="text-[11px] text-muted-foreground">Erhalten</p>
+          <p className="text-base md:text-lg font-bold text-accent mt-0.5">{totalReceived.toLocaleString("de-DE")} €</p>
+        </div>
+        <div className="bg-card rounded-xl border p-3 md:p-4">
+          <p className="text-[11px] text-muted-foreground">Offen</p>
+          <p className="text-base md:text-lg font-bold text-destructive mt-0.5">{openCount}</p>
+        </div>
+      </div>
+
+      {/* Desktop Table */}
+      <div className="hidden md:block bg-card rounded-xl border overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b bg-muted/30">
               <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Mieter</th>
               <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Immobilie</th>
-              <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Wohnung</th>
               <th className="text-right px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Betrag</th>
               <th className="text-center px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
               <th className="text-right px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Aktion</th>
@@ -33,8 +53,7 @@ const PaymentsPage = () => {
             {paymentState.map(p => (
               <tr key={p.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
                 <td className="px-5 py-3.5 text-sm font-medium text-foreground">{p.tenantName}</td>
-                <td className="px-5 py-3.5 text-sm text-muted-foreground">{p.propertyAddress}</td>
-                <td className="px-5 py-3.5 text-sm text-muted-foreground">{p.unitNumber}</td>
+                <td className="px-5 py-3.5 text-sm text-muted-foreground">{p.propertyAddress} · {p.unitNumber}</td>
                 <td className="px-5 py-3.5 text-sm font-medium text-foreground text-right">{p.amount.toLocaleString("de-DE")} €</td>
                 <td className="px-5 py-3.5 text-center">
                   {p.paid ? (
@@ -60,6 +79,39 @@ const PaymentsPage = () => {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card List */}
+      <div className="md:hidden space-y-2.5">
+        {paymentState.map(p => (
+          <div key={p.id} className="bg-card rounded-xl border p-4">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-foreground truncate">{p.tenantName}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 truncate">{p.propertyAddress} · {p.unitNumber}</p>
+              </div>
+              <div className="text-right ml-3">
+                <p className="text-sm font-bold text-foreground">{p.amount.toLocaleString("de-DE")} €</p>
+                {p.paid ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-medium text-accent mt-0.5">
+                    <CheckCircle2 className="h-3 w-3" />
+                    Bezahlt
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-medium text-destructive mt-0.5">
+                    <Clock className="h-3 w-3" />
+                    Offen
+                  </span>
+                )}
+              </div>
+            </div>
+            {!p.paid && (
+              <Button variant="outline" size="sm" className="w-full mt-3 h-8 text-xs" onClick={() => markAsPaid(p.id)}>
+                Als bezahlt markieren
+              </Button>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
