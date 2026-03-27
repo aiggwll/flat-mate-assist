@@ -182,7 +182,7 @@ const DocumentManager = ({ role }: DocumentManagerProps) => {
     setRenameValue("");
   };
 
-  const canUpload = role === "owner";
+  const canUpload = true; // Both owner and tenant can upload
   const canDelete = role === "owner";
   const canRename = role === "owner";
 
