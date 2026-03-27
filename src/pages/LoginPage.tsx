@@ -30,6 +30,7 @@ const LoginPage = () => {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [showPropertySetup, setShowPropertySetup] = useState(false);
+  const [showTenantPropertyInfo, setShowTenantPropertyInfo] = useState(false);
   const [properties, setProperties] = useState<PropertyForm[]>([{ ...emptyProperty }]);
   const navigate = useNavigate();
   const { setUserName, setUserProperties, setIsNewUser } = useUser();
@@ -55,8 +56,11 @@ const LoginPage = () => {
         setShowPropertySetup(true);
         return;
       }
-      // Tenant: save name
+      // Tenant: save name and show property info
       setUserName(nameField.trim() || "Mieter");
+      setIsNewUser(true);
+      setShowTenantPropertyInfo(true);
+      return;
     }
 
     if (selectedRole === "tenant") {
@@ -153,6 +157,92 @@ const LoginPage = () => {
                   <p className="text-sm text-muted-foreground">Schäden melden & mit Vermieter kommunizieren</p>
                 </div>
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Tenant property info screen (after registration)
+  if (showTenantPropertyInfo) {
+    const property = inviteProperty
+      ? properties.find((p) => p.address === inviteProperty) || null
+      : null;
+
+    return (
+      <div className="min-h-screen bg-primary flex">
+        <div className="flex-1 hidden lg:flex items-center justify-center p-12">
+          <div className="max-w-md">
+            <h1 className="text-4xl font-heading font-bold text-primary-foreground mb-4 tracking-tight">
+              Will<span className="text-accent">Prop</span>
+            </h1>
+            <p className="text-primary-foreground/70 text-lg leading-relaxed">
+              Willkommen in Ihrem Mieterportal. Hier finden Sie alle Informationen zu Ihrer Wohnung.
+            </p>
+            <div className="mt-8 flex items-center gap-3 text-primary-foreground/50">
+              <CheckCircle2 className="h-5 w-5 text-accent" />
+              <span className="text-sm">Konto erfolgreich erstellt</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center p-8 bg-background rounded-l-3xl lg:max-w-lg">
+          <div className="w-full max-w-sm">
+            <div className="lg:hidden mb-6">
+              <h1 className="text-2xl font-heading font-bold text-foreground">
+                Will<span className="text-accent">Prop</span>
+              </h1>
+            </div>
+
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle2 className="h-5 w-5 text-accent" />
+              <span className="text-sm font-medium text-accent">Registrierung erfolgreich</span>
+            </div>
+
+            <h2 className="text-2xl font-heading font-bold text-foreground">
+              Hallo, {nameField.trim() || "Mieter"}!
+            </h2>
+            <p className="text-muted-foreground text-sm mt-1 mb-6">
+              Hier sind die Informationen zu Ihrer Wohnung.
+            </p>
+
+            <div className="p-5 rounded-xl border bg-card space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                  <Building2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-heading font-semibold text-foreground text-sm">Ihre Wohnung</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Zugewiesen durch Ihren Vermieter</p>
+                </div>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Adresse</span>
+                  <span className="font-medium text-foreground">{inviteProperty || "Berliner Str. 42"}</span>
+                </div>
+                <div className="border-t" />
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Wohnung</span>
+                  <span className="font-medium text-foreground">{searchParams.get("unit") || "Whg. 1"}</span>
+                </div>
+                <div className="border-t" />
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Vermieter</span>
+                  <span className="font-medium text-foreground">{searchParams.get("owner") || "Ihr Vermieter"}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-3">
+              <Button className="w-full" onClick={() => navigate("/tenant-dashboard")}>
+                Zum Mieterportal →
+              </Button>
+              <p className="text-xs text-center text-muted-foreground">
+                Sie können Nachrichten senden, Schäden melden und Dokumente einsehen.
+              </p>
             </div>
           </div>
         </div>
