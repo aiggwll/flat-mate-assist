@@ -9,7 +9,7 @@ import { toast } from "@/components/ui/sonner";
 import { useUser } from "@/contexts/UserContext";
 
 const InviteTenantDialog = () => {
-  const { userProperties } = useUser();
+  const { userProperties, userName } = useUser();
   const [open, setOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
