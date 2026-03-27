@@ -32,6 +32,8 @@ const LoginPage = () => {
   const [showPropertySetup, setShowPropertySetup] = useState(false);
   const [properties, setProperties] = useState<PropertyForm[]>([{ ...emptyProperty }]);
   const navigate = useNavigate();
+  const { setUserName, setUserProperties, setIsNewUser } = useUser();
+  const [nameField, setNameField] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
