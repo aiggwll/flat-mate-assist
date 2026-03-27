@@ -245,9 +245,16 @@ const DocumentManager = ({ role }: DocumentManagerProps) => {
 
       {/* Document view */}
       {sortedYears.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-          <FileText className="h-10 w-10 mb-3 opacity-30" />
-          <p className="text-sm">Keine Dokumente gefunden.</p>
+        <div className="flex flex-col items-center justify-center py-16">
+          <FileText className="h-10 w-10 text-muted-foreground/40 mb-3" />
+          <p className="text-sm font-medium text-foreground mb-1">Noch keine Dokumente vorhanden</p>
+          <p className="text-xs text-muted-foreground mb-4">
+            {role === "tenant" ? "Laden Sie Dokumente hoch oder warten Sie auf Ihren Vermieter." : "Laden Sie Ihr erstes Dokument hoch."}
+          </p>
+          <Button size="sm" className="gap-2" onClick={() => setUploadOpen(true)}>
+            <Upload className="h-4 w-4" />
+            Dokumente hochladen
+          </Button>
         </div>
       ) : role === "tenant" ? (
         /* Tenant: simplified flat list grouped by category label */

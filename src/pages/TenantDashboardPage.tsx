@@ -246,9 +246,11 @@ const TenantDashboardPage = () => {
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {chatMessages.length === 0 && (
-                  <p className="text-sm text-muted-foreground text-center py-12">
-                    Noch keine Nachrichten. Schreiben Sie Ihrem Vermieter.
-                  </p>
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <MessageSquare className="h-10 w-10 text-muted-foreground/40 mb-3" />
+                    <p className="text-sm font-medium text-foreground mb-1">Noch kein Chat vorhanden</p>
+                    <p className="text-xs text-muted-foreground">Schreiben Sie Ihrem Vermieter eine Nachricht.</p>
+                  </div>
                 )}
                 {chatMessages.map((m) => (
                   <div key={m.id} className={`flex ${m.from === tenantName ? "justify-end" : "justify-start"}`}>
