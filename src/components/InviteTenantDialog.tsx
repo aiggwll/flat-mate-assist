@@ -28,8 +28,10 @@ const InviteTenantDialog = () => {
   const selectedProp = propertyList.find(p => p.id === selectedProperty);
   const availableUnits = selectedProp?.units.filter(u => !u.hasTenant) ?? [];
 
+  const selectedUnitObj = selectedProp?.units.find(u => u.id === selectedUnit);
+
   const inviteLink = linkGenerated
-    ? `${window.location.origin}/?role=tenant&property=${selectedProperty}&unit=${selectedUnit}`
+    ? `${window.location.origin}/?role=tenant&property=${encodeURIComponent(selectedProp?.label || "")}&unit=${encodeURIComponent(selectedUnitObj?.number || "")}&owner=${encodeURIComponent(userName)}`
     : "";
 
   const handleGenerateLink = () => {
