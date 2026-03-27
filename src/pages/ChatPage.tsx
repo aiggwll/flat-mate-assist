@@ -11,6 +11,14 @@ const ChatPage = () => {
   const [chatMessages, setChatMessages] = useState(messages);
   const [newMessage, setNewMessage] = useState("");
 
+  const selectContact = (contact: string) => {
+    // Mark all messages from this contact as read
+    setChatMessages(prev =>
+      prev.map(m => m.from === contact && !m.read ? { ...m, read: true } : m)
+    );
+    setSelectedContact(contact);
+  };
+
   const contactMessages = selectedContact
     ? chatMessages.filter(m => m.from === selectedContact || m.to === selectedContact)
     : [];
@@ -62,7 +70,7 @@ const ChatPage = () => {
                 return (
                   <button
                     key={contact}
-                    onClick={() => setSelectedContact(contact)}
+                    onClick={() => selectContact(contact)}
                     className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50 border-b last:border-0"
                   >
                     <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground shrink-0">
@@ -137,7 +145,7 @@ const ChatPage = () => {
                 return (
                   <button
                     key={contact}
-                    onClick={() => setSelectedContact(contact)}
+                    onClick={() => selectContact(contact)}
                     className="w-full flex items-center gap-3 px-4 py-3.5 bg-card rounded-xl border text-left transition-colors active:bg-muted/50"
                   >
                     <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground shrink-0">
