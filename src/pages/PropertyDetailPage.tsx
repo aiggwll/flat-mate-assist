@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Building2, MapPin, ArrowLeft, User, FileText, AlertTriangle, Plus, Camera, X, CheckCircle2, Clock } from "lucide-react";
+import { Building2, MapPin, ArrowLeft, AlertTriangle, Plus, Camera, X, FileText, Video, Upload, Download, Eye, FolderOpen } from "lucide-react";
 import { properties, type Damage } from "@/lib/dummy-data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 const statusColor: Record<string, string> = {
@@ -17,16 +18,44 @@ const statusColor: Record<string, string> = {
   erledigt: "bg-accent/10 text-accent border-0",
 };
 
-const categoryIcon: Record<string, string> = {
-  Heizung: "🔥",
-  Wasser: "💧",
-  Elektrik: "⚡",
-  Sonstiges: "🔧",
-};
-
 interface DamageWithPhotos extends Damage {
   photos?: string[];
 }
+
+// Dummy documents per property
+const propertyDocuments: Record<string, { id: string; name: string; category: string; date: string; size: string }[]> = {
+  p1: [
+    { id: "pd1", name: "Mietvertrag_Mueller.pdf", category: "Verträge", date: "2022-03-01", size: "245 KB" },
+    { id: "pd2", name: "Mietvertrag_Schmidt.pdf", category: "Verträge", date: "2021-08-15", size: "312 KB" },
+    { id: "pd3", name: "Übergabeprotokoll_1OG.pdf", category: "Protokolle", date: "2022-03-01", size: "180 KB" },
+    { id: "pd4", name: "Nebenkostenabrechnung_2025.pdf", category: "Rechnungen", date: "2025-12-15", size: "89 KB" },
+    { id: "pd5", name: "Gebäudeversicherung_2026.pdf", category: "Versicherungen", date: "2026-01-10", size: "156 KB" },
+  ],
+  p2: [
+    { id: "pd6", name: "Mietvertrag_Weber.pdf", category: "Verträge", date: "2023-01-01", size: "278 KB" },
+    { id: "pd7", name: "Rechnung_Sanitaer.pdf", category: "Rechnungen", date: "2026-01-05", size: "67 KB" },
+  ],
+  p3: [
+    { id: "pd8", name: "Mietvertrag_Klein.pdf", category: "Verträge", date: "2020-11-01", size: "230 KB" },
+    { id: "pd9", name: "Stromabrechnung_Q1.pdf", category: "Versorger", date: "2026-01-20", size: "45 KB" },
+  ],
+};
+
+// Dummy video tours per property
+const propertyVideos: Record<string, { id: string; tenant: string; room: string; date: string; type: "video" | "photo" }[]> = {
+  p1: [
+    { id: "v1", tenant: "Anna Müller", room: "Küche", date: "2026-03-23", type: "video" },
+    { id: "v2", tenant: "Anna Müller", room: "Badezimmer", date: "2026-03-23", type: "video" },
+    { id: "v3", tenant: "Max Schmidt", room: "Wohnzimmer", date: "2026-03-20", type: "photo" },
+  ],
+  p2: [
+    { id: "v4", tenant: "Lisa Weber", room: "Flur", date: "2026-03-21", type: "video" },
+    { id: "v5", tenant: "Tom Fischer", room: "Schlafzimmer", date: "2026-03-18", type: "photo" },
+  ],
+  p3: [
+    { id: "v6", tenant: "Sarah Klein", room: "Wohnzimmer", date: "2026-02-25", type: "video" },
+  ],
+};
 
 const PropertyDetailPage = () => {
   const { id } = useParams();
@@ -102,8 +131,19 @@ const PropertyDetailPage = () => {
     return [...baseDamages, ...(extraDamages[unitId] ?? [])];
   };
 
+  const docs = propertyDocuments[property.id] ?? [];
+  const videos = propertyVideos[property.id] ?? [];
+
+  // Group docs by category
+  const docsByCategory: Record<string, typeof docs> = {};
+  docs.forEach(d => {
+    if (!docsByCategory[d.category]) docsByCategory[d.category] = [];
+    docsByCategory[d.category].push(d);
+  });
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
         <Link to="/properties" className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
           <ArrowLeft className="h-4 w-4" />
@@ -123,60 +163,150 @@ const PropertyDetailPage = () => {
         </div>
       </div>
 
-      <div className="space-y-4">
-        <h2 className="font-heading font-semibold text-foreground">Wohnungen ({property.units.length})</h2>
-        <div className="space-y-3">
-          {property.units.map(unit => {
-            const allDamages = getDamagesForUnit(unit.id, unit.damages);
-            const openDamages = allDamages.filter(d => d.status !== "erledigt");
+      {/* Tabs */}
+      <Tabs defaultValue="units" className="w-full">
+        <TabsList className="w-full grid grid-cols-3">
+          <TabsTrigger value="units" className="text-xs sm:text-sm">
+            Wohnungen
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="text-xs sm:text-sm">
+            Dokumente
+          </TabsTrigger>
+          <TabsTrigger value="media" className="text-xs sm:text-sm">
+            Begehungen
+          </TabsTrigger>
+        </TabsList>
 
-            return (
-              <div key={unit.id} className="bg-card rounded-xl border p-5 space-y-0">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-heading font-semibold text-foreground">Whg. {unit.number}</h3>
-                    <p className="text-sm text-muted-foreground">{unit.size} m² · {unit.rent.toLocaleString("de-DE")} €/Monat</p>
-                  </div>
-                  {unit.tenant ? (
-                    <Badge variant="secondary" className="bg-accent/10 text-accent border-0">Vermietet</Badge>
-                  ) : (
-                    <Badge variant="secondary" className="bg-warning/10 text-warning border-0">Leerstand</Badge>
-                  )}
-                </div>
+        {/* === Wohnungen Tab === */}
+        <TabsContent value="units" className="mt-4">
+          <div className="space-y-3">
+            {property.units.map(unit => {
+              const allDamages = getDamagesForUnit(unit.id, unit.damages);
+              const openDamages = allDamages.filter(d => d.status !== "erledigt");
 
-                {/* Tenant */}
-                {unit.tenant && (
-                  <div className="mt-3 pt-3 border-t flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
-                        {unit.tenant.name.split(" ").map(n => n[0]).join("")}
-                      </div>
-                      <p className="text-sm font-medium text-foreground">{unit.tenant.name}</p>
+              return (
+                <div key={unit.id} className="bg-card rounded-xl border p-5 space-y-0">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-heading font-semibold text-foreground">Whg. {unit.number}</h3>
+                      <p className="text-sm text-muted-foreground">{unit.size} m² · {unit.rent.toLocaleString("de-DE")} €/Monat</p>
                     </div>
-                    {openDamages.length > 0 && (
-                      <div className="flex items-center gap-1.5 text-xs text-destructive">
-                        <AlertTriangle className="h-3.5 w-3.5" />
-                        <span>{openDamages.length} offene Schäden</span>
-                      </div>
+                    {unit.tenant ? (
+                      <Badge variant="secondary" className="bg-accent/10 text-accent border-0">Vermietet</Badge>
+                    ) : (
+                      <Badge variant="secondary" className="bg-warning/10 text-warning border-0">Leerstand</Badge>
                     )}
                   </div>
-                )}
 
-                {/* Report damage button */}
-                {unit.tenant && (
-                  <div className="mt-3 pt-3 border-t">
-                    <Button variant="outline" size="sm" onClick={() => openReportDialog(unit.id)}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Schaden melden
-                    </Button>
+                  {unit.tenant && (
+                    <div className="mt-3 pt-3 border-t flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
+                          {unit.tenant.name.split(" ").map(n => n[0]).join("")}
+                        </div>
+                        <p className="text-sm font-medium text-foreground">{unit.tenant.name}</p>
+                      </div>
+                      {openDamages.length > 0 && (
+                        <div className="flex items-center gap-1.5 text-xs text-destructive">
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                          <span>{openDamages.length} offene Schäden</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {unit.tenant && (
+                    <div className="mt-3 pt-3 border-t">
+                      <Button variant="outline" size="sm" onClick={() => openReportDialog(unit.id)}>
+                        <Plus className="h-4 w-4 mr-1" />
+                        Schaden melden
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </TabsContent>
+
+        {/* === Dokumente Tab === */}
+        <TabsContent value="documents" className="mt-4">
+          {docs.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+              <FileText className="h-10 w-10 mb-3 opacity-30" />
+              <p className="text-sm">Keine Dokumente vorhanden.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {Object.entries(docsByCategory).map(([category, catDocs]) => (
+                <div key={category}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{category}</p>
+                    <span className="text-xs text-muted-foreground">({catDocs.length})</span>
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+                  <div className="border rounded-lg divide-y">
+                    {catDocs.map(doc => (
+                      <div key={doc.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/10 transition-colors group">
+                        <div className="h-8 w-8 rounded-md bg-muted/50 flex items-center justify-center shrink-0">
+                          <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-foreground truncate">{doc.name}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-xs text-muted-foreground">{doc.size}</span>
+                            <span className="text-xs text-muted-foreground">·</span>
+                            <span className="text-xs text-muted-foreground">{new Date(doc.date).toLocaleDateString("de-DE")}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                            <Eye className="h-3.5 w-3.5" />
+                          </button>
+                          <button className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                            <Download className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* === Begehungen Tab === */}
+        <TabsContent value="media" className="mt-4">
+          {videos.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+              <Video className="h-10 w-10 mb-3 opacity-30" />
+              <p className="text-sm">Keine Begehungen vorhanden.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {videos.map(v => (
+                <div key={v.id} className="bg-card rounded-xl border p-4 flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
+                    {v.type === "video" ? (
+                      <Video className="h-5 w-5 text-primary" />
+                    ) : (
+                      <Camera className="h-5 w-5 text-primary" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">{v.room}</p>
+                    <p className="text-xs text-muted-foreground">{v.tenant} · {new Date(v.date).toLocaleDateString("de-DE")}</p>
+                  </div>
+                  <Badge variant="secondary" className="shrink-0 text-xs">
+                    {v.type === "video" ? "Video" : "Foto"}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {/* Report Damage Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
@@ -193,7 +323,6 @@ const PropertyDetailPage = () => {
               <Label>Titel *</Label>
               <Input placeholder="z.B. Heizung defekt" value={form.title} onChange={e => update("title", e.target.value)} />
             </div>
-
             <div>
               <Label>Kategorie *</Label>
               <Select value={form.category} onValueChange={v => update("category", v)}>
@@ -206,7 +335,6 @@ const PropertyDetailPage = () => {
                 </SelectContent>
               </Select>
             </div>
-
             <div>
               <Label>Beschreibung *</Label>
               <Textarea
@@ -216,7 +344,6 @@ const PropertyDetailPage = () => {
                 rows={4}
               />
             </div>
-
             <div>
               <Label>Fotos (max. 5)</Label>
               <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={e => handlePhotos(e.target.files)} />
