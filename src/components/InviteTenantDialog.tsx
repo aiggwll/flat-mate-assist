@@ -123,8 +123,27 @@ const InviteTenantDialog = () => {
             )}
           </div>
 
+          <div className="space-y-2">
+            <Label>Name des Mieters *</Label>
+            <Input
+              placeholder="Max Mustermann"
+              value={tenantName}
+              onChange={(e) => { setTenantName(e.target.value); setLinkGenerated(false); }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>E-Mail des Mieters *</Label>
+            <Input
+              type="email"
+              placeholder="mieter@beispiel.de"
+              value={tenantEmail}
+              onChange={(e) => { setTenantEmail(e.target.value); setLinkGenerated(false); }}
+            />
+          </div>
+
           {!linkGenerated ? (
-            <Button onClick={handleGenerateLink} className="w-full gap-2" disabled={!selectedProperty || !selectedUnit}>
+            <Button onClick={handleGenerateLink} className="w-full gap-2" disabled={!selectedProperty || !selectedUnit || !tenantName.trim() || !tenantEmail.trim()}>
               Einladungslink erstellen
             </Button>
           ) : (
@@ -139,27 +158,10 @@ const InviteTenantDialog = () => {
                 </div>
               </div>
 
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">oder per E-Mail</span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>E-Mail des Mieters</Label>
-                <div className="flex gap-2">
-                  <Input
-                    type="email"
-                    placeholder="mieter@beispiel.de"
-                    value={tenantEmail}
-                    onChange={(e) => setTenantEmail(e.target.value)}
-                  />
-                  <Button variant="outline" size="icon" onClick={handleSendEmail}>
-                    <Mail className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+              <Button variant="outline" className="w-full gap-2" onClick={handleSendEmail}>
+                <Mail className="h-4 w-4" />
+                Einladung per E-Mail senden
+              </Button>
             </div>
           )}
         </div>
