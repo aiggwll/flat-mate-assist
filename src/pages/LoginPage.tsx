@@ -50,9 +50,13 @@ const LoginPage = () => {
       setPasswordError("");
 
       if (selectedRole === "owner") {
+        setUserName(nameField.trim() || "Eigentümer");
+        setIsNewUser(true);
         setShowPropertySetup(true);
         return;
       }
+      // Tenant: save name
+      setUserName(nameField.trim() || "Mieter");
     }
 
     if (selectedRole === "tenant") {
