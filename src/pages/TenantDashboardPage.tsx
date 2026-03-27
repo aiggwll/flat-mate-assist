@@ -51,6 +51,7 @@ import {
 
 const TenantDashboardPage = () => {
   const [searchParams] = useSearchParams();
+  const { userName } = useUser();
   const propertyId = searchParams.get("property") || "p1";
   const unitId = searchParams.get("unit") || "u1";
 
@@ -58,8 +59,8 @@ const TenantDashboardPage = () => {
   const unit = property?.units.find((u) => u.id === unitId) || property?.units[0];
   const tenant = unit?.tenant;
 
-  // Chat state
-  const tenantName = tenant?.name || "Mieter";
+  // Chat state - use registration name or fallback to dummy
+  const tenantName = userName || tenant?.name || "Mieter";
   const [chatMessages, setChatMessages] = useState(
     allMessages.filter((m) => m.from === tenantName || m.to === tenantName)
   );
