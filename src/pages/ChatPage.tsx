@@ -70,7 +70,7 @@ const ChatPage = () => {
                 return (
                   <button
                     key={contact}
-                    onClick={() => setSelectedContact(contact)}
+                    onClick={() => selectContact(contact)}
                     className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50 border-b last:border-0"
                   >
                     <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground shrink-0">
