@@ -379,9 +379,14 @@ const TenantDashboardPage = () => {
               </div>
 
               {damages.length === 0 ? (
-                <Card className="p-8 text-center">
-                  <AlertTriangle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">Keine Schadenmeldungen vorhanden.</p>
+                <Card className="p-12 text-center">
+                  <AlertTriangle className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
+                  <p className="text-sm font-medium text-foreground mb-1">Kein Schaden gemeldet</p>
+                  <p className="text-xs text-muted-foreground mb-4">Melden Sie Schäden direkt an Ihren Vermieter.</p>
+                  <Button size="sm" className="gap-2" onClick={() => setDamageOpen(true)}>
+                    <Plus className="h-4 w-4" />
+                    Neuen Schaden melden
+                  </Button>
                 </Card>
               ) : (
                 <div className="space-y-3">
