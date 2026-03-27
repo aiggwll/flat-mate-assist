@@ -13,6 +13,7 @@ const InviteTenantDialog = () => {
   const [open, setOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
+  const [tenantName, setTenantName] = useState("");
   const [tenantEmail, setTenantEmail] = useState("");
   const [copied, setCopied] = useState(false);
   const [linkGenerated, setLinkGenerated] = useState(false);
