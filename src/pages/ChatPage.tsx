@@ -11,6 +11,14 @@ const ChatPage = () => {
   const [chatMessages, setChatMessages] = useState(messages);
   const [newMessage, setNewMessage] = useState("");
 
+  const selectContact = (contact: string) => {
+    // Mark all messages from this contact as read
+    setChatMessages(prev =>
+      prev.map(m => m.from === contact && !m.read ? { ...m, read: true } : m)
+    );
+    setSelectedContact(contact);
+  };
+
   const contactMessages = selectedContact
     ? chatMessages.filter(m => m.from === selectedContact || m.to === selectedContact)
     : [];
