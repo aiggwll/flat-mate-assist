@@ -89,8 +89,8 @@ const InviteTenantDialog = () => {
               className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
             >
               <option value="">Immobilie wählen...</option>
-              {properties.map(p => (
-                <option key={p.id} value={p.id}>{p.address}, {p.city}</option>
+              {propertyList.map(p => (
+                <option key={p.id} value={p.id}>{p.label}</option>
               ))}
             </select>
           </div>
