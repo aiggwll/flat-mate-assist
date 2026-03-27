@@ -86,6 +86,15 @@ const LoginPage = () => {
       toast.error("Bitte füllen Sie mindestens Adresse, Stadt und PLZ aus.");
       return;
     }
+    const mapped = properties.map((p, i) => ({
+      id: `user-p${i + 1}`,
+      address: p.address.trim(),
+      city: p.city.trim(),
+      zipCode: p.zipCode.trim(),
+      yearBuilt: parseInt(p.yearBuilt) || 0,
+      units: parseInt(p.units) || 1,
+    }));
+    setUserProperties(mapped);
     toast.success(`${properties.length} ${properties.length === 1 ? "Immobilie" : "Immobilien"} angelegt!`);
     navigate("/dashboard");
   };
