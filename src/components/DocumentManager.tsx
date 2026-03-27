@@ -63,16 +63,22 @@ interface Doc {
   description: string;
 }
 
-const initialDocs: Doc[] = [
-  { id: "d1", name: "Mietvertrag_Mueller.pdf", year: "2024", category: "Verträge", uploadedAt: "2024-03-01", fileType: "PDF", size: "245 KB", status: "unterzeichnet", description: "" },
-  { id: "d2", name: "Mietvertrag_Schmidt.pdf", year: "2024", category: "Verträge", uploadedAt: "2024-08-15", fileType: "PDF", size: "312 KB", status: "unterzeichnet", description: "" },
-  { id: "d3", name: "Übergabeprotokoll_1OG.pdf", year: "2024", category: "Protokolle", uploadedAt: "2024-03-01", fileType: "PDF", size: "180 KB", status: "", description: "" },
-  { id: "d4", name: "Nebenkostenabrechnung_2024.pdf", year: "2024", category: "Rechnungen", uploadedAt: "2024-12-15", fileType: "PDF", size: "89 KB", status: "offen", description: "" },
-  { id: "d5", name: "Rechnung_Sanitaer.pdf", year: "2025", category: "Instandhaltung", uploadedAt: "2025-05-20", fileType: "PDF", size: "67 KB", status: "", description: "Reparatur Wasserhahn Küche" },
-  { id: "d6", name: "Mietvertrag_Weber.pdf", year: "2025", category: "Verträge", uploadedAt: "2025-01-01", fileType: "PDF", size: "278 KB", status: "unterzeichnet", description: "" },
-  { id: "d7", name: "Gebäudeversicherung_2025.pdf", year: "2025", category: "Versicherungen", uploadedAt: "2025-01-10", fileType: "PDF", size: "156 KB", status: "", description: "" },
-  { id: "d8", name: "Stromabrechnung_Q1.pdf", year: "2026", category: "Versorger", uploadedAt: "2026-01-20", fileType: "PDF", size: "45 KB", status: "", description: "" },
-  { id: "d9", name: "Heizungsrechnung_Wartung.pdf", year: "2026", category: "Instandhaltung", uploadedAt: "2026-02-10", fileType: "PDF", size: "92 KB", status: "", description: "" },
+// All documents, tagged by propertyId
+const allDocuments: (Doc & { propertyId?: string })[] = [
+  // Property p1 - Berliner Str. 42
+  { id: "d1", name: "Mietvertrag_Mueller.pdf", year: "2024", category: "Verträge", uploadedAt: "2024-03-01", fileType: "PDF", size: "245 KB", status: "unterzeichnet", description: "", propertyId: "p1" },
+  { id: "d2", name: "Mietvertrag_Schmidt.pdf", year: "2024", category: "Verträge", uploadedAt: "2024-08-15", fileType: "PDF", size: "312 KB", status: "unterzeichnet", description: "", propertyId: "p1" },
+  { id: "d3", name: "Übergabeprotokoll_1OG.pdf", year: "2024", category: "Protokolle", uploadedAt: "2024-03-01", fileType: "PDF", size: "180 KB", status: "", description: "", propertyId: "p1" },
+  { id: "d4", name: "Nebenkostenabrechnung_2024.pdf", year: "2024", category: "Rechnungen", uploadedAt: "2024-12-15", fileType: "PDF", size: "89 KB", status: "offen", description: "", propertyId: "p1" },
+  { id: "d5", name: "Gebäudeversicherung_2025.pdf", year: "2025", category: "Versicherungen", uploadedAt: "2025-01-10", fileType: "PDF", size: "156 KB", status: "", description: "", propertyId: "p1" },
+  // Property p2 - Mozartstraße 15
+  { id: "d6", name: "Mietvertrag_Weber.pdf", year: "2025", category: "Verträge", uploadedAt: "2025-01-01", fileType: "PDF", size: "278 KB", status: "unterzeichnet", description: "", propertyId: "p2" },
+  { id: "d7", name: "Rechnung_Sanitaer.pdf", year: "2025", category: "Instandhaltung", uploadedAt: "2025-05-20", fileType: "PDF", size: "67 KB", status: "", description: "Reparatur Wasserhahn Küche", propertyId: "p2" },
+  { id: "d8", name: "Nebenkostenabrechnung_2025.pdf", year: "2025", category: "Rechnungen", uploadedAt: "2025-12-15", fileType: "PDF", size: "95 KB", status: "offen", description: "", propertyId: "p2" },
+  // Property p3 - Hauptstraße 8
+  { id: "d9", name: "Mietvertrag_Klein.pdf", year: "2020", category: "Verträge", uploadedAt: "2020-11-01", fileType: "PDF", size: "230 KB", status: "unterzeichnet", description: "", propertyId: "p3" },
+  { id: "d10", name: "Stromabrechnung_Q1.pdf", year: "2026", category: "Versorger", uploadedAt: "2026-01-20", fileType: "PDF", size: "45 KB", status: "", description: "", propertyId: "p3" },
+  { id: "d11", name: "Heizungsrechnung_Wartung.pdf", year: "2026", category: "Instandhaltung", uploadedAt: "2026-02-10", fileType: "PDF", size: "92 KB", status: "", description: "", propertyId: "p3" },
 ];
 
 // Categories visible to tenants
