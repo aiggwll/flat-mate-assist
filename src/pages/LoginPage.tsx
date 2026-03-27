@@ -56,8 +56,11 @@ const LoginPage = () => {
         setShowPropertySetup(true);
         return;
       }
-      // Tenant: save name
+      // Tenant: save name and show property info
       setUserName(nameField.trim() || "Mieter");
+      setIsNewUser(true);
+      setShowTenantPropertyInfo(true);
+      return;
     }
 
     if (selectedRole === "tenant") {
