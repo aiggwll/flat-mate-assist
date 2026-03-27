@@ -10,6 +10,7 @@ import { useUser } from "@/contexts/UserContext";
 
 const InviteTenantDialog = () => {
   const { userProperties, userName } = useUser();
+  const ownerDisplayName = userName || "Max Kaufmann";
   const [open, setOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
@@ -31,7 +32,7 @@ const InviteTenantDialog = () => {
   const selectedUnitObj = selectedProp?.units.find(u => u.id === selectedUnit);
 
   const inviteLink = linkGenerated
-    ? `${window.location.origin}/?role=tenant&property=${encodeURIComponent(selectedProp?.label || "")}&unit=${encodeURIComponent(selectedUnitObj?.number || "")}&owner=${encodeURIComponent(userName)}`
+    ? `${window.location.origin}/?role=tenant&property=${encodeURIComponent(selectedProp?.label || "")}&unit=${encodeURIComponent(selectedUnitObj?.number || "")}&owner=${encodeURIComponent(ownerDisplayName)}`
     : "";
 
   const handleGenerateLink = () => {
