@@ -102,7 +102,10 @@ const statusVariant = (s: DocStatus) => {
   return "outline" as const;
 };
 
-const DocumentManager = ({ role }: DocumentManagerProps) => {
+const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
+  const initialDocs = propertyId
+    ? allDocuments.filter((d) => d.propertyId === propertyId)
+    : allDocuments;
   const [docs, setDocs] = useState<Doc[]>(initialDocs);
   const [search, setSearch] = useState("");
   const [filterYear, setFilterYear] = useState("all");
