@@ -86,6 +86,7 @@ const TENANT_CATEGORIES: Category[] = ["Verträge", "Protokolle", "Rechnungen"];
 
 interface DocumentManagerProps {
   role: "owner" | "tenant";
+  propertyId?: string;
 }
 
 const statusLabel: Record<string, string> = {
