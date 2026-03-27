@@ -354,7 +354,7 @@ const LoginPage = () => {
             {!isLogin && (
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" placeholder="Max Mustermann" required />
+                <Input id="name" placeholder="Max Mustermann" required value={nameField} onChange={e => setNameField(e.target.value)} />
               </div>
             )}
             <div className="space-y-2">
