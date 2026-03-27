@@ -71,6 +71,7 @@ const InviteTenantDialog = () => {
   const handleReset = () => {
     setSelectedProperty("");
     setSelectedUnit("");
+    setTenantName("");
     setTenantEmail("");
     setLinkGenerated(false);
     setCopied(false);
