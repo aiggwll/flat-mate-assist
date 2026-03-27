@@ -246,9 +246,11 @@ const TenantDashboardPage = () => {
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {chatMessages.length === 0 && (
-                  <p className="text-sm text-muted-foreground text-center py-12">
-                    Noch keine Nachrichten. Schreiben Sie Ihrem Vermieter.
-                  </p>
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <MessageSquare className="h-10 w-10 text-muted-foreground/40 mb-3" />
+                    <p className="text-sm font-medium text-foreground mb-1">Noch kein Chat vorhanden</p>
+                    <p className="text-xs text-muted-foreground">Schreiben Sie Ihrem Vermieter eine Nachricht.</p>
+                  </div>
                 )}
                 {chatMessages.map((m) => (
                   <div key={m.id} className={`flex ${m.from === tenantName ? "justify-end" : "justify-start"}`}>
@@ -379,9 +381,14 @@ const TenantDashboardPage = () => {
               </div>
 
               {damages.length === 0 ? (
-                <Card className="p-8 text-center">
-                  <AlertTriangle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">Keine Schadenmeldungen vorhanden.</p>
+                <Card className="p-12 text-center">
+                  <AlertTriangle className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
+                  <p className="text-sm font-medium text-foreground mb-1">Kein Schaden gemeldet</p>
+                  <p className="text-xs text-muted-foreground mb-4">Melden Sie Schäden direkt an Ihren Vermieter.</p>
+                  <Button size="sm" className="gap-2" onClick={() => setDamageOpen(true)}>
+                    <Plus className="h-4 w-4" />
+                    Neuen Schaden melden
+                  </Button>
                 </Card>
               ) : (
                 <div className="space-y-3">
