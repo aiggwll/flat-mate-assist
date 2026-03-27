@@ -2,6 +2,7 @@ import { useState } from "react";
 import CameraRecorder from "@/components/CameraRecorder";
 import DocumentManager from "@/components/DocumentManager";
 import { useSearchParams, NavLink } from "react-router-dom";
+import { useUser } from "@/contexts/UserContext";
 import { properties, messages as allMessages } from "@/lib/dummy-data";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
