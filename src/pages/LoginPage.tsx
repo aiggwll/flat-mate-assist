@@ -166,9 +166,9 @@ const LoginPage = () => {
 
   // Tenant property info screen (after registration)
   if (showTenantPropertyInfo) {
-    const property = inviteProperty
-      ? properties.find((p) => p.address === inviteProperty) || null
-      : null;
+    const propertyAddress = inviteProperty || "Berliner Str. 42, Berlin";
+    const unitLabel = searchParams.get("unit") || "Whg. 1";
+    const ownerName = searchParams.get("owner") || "Ihr Vermieter";
 
     return (
       <div className="min-h-screen bg-primary flex">
@@ -221,17 +221,17 @@ const LoginPage = () => {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Adresse</span>
-                  <span className="font-medium text-foreground">{inviteProperty || "Berliner Str. 42"}</span>
+                  <span className="font-medium text-foreground">{propertyAddress}</span>
                 </div>
                 <div className="border-t" />
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Wohnung</span>
-                  <span className="font-medium text-foreground">{searchParams.get("unit") || "Whg. 1"}</span>
+                  <span className="font-medium text-foreground">{unitLabel}</span>
                 </div>
                 <div className="border-t" />
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Vermieter</span>
-                  <span className="font-medium text-foreground">{searchParams.get("owner") || "Ihr Vermieter"}</span>
+                  <span className="font-medium text-foreground">{ownerName}</span>
                 </div>
               </div>
             </div>
