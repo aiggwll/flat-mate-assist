@@ -37,6 +37,14 @@ const InviteTenantDialog = () => {
       toast("Bitte wählen Sie eine Immobilie und Wohnung aus.");
       return;
     }
+    if (!tenantName.trim()) {
+      toast("Bitte geben Sie den Namen des Mieters ein.");
+      return;
+    }
+    if (!tenantEmail.trim()) {
+      toast("Bitte geben Sie die E-Mail-Adresse des Mieters ein.");
+      return;
+    }
     setLinkGenerated(true);
   };
 
