@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Building2, Home, Plus, X, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { useUser } from "@/contexts/UserContext";
 
 type Role = "owner" | "tenant";
 
@@ -31,6 +32,8 @@ const LoginPage = () => {
   const [showPropertySetup, setShowPropertySetup] = useState(false);
   const [properties, setProperties] = useState<PropertyForm[]>([{ ...emptyProperty }]);
   const navigate = useNavigate();
+  const { setUserName, setUserProperties, setIsNewUser } = useUser();
+  const [nameField, setNameField] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,9 +50,13 @@ const LoginPage = () => {
       setPasswordError("");
 
       if (selectedRole === "owner") {
+        setUserName(nameField.trim() || "Eigentümer");
+        setIsNewUser(true);
         setShowPropertySetup(true);
         return;
       }
+      // Tenant: save name
+      setUserName(nameField.trim() || "Mieter");
     }
 
     if (selectedRole === "tenant") {
@@ -79,6 +86,15 @@ const LoginPage = () => {
       toast.error("Bitte füllen Sie mindestens Adresse, Stadt und PLZ aus.");
       return;
     }
+    const mapped = properties.map((p, i) => ({
+      id: `user-p${i + 1}`,
+      address: p.address.trim(),
+      city: p.city.trim(),
+      zipCode: p.zipCode.trim(),
+      yearBuilt: parseInt(p.yearBuilt) || 0,
+      units: parseInt(p.units) || 1,
+    }));
+    setUserProperties(mapped);
     toast.success(`${properties.length} ${properties.length === 1 ? "Immobilie" : "Immobilien"} angelegt!`);
     navigate("/dashboard");
   };
@@ -338,7 +354,7 @@ const LoginPage = () => {
             {!isLogin && (
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" placeholder="Max Mustermann" required />
+                <Input id="name" placeholder="Max Mustermann" required value={nameField} onChange={e => setNameField(e.target.value)} />
               </div>
             )}
             <div className="space-y-2">

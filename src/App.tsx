@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { UserProvider } from "./contexts/UserContext";
 import AppLayout from "./components/AppLayout";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -22,26 +23,28 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route element={<AppLayout />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/properties" element={<PropertiesPage />} />
-            <Route path="/properties/:id" element={<PropertyDetailPage />} />
-            <Route path="/payments" element={<PaymentsPage />} />
-            <Route path="/documents" element={<DocumentsPage />} />
-            <Route path="/chat" element={<ChatPage />} />
-            
-            <Route path="/tasks" element={<TasksPage />} />
-            <Route path="/marketplace" element={<MarketplacePage />} />
-          </Route>
-          <Route path="/tenant-dashboard" element={<TenantDashboardPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <UserProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LoginPage />} />
+            <Route element={<AppLayout />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/properties" element={<PropertiesPage />} />
+              <Route path="/properties/:id" element={<PropertyDetailPage />} />
+              <Route path="/payments" element={<PaymentsPage />} />
+              <Route path="/documents" element={<DocumentsPage />} />
+              <Route path="/chat" element={<ChatPage />} />
+              
+              <Route path="/tasks" element={<TasksPage />} />
+              <Route path="/marketplace" element={<MarketplacePage />} />
+            </Route>
+            <Route path="/tenant-dashboard" element={<TenantDashboardPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </UserProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
