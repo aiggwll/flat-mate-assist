@@ -105,7 +105,7 @@ const InviteTenantDialog = () => {
             >
               <option value="">Wohnung wählen...</option>
               {availableUnits.map(u => (
-                <option key={u.id} value={u.id}>{u.number} – {u.size} m² – {u.rent} €</option>
+                <option key={u.id} value={u.id}>{u.number}{u.size ? ` – ${u.size} m²` : ""}{u.rent ? ` – ${u.rent} €` : ""}</option>
               ))}
             </select>
             {selectedProperty && availableUnits.length === 0 && (
