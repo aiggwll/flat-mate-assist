@@ -321,7 +321,7 @@ const TenantDashboardPage = () => {
                             <>
                               <label className="h-20 w-20 rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center cursor-pointer hover:border-accent transition-colors">
                                 <Camera className="h-5 w-5 text-muted-foreground" />
-                                <span className="text-[10px] text-muted-foreground mt-1">Kamera</span>
+                                <span className="text-[9px] text-muted-foreground mt-1 text-center leading-tight">Foto aufnehmen</span>
                                 <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleAddPhotos(e.target.files)} />
                               </label>
                               <label className="h-20 w-20 rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center cursor-pointer hover:border-accent transition-colors">
