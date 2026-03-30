@@ -219,14 +219,10 @@ const TenantDashboardPage = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="messages" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="messages" className="gap-2">
               <MessageSquare className="h-4 w-4" />
               <span className="hidden sm:inline">Nachrichten</span>
-            </TabsTrigger>
-            <TabsTrigger value="damages" className="gap-2">
-              <AlertTriangle className="h-4 w-4" />
-              <span className="hidden sm:inline">Schäden</span>
             </TabsTrigger>
             <TabsTrigger value="documents" className="gap-2">
               <FileText className="h-4 w-4" />
@@ -279,6 +275,63 @@ const TenantDashboardPage = () => {
                 ))}
               </div>
               <div className="p-4 border-t flex gap-2">
+                <Dialog open={damageOpen} onOpenChange={setDamageOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="icon" variant="outline" title="Schaden melden">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle>Schaden melden</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-2">
+                      <div className="space-y-2">
+                        <Label>Kategorie</Label>
+                        <Select value={damageCategory} onValueChange={setDamageCategory}>
+                          <SelectTrigger><SelectValue placeholder="Kategorie wählen" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Heizung">🔥 Heizung</SelectItem>
+                            <SelectItem value="Wasser">💧 Wasser</SelectItem>
+                            <SelectItem value="Elektrik">⚡ Elektrik</SelectItem>
+                            <SelectItem value="Sonstiges">🔧 Sonstiges</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Titel</Label>
+                        <Input value={damageTitle} onChange={(e) => setDamageTitle(e.target.value)} placeholder="z.B. Heizung defekt" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Beschreibung</Label>
+                        <Textarea value={damageDesc} onChange={(e) => setDamageDesc(e.target.value)} placeholder="Beschreiben Sie den Schaden..." rows={3} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Fotos & Dateien (max. 5)</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {damagePhotos.map((photo, i) => (
+                            <div key={i} className="relative h-20 w-20 rounded-lg overflow-hidden border">
+                              <img src={photo.preview} alt="" className="h-full w-full object-cover" />
+                              <button onClick={() => handleRemovePhoto(i)} className="absolute top-0.5 right-0.5 h-5 w-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                          {damagePhotos.length < 5 && (
+                            <label className="h-20 w-20 rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center cursor-pointer hover:border-accent transition-colors">
+                              <Camera className="h-5 w-5 text-muted-foreground" />
+                              <span className="text-[10px] text-muted-foreground mt-1">Foto</span>
+                              <input type="file" accept="image/*,application/pdf" multiple className="hidden" onChange={(e) => handleAddPhotos(e.target.files)} />
+                            </label>
+                          )}
+                        </div>
+                      </div>
+                      <Button onClick={handleSubmitDamage} disabled={!damageTitle || !damageDesc || !damageCategory} className="w-full">
+                        Schaden melden
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
@@ -291,126 +344,6 @@ const TenantDashboardPage = () => {
                 </Button>
               </div>
             </Card>
-          </TabsContent>
-
-          {/* Damages Tab */}
-          <TabsContent value="damages">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-heading font-semibold text-foreground">Schadenmeldungen</h3>
-                <Dialog open={damageOpen} onOpenChange={setDamageOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" className="gap-2">
-                      <Plus className="h-4 w-4" />
-                      Schaden melden
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-lg">
-                    <DialogHeader>
-                      <DialogTitle>Neuen Schaden melden</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 pt-2">
-                      <div className="space-y-2">
-                        <Label>Kategorie</Label>
-                        <Select value={damageCategory} onValueChange={setDamageCategory}>
-                          <SelectTrigger><SelectValue placeholder="Kategorie wählen" /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Heizung">Heizung</SelectItem>
-                            <SelectItem value="Wasser">Wasser</SelectItem>
-                            <SelectItem value="Elektrik">Elektrik</SelectItem>
-                            <SelectItem value="Sonstiges">Sonstiges</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Titel</Label>
-                        <Input
-                          value={damageTitle}
-                          onChange={(e) => setDamageTitle(e.target.value)}
-                          placeholder="z.B. Heizung defekt"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Beschreibung</Label>
-                        <Textarea
-                          value={damageDesc}
-                          onChange={(e) => setDamageDesc(e.target.value)}
-                          placeholder="Beschreiben Sie den Schaden möglichst genau..."
-                          rows={4}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Fotos (max. 5)</Label>
-                        <div className="flex flex-wrap gap-2">
-                          {damagePhotos.map((photo, i) => (
-                            <div key={i} className="relative h-20 w-20 rounded-lg overflow-hidden border">
-                              <img src={photo.preview} alt="" className="h-full w-full object-cover" />
-                              <button
-                                onClick={() => handleRemovePhoto(i)}
-                                className="absolute top-0.5 right-0.5 h-5 w-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </div>
-                          ))}
-                          {damagePhotos.length < 5 && (
-                            <label className="h-20 w-20 rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center cursor-pointer hover:border-accent transition-colors">
-                              <Camera className="h-5 w-5 text-muted-foreground" />
-                              <span className="text-[10px] text-muted-foreground mt-1">Foto</span>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                className="hidden"
-                                onChange={(e) => handleAddPhotos(e.target.files)}
-                              />
-                            </label>
-                          )}
-                        </div>
-                      </div>
-                      <Button
-                        onClick={handleSubmitDamage}
-                        disabled={!damageTitle || !damageDesc || !damageCategory}
-                        className="w-full"
-                      >
-                        Schaden melden
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-
-              {damages.length === 0 ? (
-                <Card className="p-12 text-center">
-                  <AlertTriangle className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
-                  <p className="text-sm font-medium text-foreground mb-1">Kein Schaden gemeldet</p>
-                  <p className="text-xs text-muted-foreground mb-4">Melden Sie Schäden direkt an Ihren Vermieter.</p>
-                  <Button size="sm" className="gap-2" onClick={() => setDamageOpen(true)}>
-                    <Plus className="h-4 w-4" />
-                    Neuen Schaden melden
-                  </Button>
-                </Card>
-              ) : (
-                <div className="space-y-3">
-                  {damages.map((d) => (
-                    <Card key={d.id} className="p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-medium text-foreground text-sm">{d.title}</h4>
-                            <Badge variant={statusColor(d.status)}>{d.status}</Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground">{d.description}</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {d.category} · Gemeldet am {d.reportedAt}
-                          </p>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
           </TabsContent>
 
           {/* Documents Tab */}
