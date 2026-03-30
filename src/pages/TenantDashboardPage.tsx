@@ -219,14 +219,10 @@ const TenantDashboardPage = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="messages" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="messages" className="gap-2">
               <MessageSquare className="h-4 w-4" />
               <span className="hidden sm:inline">Nachrichten</span>
-            </TabsTrigger>
-            <TabsTrigger value="damages" className="gap-2">
-              <AlertTriangle className="h-4 w-4" />
-              <span className="hidden sm:inline">Schäden</span>
             </TabsTrigger>
             <TabsTrigger value="documents" className="gap-2">
               <FileText className="h-4 w-4" />
