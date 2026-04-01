@@ -207,7 +207,7 @@ const TenantDashboardPage = () => {
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-medium text-foreground">{tenantName}</p>
-              <p className="text-xs text-muted-foreground">{property.address}, {unit?.number}</p>
+              <p className="text-xs text-muted-foreground">{propertyAddress}, {unitLabel}</p>
             </div>
             <button
               onClick={async () => { await signOut(); navigate("/"); }}
