@@ -259,15 +259,14 @@ const TenantDashboardPage = () => {
           <TabsContent value="messages">
             <TenantAiChat
               propertyInfo={{
-                address: property.address,
-                unit: unit?.number || "",
-                rent: unit?.rent || 0,
-                landlord: searchParams.get("owner") || "Vermieter",
+                address: propertyAddress,
+                unit: unitLabel,
+                rent: 0,
+                landlord: ownerName,
               }}
               tenantName={tenantName}
-              landlordName={searchParams.get("owner") || "Vermieter"}
+              landlordName={ownerName}
               onEscalate={(msg) => {
-                const ownerName = searchParams.get("owner") || "Vermieter";
                 addMessage({
                   from: tenantName,
                   to: ownerName,
