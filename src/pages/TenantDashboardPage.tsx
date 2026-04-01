@@ -5,7 +5,7 @@ import TenantAiChat from "@/components/TenantAiChat";
 import { useSearchParams, NavLink, useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { useMessages } from "@/contexts/MessagesContext";
-import { properties, messages as allMessages } from "@/lib/dummy-data";
+import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
