@@ -152,7 +152,7 @@ const TenantAiChat = ({ propertyInfo, tenantName, onEscalate, damageButton }: Te
               {m.role === "assistant" && (
                 <div className="flex items-center gap-1.5 mb-1">
                   <Bot className="h-3 w-3 text-accent" />
-                  <span className="text-[10px] font-medium text-accent">Assistent</span>
+                  <span className="text-[10px] font-medium text-accent">Henrik</span>
                 </div>
               )}
               <p className="whitespace-pre-wrap">{m.content}</p>
