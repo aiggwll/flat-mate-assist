@@ -100,13 +100,10 @@ const TenantAiChat = ({ propertyInfo, tenantName, onEscalate, damageButton }: Te
         }
       }
 
-      // Check if AI suggests escalation
-      if (assistantSoFar.toLowerCase().includes("vermieter weiterleite") || assistantSoFar.toLowerCase().includes("an ihren vermieter")) {
-        setShowEscalateOption(true);
-        // Collect last few messages as context for escalation
-        const context = allMessages.slice(-3).map((m) => m.content).join("\n");
-        setEscalateMessage(context);
-      }
+      // Always show escalation option after AI responds
+      setShowEscalateOption(true);
+      const context = allMessages.slice(-3).map((m) => m.content).join("\n");
+      setEscalateMessage(context);
     } catch (err) {
       console.error("AI chat error:", err);
       setMessages((prev) => [
