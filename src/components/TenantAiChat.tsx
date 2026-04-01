@@ -14,6 +14,7 @@ interface TenantAiChatProps {
     landlord: string;
   };
   tenantName: string;
+  landlordName: string;
   onEscalate: (message: string) => void;
   damageButton?: React.ReactNode;
 }
