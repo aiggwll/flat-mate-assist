@@ -192,12 +192,12 @@ const TenantDashboardPage = () => {
               <p className="text-sm font-medium text-foreground">{tenantName}</p>
               <p className="text-xs text-muted-foreground">{property.address}, {unit?.number}</p>
             </div>
-            <NavLink
-              to="/"
+            <button
+              onClick={async () => { await signOut(); navigate("/"); }}
               className="h-9 w-9 rounded-lg border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             >
               <LogOut className="h-4 w-4" />
-            </NavLink>
+            </button>
           </div>
         </div>
       </header>
