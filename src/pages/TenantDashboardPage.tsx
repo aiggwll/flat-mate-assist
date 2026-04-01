@@ -63,7 +63,7 @@ const TenantDashboardPage = () => {
   const [ownerName, setOwnerName] = useState("Vermieter");
   const [profileLoaded, setProfileLoaded] = useState(false);
 
-  useState(() => {
+  useEffect(() => {
     const loadProfile = async () => {
       if (!userId) return;
       const { data } = await supabase
@@ -79,7 +79,7 @@ const TenantDashboardPage = () => {
       setProfileLoaded(true);
     };
     loadProfile();
-  });
+  }, [userId]);
 
   const tenantName = userName || "Mieter";
   const [chatMessages, setChatMessages] = useState<any[]>([]);
