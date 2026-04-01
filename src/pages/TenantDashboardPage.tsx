@@ -93,7 +93,7 @@ const TenantDashboardPage = () => {
   const [damageDesc, setDamageDesc] = useState("");
   const [damageCategory, setDamageCategory] = useState("");
   const [damagePhotos, setDamagePhotos] = useState<{ file: File; preview: string }[]>([]);
-  const [damages, setDamages] = useState(unit?.damages || []);
+  const [damages, setDamages] = useState<any[]>([]);
 
   // 360° upload state
   const defaultRooms = ["Küche", "Badezimmer", "Fenster", "Zimmer 1", "Wohnzimmer", "Flur"];
