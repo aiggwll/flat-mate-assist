@@ -134,8 +134,8 @@ const TenantAiChat = ({ propertyInfo, tenantName, onEscalate, damageButton }: Te
           <Bot className="h-4 w-4 text-accent" />
         </div>
         <div>
-          <p className="font-heading font-semibold text-foreground text-sm">WillProp Assistent</p>
-          <p className="text-[10px] text-muted-foreground">KI-gestützter Support</p>
+          <p className="font-heading font-semibold text-foreground text-sm">Henrik</p>
+          <p className="text-[10px] text-muted-foreground">WillProp KI-Assistent</p>
         </div>
       </div>
 
