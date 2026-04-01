@@ -22,7 +22,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tenant-chat`
 
 const TenantAiChat = ({ propertyInfo, tenantName, onEscalate, damageButton }: TenantAiChatProps) => {
   const [messages, setMessages] = useState<ChatMsg[]>([
-    { role: "assistant", content: `Hallo ${tenantName}! 👋 Ich bin Ihr WillProp Assistent. Wie kann ich Ihnen helfen? Ich kann Fragen zu Ihrer Wohnung, Nebenkosten, Hausordnung und vielem mehr beantworten. Bei Anliegen, die ich nicht lösen kann, leite ich Sie gerne an Ihren Vermieter weiter.` },
+    { role: "assistant", content: `Hallo, ich bin Henrik, Ihr WillProp KI-Assistent. Wie kann ich Ihnen helfen? Ich kann Fragen zu Ihrer Wohnung, Nebenkosten, Hausordnung und vielem mehr beantworten.` },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -100,13 +100,10 @@ const TenantAiChat = ({ propertyInfo, tenantName, onEscalate, damageButton }: Te
         }
       }
 
-      // Check if AI suggests escalation
-      if (assistantSoFar.toLowerCase().includes("vermieter weiterleite") || assistantSoFar.toLowerCase().includes("an ihren vermieter")) {
-        setShowEscalateOption(true);
-        // Collect last few messages as context for escalation
-        const context = allMessages.slice(-3).map((m) => m.content).join("\n");
-        setEscalateMessage(context);
-      }
+      // Always show escalation option after AI responds
+      setShowEscalateOption(true);
+      const context = allMessages.slice(-3).map((m) => m.content).join("\n");
+      setEscalateMessage(context);
     } catch (err) {
       console.error("AI chat error:", err);
       setMessages((prev) => [
@@ -134,8 +131,8 @@ const TenantAiChat = ({ propertyInfo, tenantName, onEscalate, damageButton }: Te
           <Bot className="h-4 w-4 text-accent" />
         </div>
         <div>
-          <p className="font-heading font-semibold text-foreground text-sm">WillProp Assistent</p>
-          <p className="text-[10px] text-muted-foreground">KI-gestützter Support</p>
+          <p className="font-heading font-semibold text-foreground text-sm">Henrik</p>
+          <p className="text-[10px] text-muted-foreground">WillProp KI-Assistent</p>
         </div>
       </div>
 
@@ -152,7 +149,7 @@ const TenantAiChat = ({ propertyInfo, tenantName, onEscalate, damageButton }: Te
               {m.role === "assistant" && (
                 <div className="flex items-center gap-1.5 mb-1">
                   <Bot className="h-3 w-3 text-accent" />
-                  <span className="text-[10px] font-medium text-accent">Assistent</span>
+                  <span className="text-[10px] font-medium text-accent">Henrik</span>
                 </div>
               )}
               <p className="whitespace-pre-wrap">{m.content}</p>
