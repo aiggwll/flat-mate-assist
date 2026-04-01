@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CameraRecorder from "@/components/CameraRecorder";
 import DocumentManager from "@/components/DocumentManager";
 import TenantAiChat from "@/components/TenantAiChat";
 import { useSearchParams, NavLink, useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { useMessages } from "@/contexts/MessagesContext";
-import { properties, messages as allMessages } from "@/lib/dummy-data";
+import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -53,21 +53,36 @@ import {
 
 const TenantDashboardPage = () => {
   const [searchParams] = useSearchParams();
-  const { userName, signOut } = useUser();
+  const { userName, userId, signOut } = useUser();
   const { addMessage } = useMessages();
   const navigate = useNavigate();
-  const propertyId = searchParams.get("property") || "p1";
-  const unitId = searchParams.get("unit") || "u1";
 
-  const property = properties.find((p) => p.id === propertyId) || properties[0];
-  const unit = property?.units.find((u) => u.id === unitId) || property?.units[0];
-  const tenant = unit?.tenant;
+  // Load real property info from profile
+  const [propertyAddress, setPropertyAddress] = useState("Wird geladen...");
+  const [unitLabel, setUnitLabel] = useState("");
+  const [ownerName, setOwnerName] = useState("Vermieter");
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
-  // Chat state - use registration name or fallback to dummy
-  const tenantName = userName || tenant?.name || "Mieter";
-  const [chatMessages, setChatMessages] = useState(
-    allMessages.filter((m) => m.from === tenantName || m.to === tenantName)
-  );
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!userId) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("property_id, unit_id, owner_name")
+        .eq("user_id", userId)
+        .single();
+      if (data) {
+        setPropertyAddress(data.property_id || searchParams.get("property") || "Keine Immobilie");
+        setUnitLabel(data.unit_id || searchParams.get("unit") || "");
+        setOwnerName((data as any).owner_name || searchParams.get("owner") || "Vermieter");
+      }
+      setProfileLoaded(true);
+    };
+    loadProfile();
+  }, [userId]);
+
+  const tenantName = userName || "Mieter";
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
 
   // Damage report state
@@ -76,7 +91,7 @@ const TenantDashboardPage = () => {
   const [damageDesc, setDamageDesc] = useState("");
   const [damageCategory, setDamageCategory] = useState("");
   const [damagePhotos, setDamagePhotos] = useState<{ file: File; preview: string }[]>([]);
-  const [damages, setDamages] = useState(unit?.damages || []);
+  const [damages, setDamages] = useState<any[]>([]);
 
   // 360° upload state
   const defaultRooms = ["Küche", "Badezimmer", "Fenster", "Zimmer 1", "Wohnzimmer", "Flur"];
@@ -190,7 +205,7 @@ const TenantDashboardPage = () => {
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-medium text-foreground">{tenantName}</p>
-              <p className="text-xs text-muted-foreground">{property.address}, {unit?.number}</p>
+              <p className="text-xs text-muted-foreground">{propertyAddress}, {unitLabel}</p>
             </div>
             <button
               onClick={async () => { await signOut(); navigate("/"); }}
@@ -210,12 +225,12 @@ const TenantDashboardPage = () => {
               <Building2 className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-lg font-heading font-bold text-foreground">{property.address}</h2>
+              <h2 className="text-lg font-heading font-bold text-foreground">{propertyAddress}</h2>
               <p className="text-sm text-muted-foreground">
-                {property.zipCode} {property.city} · Wohnung {unit?.number} · {unit?.size} m²
+                Wohnung {unitLabel}
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                Miete: <span className="font-semibold text-foreground">{unit?.rent} €</span>/Monat
+                Vermieter: <span className="font-semibold text-foreground">{ownerName}</span>
               </p>
             </div>
           </div>
@@ -242,15 +257,14 @@ const TenantDashboardPage = () => {
           <TabsContent value="messages">
             <TenantAiChat
               propertyInfo={{
-                address: property.address,
-                unit: unit?.number || "",
-                rent: unit?.rent || 0,
-                landlord: searchParams.get("owner") || "Vermieter",
+                address: propertyAddress,
+                unit: unitLabel,
+                rent: 0,
+                landlord: ownerName,
               }}
               tenantName={tenantName}
-              landlordName={searchParams.get("owner") || "Vermieter"}
+              landlordName={ownerName}
               onEscalate={(msg) => {
-                const ownerName = searchParams.get("owner") || "Vermieter";
                 addMessage({
                   from: tenantName,
                   to: ownerName,
@@ -330,7 +344,7 @@ const TenantDashboardPage = () => {
 
           {/* Documents Tab */}
           <TabsContent value="documents">
-            <DocumentManager role="tenant" propertyId={propertyId} />
+            <DocumentManager role="tenant" propertyId={propertyAddress} />
           </TabsContent>
 
           {/* 360° Video Tab */}

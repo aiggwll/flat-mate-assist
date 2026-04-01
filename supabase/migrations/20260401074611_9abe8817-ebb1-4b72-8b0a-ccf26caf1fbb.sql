@@ -1,0 +1,1 @@
+UPDATE public.profiles SET property_id = 'Musterstraße 15, Berlin', unit_id = 'Whg. 1', owner_name = 'Thomas Müller' WHERE email = 'mieter@willprop-test.de';
