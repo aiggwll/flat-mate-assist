@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Building2, Home, Plus, X, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@/contexts/UserContext";
+import { supabase } from "@/integrations/supabase/client";
 
 type Role = "owner" | "tenant";
 
@@ -26,47 +27,91 @@ const LoginPage = () => {
 
   const [isLogin, setIsLogin] = useState(!inviteRole);
   const [selectedRole, setSelectedRole] = useState<Role | null>(inviteRole);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [showPropertySetup, setShowPropertySetup] = useState(false);
   const [showTenantPropertyInfo, setShowTenantPropertyInfo] = useState(false);
   const [properties, setProperties] = useState<PropertyForm[]>([{ ...emptyProperty }]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { setUserName, setUserProperties, setIsNewUser } = useUser();
+  const { setUserName, setUserProperties, setIsNewUser, setUserRole } = useUser();
   const [nameField, setNameField] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setPasswordError("");
 
-    if (!isLogin) {
-      if (password.length < 6) {
-        setPasswordError("Passwort muss mindestens 6 Zeichen lang sein.");
-        return;
-      }
-      if (password !== passwordConfirm) {
-        setPasswordError("Passwörter stimmen nicht überein.");
-        return;
-      }
-      setPasswordError("");
+    try {
+      if (isLogin) {
+        // Login
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          setPasswordError(error.message === "Invalid login credentials"
+            ? "Ungültige E-Mail oder Passwort."
+            : error.message);
+          setLoading(false);
+          return;
+        }
+        // Fetch profile to determine role
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("name, role")
+            .eq("user_id", user.id)
+            .single();
+          if (profile) {
+            setUserName(profile.name);
+            setUserRole(profile.role as Role);
+            navigate(profile.role === "owner" ? "/dashboard" : "/tenant-dashboard");
+          }
+        }
+      } else {
+        // Register
+        if (password.length < 6) {
+          setPasswordError("Passwort muss mindestens 6 Zeichen lang sein.");
+          setLoading(false);
+          return;
+        }
+        if (password !== passwordConfirm) {
+          setPasswordError("Passwörter stimmen nicht überein.");
+          setLoading(false);
+          return;
+        }
 
-      if (selectedRole === "owner") {
-        setUserName(nameField.trim() || "Eigentümer");
+        const role = selectedRole || "tenant";
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { name: nameField.trim(), role },
+            emailRedirectTo: window.location.origin,
+          },
+        });
+
+        if (error) {
+          setPasswordError(error.message);
+          setLoading(false);
+          return;
+        }
+
+        setUserName(nameField.trim() || (role === "owner" ? "Eigentümer" : "Mieter"));
+        setUserRole(role);
         setIsNewUser(true);
-        setShowPropertySetup(true);
-        return;
-      }
-      // Tenant: save name and show property info
-      setUserName(nameField.trim() || "Mieter");
-      setIsNewUser(true);
-      setShowTenantPropertyInfo(true);
-      return;
-    }
 
-    if (selectedRole === "tenant") {
-      navigate("/tenant-dashboard");
-    } else {
-      navigate("/dashboard");
+        if (role === "owner") {
+          setShowPropertySetup(true);
+        } else {
+          setShowTenantPropertyInfo(true);
+        }
+      }
+    } catch (err) {
+      setPasswordError("Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -449,7 +494,7 @@ const LoginPage = () => {
             )}
             <div className="space-y-2">
               <Label htmlFor="email">E-Mail</Label>
-              <Input id="email" type="email" placeholder="name@beispiel.de" required />
+              <Input id="email" type="email" placeholder="name@beispiel.de" required value={email} onChange={e => setEmail(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Passwort</Label>
@@ -485,8 +530,8 @@ const LoginPage = () => {
                 Passwort vergessen?
               </button>
             )}
-            <Button type="submit" className="w-full">
-              {isLogin ? "Anmelden" : "Registrieren"}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Bitte warten..." : (isLogin ? "Anmelden" : "Registrieren")}
             </Button>
           </form>
 
