@@ -243,21 +243,19 @@ const TenantDashboardPage = () => {
                 address: property.address,
                 unit: unit?.number || "",
                 rent: unit?.rent || 0,
-                landlord: "Vermieter",
+                landlord: searchParams.get("owner") || "Vermieter",
               }}
               tenantName={tenantName}
+              landlordName={searchParams.get("owner") || "Vermieter"}
               onEscalate={(msg) => {
-                setChatMessages((prev) => [
-                  ...prev,
-                  {
-                    id: `m-${Date.now()}`,
-                    from: tenantName,
-                    to: "Eigentümer",
-                    text: msg,
-                    timestamp: new Date().toISOString(),
-                    read: false,
-                  },
-                ]);
+                const ownerName = searchParams.get("owner") || "Vermieter";
+                addMessage({
+                  from: tenantName,
+                  to: ownerName,
+                  text: msg,
+                  timestamp: new Date().toISOString(),
+                  read: false,
+                });
               }}
               damageButton={
                 <Dialog open={damageOpen} onOpenChange={setDamageOpen}>
