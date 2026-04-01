@@ -102,6 +102,18 @@ const LoginPage = () => {
         setUserRole(role);
         setIsNewUser(true);
 
+        // For tenants: save invite property info to profile
+        if (role === "tenant" && inviteProperty) {
+          const { data: { user: newUser } } = await supabase.auth.getUser();
+          if (newUser) {
+            await supabase.from("profiles").update({
+              property_id: inviteProperty,
+              unit_id: searchParams.get("unit") || "",
+              owner_name: searchParams.get("owner") || "",
+            }).eq("user_id", newUser.id);
+          }
+        }
+
         if (role === "owner") {
           setShowPropertySetup(true);
         } else {

@@ -53,18 +53,35 @@ import {
 
 const TenantDashboardPage = () => {
   const [searchParams] = useSearchParams();
-  const { userName, signOut } = useUser();
+  const { userName, userId, signOut } = useUser();
   const { addMessage } = useMessages();
   const navigate = useNavigate();
-  const propertyId = searchParams.get("property") || "p1";
-  const unitId = searchParams.get("unit") || "u1";
 
-  const property = properties.find((p) => p.id === propertyId) || properties[0];
-  const unit = property?.units.find((u) => u.id === unitId) || property?.units[0];
-  const tenant = unit?.tenant;
+  // Load real property info from profile
+  const [propertyAddress, setPropertyAddress] = useState("Wird geladen...");
+  const [unitLabel, setUnitLabel] = useState("");
+  const [ownerName, setOwnerName] = useState("Vermieter");
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
-  // Chat state - use registration name or fallback to dummy
-  const tenantName = userName || tenant?.name || "Mieter";
+  useState(() => {
+    const loadProfile = async () => {
+      if (!userId) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("property_id, unit_id, owner_name")
+        .eq("user_id", userId)
+        .single();
+      if (data) {
+        setPropertyAddress(data.property_id || searchParams.get("property") || "Keine Immobilie");
+        setUnitLabel(data.unit_id || searchParams.get("unit") || "");
+        setOwnerName((data as any).owner_name || searchParams.get("owner") || "Vermieter");
+      }
+      setProfileLoaded(true);
+    };
+    loadProfile();
+  });
+
+  const tenantName = userName || "Mieter";
   const [chatMessages, setChatMessages] = useState(
     allMessages.filter((m) => m.from === tenantName || m.to === tenantName)
   );
