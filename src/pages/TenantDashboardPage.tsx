@@ -54,6 +54,7 @@ import {
 const TenantDashboardPage = () => {
   const [searchParams] = useSearchParams();
   const { userName } = useUser();
+  const { addMessage } = useMessages();
   const propertyId = searchParams.get("property") || "p1";
   const unitId = searchParams.get("unit") || "u1";
 
