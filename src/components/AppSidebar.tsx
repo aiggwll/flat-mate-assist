@@ -63,15 +63,15 @@ const AppSidebar = () => {
       <div className="p-3 border-t border-sidebar-border">
         <div className="flex items-center gap-3 px-3 py-2.5">
           <div className="h-8 w-8 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-primary text-sm font-bold">
-            MK
+            {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-sidebar-foreground truncate">Max Kaufmann</p>
+            <p className="text-sm font-medium text-sidebar-foreground truncate">{userName || "Eigentümer"}</p>
             <p className="text-xs text-sidebar-muted truncate">Eigentümer</p>
           </div>
-          <NavLink to="/" className="text-sidebar-muted hover:text-sidebar-foreground transition-colors">
+          <button onClick={async () => { await signOut(); navigate("/"); }} className="text-sidebar-muted hover:text-sidebar-foreground transition-colors">
             <LogOut className="h-4 w-4" />
-          </NavLink>
+          </button>
         </div>
       </div>
     </aside>
