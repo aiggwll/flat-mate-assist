@@ -1,39 +1,29 @@
-import { useState, useEffect } from "react";
-import { messages as dummyMessages } from "@/lib/dummy-data";
+import { useState } from "react";
 import { useMessages } from "@/contexts/MessagesContext";
 import { useUser } from "@/contexts/UserContext";
-import { Send, ArrowLeft } from "lucide-react";
+import { Send, ArrowLeft, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const ChatPage = () => {
   const { userName } = useUser();
-  const { messages: sharedMessages, addMessage, markAsRead } = useMessages();
+  const { messages, addMessage, markAsRead } = useMessages();
   const ownerName = userName || "Eigentümer";
 
-  // Merge dummy messages + shared (real) messages
-  const allMessages = [
-    ...dummyMessages.map((m) => ({
-      ...m,
-      // Replace "Eigentümer" with the actual owner name in dummy data
-      from: m.from === "Eigentümer" ? ownerName : m.from,
-      to: m.to === "Eigentümer" ? ownerName : m.to,
-    })),
-    ...sharedMessages,
-  ];
+  // Only real messages — no dummy data
+  const allMessages = messages;
 
   // Get unique contacts (everyone who isn't the owner)
-  const contacts = [...new Set(allMessages.filter((m) => m.from !== ownerName).map((m) => m.from))];
+  const contacts = [...new Set([
+    ...allMessages.filter((m) => m.from !== ownerName).map((m) => m.from),
+    ...allMessages.filter((m) => m.to !== ownerName).map((m) => m.to),
+  ])].filter(Boolean);
 
   const [selectedContact, setSelectedContact] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
-  const [readDummy, setReadDummy] = useState<Set<string>>(new Set());
 
   const selectContact = (contact: string) => {
-    // Mark shared messages as read
     markAsRead(contact, ownerName);
-    // Track read state for dummy messages
-    setReadDummy((prev) => new Set([...prev, contact]));
     setSelectedContact(contact);
   };
 
@@ -62,15 +52,31 @@ const ChatPage = () => {
     return msgs[msgs.length - 1];
   };
 
-  const getUnreadCount = (contact: string) => {
-    const dummyUnread = readDummy.has(contact)
-      ? 0
-      : dummyMessages.filter((m) => m.from === contact && !m.read).length;
-    const sharedUnread = sharedMessages.filter((m) => m.from === contact && m.to === ownerName && !m.read).length;
-    return dummyUnread + sharedUnread;
-  };
+  const getUnreadCount = (contact: string) =>
+    messages.filter((m) => m.from === contact && m.to === ownerName && !m.read).length;
 
   const showChat = selectedContact !== null;
+
+  // Empty state
+  if (contacts.length === 0 && !showChat) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-heading font-bold text-foreground">Nachrichten</h1>
+          <p className="text-muted-foreground text-sm mt-1">Kommunikation mit Ihren Mietern</p>
+        </div>
+        <div className="bg-card rounded-xl border p-12 text-center space-y-3">
+          <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center mx-auto">
+            <MessageSquare className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium text-foreground">Noch keine Nachrichten</p>
+          <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+            Sobald ein Mieter eine Nachricht über den KI-Assistenten weiterleitet, erscheint sie hier.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 md:space-y-6">
