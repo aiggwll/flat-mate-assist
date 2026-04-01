@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CameraRecorder from "@/components/CameraRecorder";
 import DocumentManager from "@/components/DocumentManager";
 import TenantAiChat from "@/components/TenantAiChat";
