@@ -22,7 +22,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tenant-chat`
 
 const TenantAiChat = ({ propertyInfo, tenantName, onEscalate, damageButton }: TenantAiChatProps) => {
   const [messages, setMessages] = useState<ChatMsg[]>([
-    { role: "assistant", content: `Hallo, ich bin Henrik, Ihr WillProp KI-Assistent. Wie kann ich Ihnen helfen? Ich kann Fragen zu Ihrer Wohnung, Nebenkosten, Hausordnung und vielem mehr beantworten.` },
+    { role: "assistant", content: `Hallo, ich bin Henrik, Ihr WillProp KI-Assistent. Gerne beantworte ich Ihre Fragen zu Wohnung, Nebenkosten und Hausordnung. Sollte Ihre Frage meine Kompetenzen übersteigen, leite ich Ihr Anliegen gerne an Ihren Vermieter weiter.` },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
