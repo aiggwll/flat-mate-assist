@@ -4,6 +4,7 @@ import DocumentManager from "@/components/DocumentManager";
 import TenantAiChat from "@/components/TenantAiChat";
 import { useSearchParams, NavLink } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
+import { useMessages } from "@/contexts/MessagesContext";
 import { properties, messages as allMessages } from "@/lib/dummy-data";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
@@ -53,6 +54,7 @@ import {
 const TenantDashboardPage = () => {
   const [searchParams] = useSearchParams();
   const { userName } = useUser();
+  const { addMessage } = useMessages();
   const propertyId = searchParams.get("property") || "p1";
   const unitId = searchParams.get("unit") || "u1";
 
@@ -242,21 +244,19 @@ const TenantDashboardPage = () => {
                 address: property.address,
                 unit: unit?.number || "",
                 rent: unit?.rent || 0,
-                landlord: "Vermieter",
+                landlord: searchParams.get("owner") || "Vermieter",
               }}
               tenantName={tenantName}
+              landlordName={searchParams.get("owner") || "Vermieter"}
               onEscalate={(msg) => {
-                setChatMessages((prev) => [
-                  ...prev,
-                  {
-                    id: `m-${Date.now()}`,
-                    from: tenantName,
-                    to: "Eigentümer",
-                    text: msg,
-                    timestamp: new Date().toISOString(),
-                    read: false,
-                  },
-                ]);
+                const ownerName = searchParams.get("owner") || "Vermieter";
+                addMessage({
+                  from: tenantName,
+                  to: ownerName,
+                  text: msg,
+                  timestamp: new Date().toISOString(),
+                  read: false,
+                });
               }}
               damageButton={
                 <Dialog open={damageOpen} onOpenChange={setDamageOpen}>

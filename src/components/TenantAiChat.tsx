@@ -14,13 +14,14 @@ interface TenantAiChatProps {
     landlord: string;
   };
   tenantName: string;
+  landlordName: string;
   onEscalate: (message: string) => void;
   damageButton?: React.ReactNode;
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tenant-chat`;
 
-const TenantAiChat = ({ propertyInfo, tenantName, onEscalate, damageButton }: TenantAiChatProps) => {
+const TenantAiChat = ({ propertyInfo, tenantName, landlordName, onEscalate, damageButton }: TenantAiChatProps) => {
   const [messages, setMessages] = useState<ChatMsg[]>([
     { role: "assistant", content: `Hallo, ich bin Henrik, Ihr WillProp KI-Assistent. Gerne beantworte ich Ihre Fragen zu Wohnung, Nebenkosten und Hausordnung. Sollte Ihre Frage meine Kompetenzen übersteigen, leite ich Ihr Anliegen gerne an Ihren Vermieter weiter.` },
   ]);
