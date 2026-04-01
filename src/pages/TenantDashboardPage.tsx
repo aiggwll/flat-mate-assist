@@ -346,7 +346,7 @@ const TenantDashboardPage = () => {
 
           {/* Documents Tab */}
           <TabsContent value="documents">
-            <DocumentManager role="tenant" propertyId={propertyId} />
+            <DocumentManager role="tenant" propertyId={propertyAddress} />
           </TabsContent>
 
           {/* 360° Video Tab */}
