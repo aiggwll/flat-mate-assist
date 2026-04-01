@@ -23,6 +23,9 @@ const navItems = [
 
 const AppSidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { userName, signOut } = useUser();
+  const initials = userName ? userName.split(" ").map(n => n[0]).join("").toUpperCase() : "??";
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-64 bg-sidebar flex flex-col z-50">
