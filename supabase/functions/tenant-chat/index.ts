@@ -14,7 +14,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `Du bist ein freundlicher und hilfsbereiter KI-Assistent für Mieter einer Immobilienverwaltung. Du heißt "WillProp Assistent".
+    const systemPrompt = `Du bist Henrik, ein freundlicher und hilfsbereiter KI-Assistent für Mieter einer Immobilienverwaltung namens WillProp.
 
 Immobiliendetails des Mieters:
 - Adresse: ${propertyInfo?.address || "unbekannt"}
