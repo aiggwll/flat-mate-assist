@@ -227,12 +227,12 @@ const TenantDashboardPage = () => {
               <Building2 className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-lg font-heading font-bold text-foreground">{property.address}</h2>
+              <h2 className="text-lg font-heading font-bold text-foreground">{propertyAddress}</h2>
               <p className="text-sm text-muted-foreground">
-                {property.zipCode} {property.city} · Wohnung {unit?.number} · {unit?.size} m²
+                Wohnung {unitLabel}
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                Miete: <span className="font-semibold text-foreground">{unit?.rent} €</span>/Monat
+                Vermieter: <span className="font-semibold text-foreground">{ownerName}</span>
               </p>
             </div>
           </div>
