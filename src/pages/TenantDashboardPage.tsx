@@ -82,9 +82,7 @@ const TenantDashboardPage = () => {
   });
 
   const tenantName = userName || "Mieter";
-  const [chatMessages, setChatMessages] = useState(
-    allMessages.filter((m) => m.from === tenantName || m.to === tenantName)
-  );
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
 
   // Damage report state
