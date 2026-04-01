@@ -39,7 +39,10 @@ const allNav = [
 
 const MobileNav = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { userName, signOut } = useUser();
   const [open, setOpen] = useState(false);
+  const initials = userName ? userName.split(" ").map(n => n[0]).join("").toUpperCase() : "??";
 
   return (
     <>
