@@ -1,6 +1,7 @@
 import { useState } from "react";
 import CameraRecorder from "@/components/CameraRecorder";
 import DocumentManager from "@/components/DocumentManager";
+import TenantAiChat from "@/components/TenantAiChat";
 import { useSearchParams, NavLink } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { properties, messages as allMessages } from "@/lib/dummy-data";
@@ -236,45 +237,28 @@ const TenantDashboardPage = () => {
 
           {/* Messages Tab */}
           <TabsContent value="messages">
-            <Card className="flex flex-col h-[500px]">
-              <div className="p-4 border-b">
-                <p className="font-heading font-semibold text-foreground">Chat mit Vermieter</p>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {chatMessages.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <MessageSquare className="h-10 w-10 text-muted-foreground/40 mb-3" />
-                    <p className="text-sm font-medium text-foreground mb-1">Noch kein Chat vorhanden</p>
-                    <p className="text-xs text-muted-foreground">Schreiben Sie Ihrem Vermieter eine Nachricht.</p>
-                  </div>
-                )}
-                {chatMessages.map((m) => (
-                  <div key={m.id} className={`flex ${m.from === tenantName ? "justify-end" : "justify-start"}`}>
-                    <div
-                      className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
-                        m.from === tenantName
-                          ? "bg-primary text-primary-foreground rounded-br-md"
-                          : "bg-muted text-foreground rounded-bl-md"
-                      }`}
-                    >
-                      {m.text}
-                      <p
-                        className={`text-[10px] mt-1 ${
-                          m.from === tenantName ? "text-primary-foreground/50" : "text-muted-foreground"
-                        }`}
-                      >
-                        {new Date(m.timestamp).toLocaleString("de-DE", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          day: "2-digit",
-                          month: "2-digit",
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="p-4 border-t flex gap-2">
+            <TenantAiChat
+              propertyInfo={{
+                address: property.address,
+                unit: unit?.number || "",
+                rent: unit?.rent || 0,
+                landlord: "Vermieter",
+              }}
+              tenantName={tenantName}
+              onEscalate={(msg) => {
+                setChatMessages((prev) => [
+                  ...prev,
+                  {
+                    id: `m-${Date.now()}`,
+                    from: tenantName,
+                    to: "Eigentümer",
+                    text: msg,
+                    timestamp: new Date().toISOString(),
+                    read: false,
+                  },
+                ]);
+              }}
+              damageButton={
                 <Dialog open={damageOpen} onOpenChange={setDamageOpen}>
                   <DialogTrigger asChild>
                     <Button size="icon" variant="outline" title="Schaden melden">
@@ -339,18 +323,8 @@ const TenantDashboardPage = () => {
                     </div>
                   </DialogContent>
                 </Dialog>
-                <Input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                  placeholder="Nachricht schreiben..."
-                  className="flex-1"
-                />
-                <Button size="icon" onClick={handleSendMessage}>
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </Card>
+              }
+            />
           </TabsContent>
 
           {/* Documents Tab */}
