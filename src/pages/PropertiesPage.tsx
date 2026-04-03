@@ -100,17 +100,17 @@ const PropertiesPage = () => {
                   <h3 className="font-heading font-semibold text-foreground">{p.address}</h3>
                   <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
                     <MapPin className="h-3 w-3" />
-                    <span className="text-xs">{p.zip_code} {p.city}</span>
+                    <span className="text-xs">{p.zipCode} {p.city}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4 pt-3 border-t">
-              {p.year_built > 0 && (
+              {p.yearBuilt > 0 && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-3.5 w-3.5 shrink-0" />
-                  <span>Bj. {p.year_built}</span>
+                  <span>Bj. {p.yearBuilt}</span>
                 </div>
               )}
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
