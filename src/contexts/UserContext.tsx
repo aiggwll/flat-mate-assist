@@ -39,46 +39,32 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [isNewUser, setIsNewUser] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // If user chose not to stay logged in, check sessionStorage flag
-    const rememberMe = localStorage.getItem("rememberMe");
-    if (rememberMe === "false") {
-      // If this is a new browser session (no sessionStorage flag), sign out
-      if (!sessionStorage.getItem("activeSession")) {
-        supabase.auth.signOut().then(() => {
-          localStorage.removeItem("rememberMe");
-          setIsLoading(false);
-        });
-        return;
-      }
-    }
-
-    // Listen for auth changes FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-
-      if (currentUser) {
-        // Mark active session for "remember me" logic
-        sessionStorage.setItem("activeSession", "true");
-        // Fetch profile
+  // Helper to load profile & properties (non-blocking, fire-and-forget)
+  const loadUserData = (currentUser: User) => {
+    // Fetch profile (async IIFE to avoid blocking)
+    (async () => {
+      try {
         const { data: profile } = await supabase
           .from("profiles")
           .select("name, role")
           .eq("user_id", currentUser.id)
           .single();
-
         if (profile) {
           setUserName(profile.name || "");
           setUserRole(profile.role as "owner" | "tenant");
         }
+      } catch (e) {
+        console.error("Error loading profile:", e);
+      }
+    })();
 
-        // Fetch properties from DB
+    // Fetch properties
+    (async () => {
+      try {
         const { data: props } = await supabase
           .from("properties")
           .select("*")
           .eq("user_id", currentUser.id);
-
         if (props && props.length > 0) {
           setUserPropertiesState(props.map(p => ({
             id: p.id,
@@ -89,32 +75,62 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             units: p.units ?? 1,
           })));
         }
+      } catch (e) {
+        console.error("Error loading properties:", e);
+      }
+    })();
 
-        // Sync pending properties from localStorage (fallback from registration)
-        const pending = localStorage.getItem("pendingProperties");
-        if (pending) {
-          try {
-            const pendingRows = JSON.parse(pending) as Array<{ address: string; city: string; zip_code: string; year_built: number; units: number }>;
-            const insertRows = pendingRows.map(r => ({ ...r, user_id: currentUser.id }));
-            const { data: synced } = await supabase.from("properties").insert(insertRows).select();
-            if (synced) {
-              localStorage.removeItem("pendingProperties");
-              setUserPropertiesState(prev => [
-                ...prev,
-                ...synced.map(p => ({
-                  id: p.id,
-                  address: p.address,
-                  city: p.city,
-                  zipCode: p.zip_code,
-                  yearBuilt: p.year_built ?? 0,
-                  units: p.units ?? 1,
-                })),
-              ]);
-            }
-          } catch (e) {
-            console.error("Error syncing pending properties:", e);
+    // Sync pending properties from localStorage (fallback from registration)
+    const pending = localStorage.getItem("pendingProperties");
+    if (pending) {
+      (async () => {
+        try {
+          const pendingRows = JSON.parse(pending) as Array<{ address: string; city: string; zip_code: string; year_built: number; units: number }>;
+          const insertRows = pendingRows.map(r => ({ ...r, user_id: currentUser.id }));
+          const { data: synced } = await supabase.from("properties").insert(insertRows).select();
+          if (synced) {
+            localStorage.removeItem("pendingProperties");
+            setUserPropertiesState(prev => [
+              ...prev,
+              ...synced.map(p => ({
+                id: p.id,
+                address: p.address,
+                city: p.city,
+                zipCode: p.zip_code,
+                yearBuilt: p.year_built ?? 0,
+                units: p.units ?? 1,
+              })),
+            ]);
           }
+        } catch (e) {
+          console.error("Error syncing pending properties:", e);
         }
+      })();
+    }
+  };
+
+  useEffect(() => {
+    // If user chose not to stay logged in, check sessionStorage flag
+    const rememberMe = localStorage.getItem("rememberMe");
+    if (rememberMe === "false") {
+      if (!sessionStorage.getItem("activeSession")) {
+        supabase.auth.signOut().then(() => {
+          localStorage.removeItem("rememberMe");
+          setIsLoading(false);
+        });
+        return;
+      }
+    }
+
+    // Listen for auth changes — NEVER await inside this callback
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+
+      if (currentUser) {
+        sessionStorage.setItem("activeSession", "true");
+        // Fire-and-forget: load data without blocking the auth event queue
+        loadUserData(currentUser);
       } else {
         setUserName("");
         setUserRole(null);
@@ -123,7 +139,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
     });
 
-    // Then check existing session
+    // Check existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) setIsLoading(false);
     });
