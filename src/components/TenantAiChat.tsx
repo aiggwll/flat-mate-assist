@@ -165,7 +165,7 @@ const TenantAiChat = ({ propertyInfo, tenantName, landlordName, onEscalate, dama
             </div>
             {m.role === "assistant" && (
               <p className="text-[10px] text-muted-foreground mt-1 ml-1">
-                ⚠️ Diese Auskunft ist unverbindlich. Bitte prüfe deinen Mietvertrag oder wende dich an deinen Vermieter.
+                ⚠️ {isSie ? "Diese Auskunft ist unverbindlich. Bitte prüfen Sie Ihren Mietvertrag oder wenden Sie sich an Ihren Vermieter." : "Diese Auskunft ist unverbindlich. Bitte prüfe deinen Mietvertrag oder wende dich an deinen Vermieter."}
               </p>
             )}
           </div>
