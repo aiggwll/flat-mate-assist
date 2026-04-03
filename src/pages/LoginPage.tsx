@@ -121,7 +121,7 @@ const LoginPage = () => {
           email,
           password,
           options: {
-            data: { name: nameField.trim(), role },
+            data: { name: nameField.trim(), role, salutation: salutationField },
             emailRedirectTo: window.location.origin,
           },
         });
