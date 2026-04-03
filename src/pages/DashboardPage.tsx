@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Building2, ArrowRight, TrendingUp, Info, MapPin, MessageSquare } from "lucide-react";
+import { Building2, ArrowRight, TrendingUp, Info, MapPin, MessageSquare, AlertTriangle } from "lucide-react";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
