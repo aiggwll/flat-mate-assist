@@ -244,7 +244,7 @@ const LoginPage = () => {
         <div className="flex-1 hidden lg:flex items-center justify-center p-12">
           <div className="max-w-md">
             <h1 className="text-4xl font-heading font-bold text-primary-foreground mb-4 tracking-tight">
-              Will<span className="text-accent">Prop</span>
+              Dwell<span className="text-accent">o</span>
             </h1>
             <p className="text-primary-foreground/70 text-lg leading-relaxed">
               Die All-in-One Plattform für private Vermieter. Verwalten Sie Ihre Immobilien, kommunizieren Sie mit Mietern und behalten Sie den Überblick.
