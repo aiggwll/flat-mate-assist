@@ -37,6 +37,8 @@ import {
   X,
   LogOut,
   Upload,
+  Video,
+  Gift,
 } from "lucide-react";
 
 const TenantDashboardPage = () => {
