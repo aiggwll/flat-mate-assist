@@ -113,6 +113,42 @@ export type Database = {
         }
         Relationships: []
       }
+      rent_payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          due_date: string
+          id: string
+          paid_at: string | null
+          status: string
+          tenant_name: string
+          unit_id: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string | null
+          due_date: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+          tenant_name: string
+          unit_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          due_date?: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+          tenant_name?: string
+          unit_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

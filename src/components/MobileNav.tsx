@@ -24,14 +24,14 @@ import {
 const primaryNav = [
   { to: "/dashboard", label: "Home", icon: LayoutDashboard },
   { to: "/properties", label: "Immobilien", icon: Building2 },
-  { to: "/payments", label: "Zahlungen", icon: CreditCard },
+  { to: "/payments", label: "Miete", icon: CreditCard },
   { to: "/chat", label: "Chat", icon: MessageSquare },
 ];
 
 const allNav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/properties", label: "Immobilien", icon: Building2 },
-  { to: "/payments", label: "Zahlungen", icon: CreditCard },
+  { to: "/payments", label: "Miete", icon: CreditCard },
   { to: "/documents", label: "Dokumente", icon: FileText },
   { to: "/chat", label: "Nachrichten", icon: MessageSquare },
   { to: "/tasks", label: "Aufgaben", icon: ClipboardCheck },
