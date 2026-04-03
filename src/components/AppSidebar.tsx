@@ -1,5 +1,6 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
+import { useMessages } from "@/contexts/MessagesContext";
 import {
   LayoutDashboard,
   Building2,
@@ -8,6 +9,7 @@ import {
   Store,
   ClipboardCheck,
   FileText,
+  AlertTriangle,
   LogOut,
 } from "lucide-react";
 
@@ -16,8 +18,9 @@ const navItems = [
   { to: "/properties", label: "Immobilien", icon: Building2 },
   { to: "/payments", label: "Zahlungen", icon: CreditCard },
   { to: "/documents", label: "Dokumente", icon: FileText },
-  { to: "/chat", label: "Nachrichten", icon: MessageSquare, badge: 2 },
+  { to: "/chat", label: "Nachrichten", icon: MessageSquare },
   { to: "/tasks", label: "Aufgaben", icon: ClipboardCheck },
+  { to: "/damages", label: "Schäden", icon: AlertTriangle },
   { to: "/marketplace", label: "Marktplatz", icon: Store },
 ];
 
@@ -25,7 +28,11 @@ const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { userName, signOut } = useUser();
+  const { messages } = useMessages();
   const initials = userName ? userName.split(" ").map(n => n[0]).join("").toUpperCase() : "??";
+
+  // Count unread messages where current user is receiver
+  const unreadCount = messages.filter(m => !m.read && m.to === userName).length;
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-64 bg-sidebar flex flex-col z-50">
@@ -36,8 +43,9 @@ const AppSidebar = () => {
       </div>
 
       <nav className="flex-1 px-3 space-y-1">
-        {navItems.map(({ to, label, icon: Icon, badge }) => {
+        {navItems.map(({ to, label, icon: Icon }) => {
           const isActive = location.pathname.startsWith(to);
+          const badge = to === "/chat" && unreadCount > 0 ? unreadCount : null;
           return (
             <NavLink
               key={to}
