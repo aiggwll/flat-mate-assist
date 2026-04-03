@@ -74,8 +74,9 @@ const LandlordOnboarding = ({ open, onComplete }: LandlordOnboardingProps) => {
                 Erste Immobilie anlegen
               </h2>
               <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
-                Legen Sie Ihre erste Immobilie an, um Mieter einladen und
-                Zahlungen tracken zu können.
+                {isSie
+                  ? "Legen Sie Ihre erste Immobilie an, um Mieter einladen und Zahlungen tracken zu können."
+                  : "Lege deine erste Immobilie an, um Mieter einladen und Zahlungen tracken zu können."}
               </p>
             </div>
             <Button
