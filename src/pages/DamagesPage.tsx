@@ -49,7 +49,8 @@ const DamagesPage = () => {
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
 
   const selectedProperty = userProperties.find(p => p.id === form.propertyId);
-  const availableUnits = selectedProperty?.units ?? [];
+  const unitCount = selectedProperty?.units ?? 1;
+  const availableUnits = Array.from({ length: unitCount }, (_, i) => ({ id: `${i + 1}`, number: `${i + 1}` }));
 
   const handlePhotos = (files: FileList | null) => {
     if (!files) return;
