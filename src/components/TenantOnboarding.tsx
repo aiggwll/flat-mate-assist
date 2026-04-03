@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Home, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useUser } from "@/contexts/UserContext";
 
 interface TenantOnboardingProps {
   open: boolean;
