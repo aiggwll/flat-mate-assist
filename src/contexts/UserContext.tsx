@@ -40,6 +40,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // If user chose not to stay logged in, check sessionStorage flag
+    const rememberMe = localStorage.getItem("rememberMe");
+    if (rememberMe === "false") {
+      // If this is a new browser session (no sessionStorage flag), sign out
+      if (!sessionStorage.getItem("activeSession")) {
+        supabase.auth.signOut().then(() => {
+          localStorage.removeItem("rememberMe");
+          setIsLoading(false);
+        });
+        return;
+      }
+    }
+
     // Listen for auth changes FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const currentUser = session?.user ?? null;
