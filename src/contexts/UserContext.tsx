@@ -38,6 +38,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       return stored ? JSON.parse(stored) : [];
     } catch { return []; }
   });
+  const setUserProperties = (props: UserProperty[]) => {
+    setUserPropertiesState(props);
+    localStorage.setItem("willprop_user_properties", JSON.stringify(props));
+  };
   const [isNewUser, setIsNewUser] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
