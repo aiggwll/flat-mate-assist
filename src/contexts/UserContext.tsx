@@ -34,6 +34,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userName, setUserName] = useState("");
   const [userRole, setUserRole] = useState<"owner" | "tenant" | null>(null);
+  const [salutation, setSalutation] = useState<"du" | "sie">("sie");
   const [userProperties, setUserPropertiesState] = useState<UserProperty[]>([]);
   const setUserProperties = (props: UserProperty[]) => {
     setUserPropertiesState(props);
