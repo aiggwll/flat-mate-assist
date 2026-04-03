@@ -33,6 +33,7 @@ const categoryIcon: Record<string, string> = {
 };
 
 const DamagesPage = () => {
+  const { userProperties } = useUser();
   const [damages, setDamages] = useState<DamageWithContext[]>(initialDamages);
   const [open, setOpen] = useState(false);
   const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([]);
@@ -47,7 +48,7 @@ const DamagesPage = () => {
 
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
 
-  const selectedProperty = properties.find(p => p.id === form.propertyId);
+  const selectedProperty = userProperties.find(p => p.id === form.propertyId);
   const availableUnits = selectedProperty?.units ?? [];
 
   const handlePhotos = (files: FileList | null) => {
