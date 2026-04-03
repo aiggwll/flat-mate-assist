@@ -91,6 +91,9 @@ const TenantDashboardPage = () => {
   const [cashbackTotal, setCashbackTotal] = useState(0);
   const [cashbackHistory, setCashbackHistory] = useState<Array<{ id: string; amount: number; reason: string; status: string; created_at: string }>>([]);
   const [roundgangSubmitted, setRundgangSubmitted] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(
+    () => !localStorage.getItem("onboarding_complete_tenant")
+  );
 
   useEffect(() => {
     const loadCashback = async () => {
