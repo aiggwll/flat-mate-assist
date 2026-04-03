@@ -33,11 +33,15 @@ const AppSidebar = () => {
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-64 bg-sidebar border-r border-sidebar-border flex flex-col z-50">
-      <div className="p-6 pb-4">
-        <h1 className="text-xl font-heading font-bold text-sidebar-foreground tracking-tight">
-          Dwell<span className="text-sidebar-primary">o</span>
-        </h1>
-        
+      <div className="p-6 pb-5">
+        <div className="flex items-center gap-2.5">
+          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+            <Building2 className="h-4 w-4 text-primary-foreground" />
+          </div>
+          <h1 className="font-heading font-extrabold text-sidebar-foreground tracking-tight" style={{ fontSize: '22px' }}>
+            Dwell<span className="text-sidebar-primary">o</span>
+          </h1>
+        </div>
       </div>
 
       <nav className="flex-1 px-3 space-y-0.5">
