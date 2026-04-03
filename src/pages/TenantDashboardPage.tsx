@@ -206,7 +206,7 @@ const TenantDashboardPage = () => {
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-heading font-bold text-foreground tracking-tight">
-              Will<span className="text-accent">Prop</span>
+              Dwell<span className="text-accent">o</span>
             </h1>
             <span className="text-sm text-muted-foreground">· Mieterportal</span>
           </div>

@@ -48,7 +48,7 @@ const LandlordOnboarding = ({ open, onComplete }: LandlordOnboardingProps) => {
             </div>
             <div>
               <h2 className="text-2xl font-heading font-bold text-foreground">
-                Willkommen bei WillProp! 🏠
+                Willkommen bei Dwello! 🏠
               </h2>
               <p className="text-sm text-muted-foreground mt-2">
                 In 3 Schritten sind Sie startklar.

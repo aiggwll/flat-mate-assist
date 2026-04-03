@@ -59,9 +59,9 @@ const InviteTenantDialog = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
       toast("Bitte geben Sie eine E-Mail-Adresse ein.");
       return;
     }
-    const subject = encodeURIComponent("Einladung zu WillProp");
+    const subject = encodeURIComponent("Einladung zu Dwello");
     const body = encodeURIComponent(
-      `Hallo ${tenantName},\n\nSie wurden eingeladen, WillProp als Mieter zu nutzen.\n\nBitte registrieren Sie sich über folgenden Link:\n${inviteLink}\n\nMit freundlichen Grüßen`
+      `Hallo ${tenantName},\n\nSie wurden eingeladen, Dwello als Mieter zu nutzen.\n\nBitte registrieren Sie sich über folgenden Link:\n${inviteLink}\n\nMit freundlichen Grüßen`
     );
     window.open(`mailto:${tenantEmail}?subject=${subject}&body=${body}`);
     toast("E-Mail-Client wird geöffnet...");

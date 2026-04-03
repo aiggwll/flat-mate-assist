@@ -244,7 +244,7 @@ const LoginPage = () => {
         <div className="flex-1 hidden lg:flex items-center justify-center p-12">
           <div className="max-w-md">
             <h1 className="text-4xl font-heading font-bold text-primary-foreground mb-4 tracking-tight">
-              Will<span className="text-accent">Prop</span>
+              Dwell<span className="text-accent">o</span>
             </h1>
             <p className="text-primary-foreground/70 text-lg leading-relaxed">
               Die All-in-One Plattform für private Vermieter. Verwalten Sie Ihre Immobilien, kommunizieren Sie mit Mietern und behalten Sie den Überblick.
@@ -256,13 +256,13 @@ const LoginPage = () => {
           <div className="w-full max-w-sm">
             <div className="lg:hidden mb-8">
               <h1 className="text-2xl font-heading font-bold text-foreground">
-                Will<span className="text-accent">Prop</span>
+                Dwell<span className="text-accent">o</span>
               </h1>
             </div>
 
             <h2 className="text-2xl font-heading font-bold text-foreground">Willkommen</h2>
             <p className="text-muted-foreground text-sm mt-1 mb-8">
-              Wie möchten Sie WillProp nutzen?
+              Wie möchten Sie Dwello nutzen?
             </p>
 
             <div className="space-y-4">
@@ -309,7 +309,7 @@ const LoginPage = () => {
         <div className="flex-1 hidden lg:flex items-center justify-center p-12">
           <div className="max-w-md">
             <h1 className="text-4xl font-heading font-bold text-primary-foreground mb-4 tracking-tight">
-              Will<span className="text-accent">Prop</span>
+              Dwell<span className="text-accent">o</span>
             </h1>
             <p className="text-primary-foreground/70 text-lg leading-relaxed">
               Willkommen in Ihrem Mieterportal. Hier finden Sie alle Informationen zu Ihrer Wohnung.
@@ -325,7 +325,7 @@ const LoginPage = () => {
           <div className="w-full max-w-sm">
             <div className="lg:hidden mb-6">
               <h1 className="text-2xl font-heading font-bold text-foreground">
-                Will<span className="text-accent">Prop</span>
+                Dwell<span className="text-accent">o</span>
               </h1>
             </div>
 
@@ -391,7 +391,7 @@ const LoginPage = () => {
         <div className="flex-1 hidden lg:flex items-center justify-center p-12">
           <div className="max-w-md">
             <h1 className="text-4xl font-heading font-bold text-primary-foreground mb-4 tracking-tight">
-              Will<span className="text-accent">Prop</span>
+              Dwell<span className="text-accent">o</span>
             </h1>
             <p className="text-primary-foreground/70 text-lg leading-relaxed">
               Legen Sie Ihre Immobilien an, um direkt loslegen zu können. Sie können später jederzeit weitere hinzufügen.
@@ -407,7 +407,7 @@ const LoginPage = () => {
           <div className="w-full max-w-sm">
             <div className="lg:hidden mb-6">
               <h1 className="text-2xl font-heading font-bold text-foreground">
-                Will<span className="text-accent">Prop</span>
+                Dwell<span className="text-accent">o</span>
               </h1>
             </div>
 
@@ -513,7 +513,7 @@ const LoginPage = () => {
       <div className="flex-1 hidden lg:flex items-center justify-center p-12">
         <div className="max-w-md">
           <h1 className="text-4xl font-heading font-bold text-primary-foreground mb-4 tracking-tight">
-            Will<span className="text-accent">Prop</span>
+            Dwell<span className="text-accent">o</span>
           </h1>
           <p className="text-primary-foreground/70 text-lg leading-relaxed">
             {selectedRole === "owner"
@@ -538,7 +538,7 @@ const LoginPage = () => {
         <div className="w-full max-w-sm">
           <div className="lg:hidden mb-8">
             <h1 className="text-2xl font-heading font-bold text-foreground">
-              Will<span className="text-accent">Prop</span>
+              Dwell<span className="text-accent">o</span>
             </h1>
           </div>
 
@@ -571,7 +571,7 @@ const LoginPage = () => {
             {isLogin ? "Willkommen zurück" : "Konto erstellen"}
           </h2>
           <p className="text-muted-foreground text-sm mt-1 mb-6">
-            {isLogin ? "Melden Sie sich an, um fortzufahren." : "Erstellen Sie Ihr WillProp Konto."}
+            {isLogin ? "Melden Sie sich an, um fortzufahren." : "Erstellen Sie Ihr Dwello Konto."}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
