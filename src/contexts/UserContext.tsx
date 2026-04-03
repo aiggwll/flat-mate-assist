@@ -57,6 +57,23 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           setUserName(profile.name || "");
           setUserRole(profile.role as "owner" | "tenant");
         }
+
+        // Fetch properties from DB
+        const { data: props } = await supabase
+          .from("properties")
+          .select("*")
+          .eq("user_id", currentUser.id);
+
+        if (props && props.length > 0) {
+          setUserPropertiesState(props.map(p => ({
+            id: p.id,
+            address: p.address,
+            city: p.city,
+            zipCode: p.zip_code,
+            yearBuilt: p.year_built ?? 0,
+            units: p.units ?? 1,
+          })));
+        }
       } else {
         setUserName("");
         setUserRole(null);
