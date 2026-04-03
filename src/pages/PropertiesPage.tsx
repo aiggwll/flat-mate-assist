@@ -32,10 +32,39 @@ const PropertiesPage = () => {
 
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
 
-  const handleSubmit = () => {
+  const { userProperties, setUserProperties } = useUser();
+
+  const handleSubmit = async () => {
     if (!form.address || !form.city || !form.zipCode) {
       toast.error("Bitte füllen Sie mindestens Adresse, Stadt und PLZ aus.");
       return;
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("Nicht eingeloggt.");
+      return;
+    }
+    const { data: inserted, error } = await supabase.from("properties").insert({
+      user_id: user.id,
+      address: form.address.trim(),
+      city: form.city.trim(),
+      zip_code: form.zipCode.trim(),
+      year_built: parseInt(form.yearBuilt) || 0,
+      units: parseInt(form.units) || 1,
+    }).select().single();
+    if (error) {
+      toast.error("Fehler: " + error.message);
+      return;
+    }
+    if (inserted) {
+      setUserProperties([...userProperties, {
+        id: inserted.id,
+        address: inserted.address,
+        city: inserted.city,
+        zipCode: inserted.zip_code,
+        yearBuilt: inserted.year_built ?? 0,
+        units: inserted.units ?? 1,
+      }]);
     }
     toast.success("Immobilie erfolgreich angelegt!");
     setOpen(false);
