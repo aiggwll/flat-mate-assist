@@ -108,8 +108,9 @@ const LandlordOnboarding = ({ open, onComplete }: LandlordOnboardingProps) => {
                 Mieter einladen
               </h2>
               <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
-                Laden Sie Ihren ersten Mieter ein. Er erhält einen Link zur
-                Registrierung.
+                {isSie
+                  ? "Laden Sie Ihren ersten Mieter ein. Er erhält einen Link zur Registrierung."
+                  : "Lade deinen ersten Mieter ein. Er erhält einen Link zur Registrierung."}
               </p>
             </div>
             <div className="flex justify-center">
