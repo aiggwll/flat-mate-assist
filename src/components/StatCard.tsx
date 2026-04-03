@@ -10,7 +10,7 @@ interface StatCardProps {
 
 const StatCard = ({ title, value, icon: Icon, accent, subtitle }: StatCardProps) => {
   return (
-    <div className="bg-card rounded-xl border p-5 animate-fade-in">
+    <div className="bg-card rounded-2xl border p-5 shadow-sm animate-fade-in">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-muted-foreground">{title}</p>
