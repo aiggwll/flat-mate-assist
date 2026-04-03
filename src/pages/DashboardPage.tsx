@@ -56,7 +56,7 @@ const DashboardPage = () => {
         <div className="relative z-10">
           <p className="text-sm text-muted-foreground font-medium">Willkommen zurück</p>
           <h1 className="text-3xl font-heading font-extrabold text-foreground mt-1">
-            Hallo, {displayName.split(" ")[0]} 👋
+            {salutation === "du" ? `Hallo, ${displayName.split(" ")[0]}` : `Guten Tag, ${displayName.split(" ")[0]}`}
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-md">
             {propertyCount === 0
