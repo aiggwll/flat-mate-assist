@@ -86,9 +86,58 @@ const TenantDashboardPage = () => {
   const [damageCategory, setDamageCategory] = useState("");
   const [damagePhotos, setDamagePhotos] = useState<{ file: File; preview: string }[]>([]);
   const [damages, setDamages] = useState<any[]>([]);
+  // Cashback state
+  const [cashbackTotal, setCashbackTotal] = useState(0);
+  const [cashbackHistory, setCashbackHistory] = useState<Array<{ id: string; amount: number; reason: string; status: string; created_at: string }>>([]);
+  const [roundgangSubmitted, setRundgangSubmitted] = useState(false);
+
+  useEffect(() => {
+    const loadCashback = async () => {
+      if (!userId) return;
+      const { data } = await supabase
+        .from("cashback_transactions" as any)
+        .select("*")
+        .eq("tenant_id", userId)
+        .order("created_at", { ascending: false });
+      if (data && (data as any[]).length > 0) {
+        const rows = data as any[];
+        setCashbackHistory(rows);
+        const total = rows
+          .filter((r: any) => r.status === "approved" || r.status === "paid")
+          .reduce((sum: number, r: any) => sum + Number(r.amount), 0);
+        setCashbackTotal(total);
+      }
+    };
+    loadCashback();
+  }, [userId]);
+
+  const handleRundgangUpload = async () => {
+    if (!userId) return;
+    await supabase.from("cashback_transactions" as any).insert({
+      tenant_id: userId,
+      amount: 100,
+      reason: "360° Rundgang",
+      status: "pending",
+    } as any);
+    setRundgangSubmitted(true);
+    // Reload cashback
+    const { data } = await supabase
+      .from("cashback_transactions" as any)
+      .select("*")
+      .eq("tenant_id", userId)
+      .order("created_at", { ascending: false });
+    if (data) {
+      const rows = data as any[];
+      setCashbackHistory(rows);
+      const total = rows
+        .filter((r: any) => r.status === "approved" || r.status === "paid")
+        .reduce((sum: number, r: any) => sum + Number(r.amount), 0);
+      setCashbackTotal(total);
+    }
+    toast.success("Ihr Rundgang wurde eingereicht!");
+  };
 
 
-  const handleSendMessage = () => {
     if (!newMessage.trim()) return;
     setChatMessages((prev) => [
       ...prev,
