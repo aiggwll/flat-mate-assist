@@ -22,9 +22,13 @@ interface TenantAiChatProps {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tenant-chat`;
 
-const TenantAiChat = ({ propertyInfo, tenantName, landlordName, onEscalate, damageButton }: TenantAiChatProps) => {
+const TenantAiChat = ({ propertyInfo, tenantName, landlordName, onEscalate, damageButton, salutation = "sie" }: TenantAiChatProps) => {
+  const isSie = salutation === "sie";
   const [messages, setMessages] = useState<ChatMsg[]>([
-    { role: "assistant", content: `Hallo! Ich bin Henrik, Ihr digitaler Assistent. Ich beantworte Fragen zu Ihrer Wohnung, Hausordnung und Nebenkosten. Bei dringenderen Anliegen leite ich Sie direkt an Ihren Vermieter weiter.` },
+    { role: "assistant", content: isSie
+      ? "Hallo! Ich bin Henrik, Ihr digitaler Assistent. Ich beantworte Fragen zu Ihrer Wohnung, Hausordnung und Nebenkosten. Bei dringenderen Anliegen leite ich Sie direkt an Ihren Vermieter weiter."
+      : "Hallo! Ich bin Henrik, dein digitaler Assistent. Ich beantworte Fragen zu deiner Wohnung, Hausordnung und Nebenkosten. Bei dringenderen Anliegen leite ich dich direkt an deinen Vermieter weiter."
+    },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
