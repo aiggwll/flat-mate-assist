@@ -24,7 +24,7 @@ import {
 const primaryNav = [
   { to: "/dashboard", label: "Home", icon: LayoutDashboard },
   { to: "/properties", label: "Immobilien", icon: Building2 },
-  { to: "/payments", label: "Zahlungen", icon: CreditCard },
+  { to: "/payments", label: "Miete", icon: CreditCard },
   { to: "/chat", label: "Chat", icon: MessageSquare },
 ];
 
