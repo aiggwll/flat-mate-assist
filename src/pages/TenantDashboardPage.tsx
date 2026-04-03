@@ -410,7 +410,7 @@ const TenantDashboardPage = () => {
 
               <h3 className="font-heading font-semibold text-foreground">Rundgang hochladen</h3>
 
-              {rundgangSubmitted ? (
+              {roundgangSubmitted ? (
                 <Card className="p-6 text-center space-y-3">
                   <div className="h-14 w-14 rounded-full bg-accent/10 flex items-center justify-center mx-auto">
                     <CheckCircle2 className="h-7 w-7 text-accent" />
