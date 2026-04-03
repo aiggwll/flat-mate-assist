@@ -157,6 +157,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setUserName("");
     setUserRole(null);
+    setSalutation("sie");
     setUserProperties([]);
   };
 
