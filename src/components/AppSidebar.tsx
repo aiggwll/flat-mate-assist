@@ -37,7 +37,7 @@ const AppSidebar = () => {
         <h1 className="text-xl font-heading font-bold text-sidebar-foreground tracking-tight">
           Will<span className="text-sidebar-primary">Prop</span>
         </h1>
-        <p className="text-[11px] text-sidebar-muted mt-0.5">Immobilienverwaltung</p>
+        
       </div>
 
       <nav className="flex-1 px-3 space-y-0.5">

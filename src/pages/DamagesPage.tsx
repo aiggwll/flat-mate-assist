@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { properties, type Damage } from "@/lib/dummy-data";
+import { type Damage } from "@/lib/dummy-data";
 import { AlertTriangle, Plus, ImagePlus, X, Camera } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

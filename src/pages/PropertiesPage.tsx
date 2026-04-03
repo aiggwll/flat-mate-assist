@@ -72,7 +72,7 @@ const PropertiesPage = () => {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {userProperties.map((p) => (
-            <div key={p.id} className="bg-card rounded-2xl border overflow-hidden hover:shadow-md transition-all group">
+            <div key={p.id} className="bg-card rounded-2xl border border-t-4 border-t-primary overflow-hidden hover:shadow-md transition-all group">
               {/* Colored header */}
               <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-5 py-4">
                 <div className="flex items-start justify-between">
