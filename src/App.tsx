@@ -13,7 +13,7 @@ import PropertiesPage from "./pages/PropertiesPage";
 import PropertyDetailPage from "./pages/PropertyDetailPage";
 import PaymentsPage from "./pages/PaymentsPage";
 import ChatPage from "./pages/ChatPage";
-
+import DamagesPage from "./pages/DamagesPage";
 import DocumentsPage from "./pages/DocumentsPage";
 import TasksPage from "./pages/TasksPage";
 import MarketplacePage from "./pages/MarketplacePage";
@@ -28,7 +28,6 @@ const App = () => (
       <MessagesProvider>
         <Toaster />
         <Sonner />
-        <Sonner />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<LoginPage />} />
@@ -39,7 +38,7 @@ const App = () => (
               <Route path="/payments" element={<PaymentsPage />} />
               <Route path="/documents" element={<DocumentsPage />} />
               <Route path="/chat" element={<ChatPage />} />
-              
+              <Route path="/damages" element={<DamagesPage />} />
               <Route path="/tasks" element={<TasksPage />} />
               <Route path="/marketplace" element={<MarketplacePage />} />
             </Route>

@@ -79,11 +79,11 @@ const DashboardPage = () => {
             {unreadMessages.length === 0 ? "Keine ungelesenen" : "ungelesene Nachrichten"}
           </p>
         </div>
-        <div className="bg-card rounded-xl border p-5">
+        <Link to="/damages" className="bg-card rounded-xl border p-5 hover:border-accent/40 transition-colors block">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">Offene Schäden</p>
           <p className="text-2xl font-heading font-bold mt-1 text-foreground">0</p>
           <p className="text-xs text-muted-foreground mt-0.5">Keine gemeldet</p>
-        </div>
+        </Link>
       </div>
 
       {/* Properties overview */}
