@@ -110,7 +110,7 @@ const PropertyDetailPage = () => {
             <h1 className="text-2xl font-heading font-bold text-foreground">{property.address}</h1>
             <div className="flex items-center gap-1.5 text-muted-foreground mt-1">
               <MapPin className="h-3.5 w-3.5" />
-              <span className="text-sm">{property.zip_code} {property.city}{property.year_built ? ` · Baujahr ${property.year_built}` : ""}</span>
+              <span className="text-sm">{property.zipCode} {property.city}{property.yearBuilt ? ` · Baujahr ${property.yearBuilt}` : ""}</span>
             </div>
           </div>
         </div>
