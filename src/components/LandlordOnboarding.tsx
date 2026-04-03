@@ -54,7 +54,7 @@ const LandlordOnboarding = ({ open, onComplete }: LandlordOnboardingProps) => {
                 Willkommen bei Dwello! 🏠
               </h2>
               <p className="text-sm text-muted-foreground mt-2">
-                In 3 Schritten sind Sie startklar.
+                {isSie ? "In 3 Schritten sind Sie startklar." : "In 3 Schritten bist du startklar."}
               </p>
             </div>
             <Button onClick={() => setStep(1)} className="w-full">
