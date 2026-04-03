@@ -37,8 +37,9 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const navigate = useNavigate();
-  const { user: contextUser, setUserName, setUserProperties, setIsNewUser, setUserRole } = useUser();
+  const { user: contextUser, setUserName, setUserProperties, setIsNewUser, setUserRole, setSalutation } = useUser();
   const [nameField, setNameField] = useState("");
+  const [salutationField, setSalutationField] = useState<"du" | "sie">("sie");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
