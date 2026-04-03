@@ -71,8 +71,9 @@ const TenantOnboarding = ({ open, onComplete }: TenantOnboardingProps) => {
                 So funktioniert Cashback 🎁
               </h2>
               <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
-                Laden Sie einen 360°-Rundgang Ihrer Wohnung hoch und erhalten
-                Sie bis zu 100 € Cashback von Ihrem Vermieter.
+                {isSie
+                  ? "Laden Sie einen 360°-Rundgang Ihrer Wohnung hoch und erhalten Sie bis zu 100 € Cashback von Ihrem Vermieter."
+                  : "Lade einen 360°-Rundgang deiner Wohnung hoch und erhalte bis zu 100 € Cashback von deinem Vermieter."}
               </p>
             </div>
             <Button onClick={finish} className="w-full">
