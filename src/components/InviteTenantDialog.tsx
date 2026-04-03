@@ -109,7 +109,7 @@ const InviteTenantDialog = () => {
           </div>
 
           <div className="space-y-2">
-            <Label>Wohnung (nur unvermietete)</Label>
+            <Label>Wohnung</Label>
             <select
               value={selectedUnit}
               onChange={(e) => { setSelectedUnit(e.target.value); setLinkGenerated(false); }}
