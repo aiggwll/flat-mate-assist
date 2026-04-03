@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { properties } from "@/lib/dummy-data";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@/contexts/UserContext";
 
 const PropertiesPage = () => {
   const [open, setOpen] = useState(false);
