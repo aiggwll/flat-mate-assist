@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserPlus, Copy, Check, Mail } from "lucide-react";
-import { properties as dummyProperties } from "@/lib/dummy-data";
+
 import { toast } from "@/components/ui/sonner";
 import { useUser } from "@/contexts/UserContext";
 
@@ -19,12 +19,7 @@ const InviteTenantDialog = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
   const [copied, setCopied] = useState(false);
   const [linkGenerated, setLinkGenerated] = useState(false);
 
-  // Use user-created properties if available, otherwise fall back to dummy data
-  const hasUserProperties = userProperties.length > 0;
-
-  const propertyList = hasUserProperties
-    ? userProperties.map(p => ({ id: p.id, label: `${p.address}, ${p.city}`, units: Array.from({ length: p.units }, (_, i) => ({ id: `${p.id}-u${i + 1}`, number: `Whg. ${i + 1}`, size: 0, rent: 0, hasTenant: false })) }))
-    : dummyProperties.map(p => ({ id: p.id, label: `${p.address}, ${p.city}`, units: p.units.map(u => ({ id: u.id, number: u.number, size: u.size, rent: u.rent, hasTenant: !!u.tenant })) }));
+  const propertyList = userProperties.map(p => ({ id: p.id, label: `${p.address}, ${p.city}`, units: Array.from({ length: p.units }, (_, i) => ({ id: `${p.id}-u${i + 1}`, number: `Whg. ${i + 1}`, size: 0, rent: 0, hasTenant: false })) }));
 
   const selectedProp = propertyList.find(p => p.id === selectedProperty);
   const availableUnits = selectedProp?.units ?? [];
