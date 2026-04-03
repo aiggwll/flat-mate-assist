@@ -13,7 +13,7 @@ const StatCard = ({ title, value, icon: Icon, accent, subtitle }: StatCardProps)
     <div className="bg-card rounded-2xl border p-5 shadow-sm animate-fade-in">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-muted-foreground">{title}</p>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <p className={`text-2xl font-heading font-bold mt-1 ${accent ? "text-accent" : "text-foreground"}`}>
             {value}
           </p>
