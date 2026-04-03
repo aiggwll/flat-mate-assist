@@ -49,8 +49,9 @@ const TenantOnboarding = ({ open, onComplete }: TenantOnboardingProps) => {
                 Willkommen in Ihrem Mieterportal! 🏡
               </h2>
               <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
-                Hier verwalten Sie Ihre Wohnung, kommunizieren mit Ihrem
-                Vermieter und verdienen Cashback.
+                {isSie
+                  ? "Hier verwalten Sie Ihre Wohnung, kommunizieren mit Ihrem Vermieter und verdienen Cashback."
+                  : "Hier verwaltest du deine Wohnung, kommunizierst mit deinem Vermieter und verdienst Cashback."}
               </p>
             </div>
             <Button onClick={() => setStep(1)} className="w-full">
