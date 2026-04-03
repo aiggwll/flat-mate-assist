@@ -15,6 +15,8 @@ interface LandlordOnboardingProps {
 const LandlordOnboarding = ({ open, onComplete }: LandlordOnboardingProps) => {
   const [step, setStep] = useState(0);
   const navigate = useNavigate();
+  const { salutation } = useUser();
+  const isSie = salutation === "sie";
 
   const finish = () => {
     localStorage.setItem("onboarding_complete_owner", "true");
