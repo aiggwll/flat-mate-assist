@@ -147,20 +147,45 @@ const LoginPage = () => {
       toast.error("Bitte füllen Sie mindestens Adresse, Stadt und PLZ aus.");
       return;
     }
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
+
+    // Try multiple methods to get user: session → context → getUser
+    let currentUser = contextUser;
     if (!currentUser) {
-      toast.error("Nicht eingeloggt.");
-      return;
+      const { data: { session } } = await supabase.auth.getSession();
+      currentUser = session?.user ?? null;
     }
+    if (!currentUser) {
+      const { data: { user: fetchedUser } } = await supabase.auth.getUser();
+      currentUser = fetchedUser;
+    }
+
     const rows = properties.map(p => ({
-      user_id: currentUser.id,
       address: p.address.trim(),
       city: p.city.trim(),
       zip_code: p.zipCode.trim(),
       year_built: parseInt(p.yearBuilt) || 0,
       units: parseInt(p.units) || 1,
     }));
-    const { data: inserted, error } = await supabase.from("properties").insert(rows).select();
+
+    if (!currentUser) {
+      // Fallback: save to localStorage, will sync after next login
+      // NOTE: Enable email confirmation in production
+      localStorage.setItem("pendingProperties", JSON.stringify(rows));
+      toast.info("Immobilien werden nach dem nächsten Login synchronisiert.");
+      setUserProperties(rows.map((r, i) => ({
+        id: `pending-${i}`,
+        address: r.address,
+        city: r.city,
+        zipCode: r.zip_code,
+        yearBuilt: r.year_built,
+        units: r.units,
+      })));
+      navigate("/dashboard");
+      return;
+    }
+
+    const insertRows = rows.map(r => ({ ...r, user_id: currentUser!.id }));
+    const { data: inserted, error } = await supabase.from("properties").insert(insertRows).select();
     if (error) {
       toast.error("Fehler beim Speichern: " + error.message);
       return;
