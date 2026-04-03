@@ -138,7 +138,7 @@ const TenantDashboardPage = () => {
   };
 
 
-    if (!newMessage.trim()) return;
+    const handleSendMessage = () => {
     setChatMessages((prev) => [
       ...prev,
       {
