@@ -47,8 +47,8 @@ const LoginPage = () => {
 
     try {
       if (isLogin) {
-        // Login
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        // Login — use session from signInWithPassword directly (avoid getUser deadlock)
+        const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           setPasswordError(error.message === "Invalid login credentials"
             ? "Ungültige E-Mail oder Passwort."
@@ -58,18 +58,23 @@ const LoginPage = () => {
         }
         // Store remember-me preference
         localStorage.setItem("rememberMe", rememberMe ? "true" : "false");
-        // Fetch profile to determine role
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
+        // Use user from sign-in response directly
+        const signedInUser = signInData?.user;
+        if (signedInUser) {
           const { data: profile } = await supabase
             .from("profiles")
             .select("name, role")
-            .eq("user_id", user.id)
+            .eq("user_id", signedInUser.id)
             .single();
           if (profile) {
             setUserName(profile.name);
             setUserRole(profile.role as Role);
             navigate(profile.role === "owner" ? "/dashboard" : "/tenant-dashboard");
+          } else {
+            // Fallback: use metadata role
+            const metaRole = signedInUser.user_metadata?.role as Role || "tenant";
+            setUserRole(metaRole);
+            navigate(metaRole === "owner" ? "/dashboard" : "/tenant-dashboard");
           }
         }
       } else {
