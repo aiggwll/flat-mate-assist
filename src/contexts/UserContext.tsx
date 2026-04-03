@@ -39,28 +39,32 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [isNewUser, setIsNewUser] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Helper to load profile & properties (non-blocking)
+  // Helper to load profile & properties (non-blocking, fire-and-forget)
   const loadUserData = (currentUser: User) => {
-    // Fetch profile
-    supabase
-      .from("profiles")
-      .select("name, role")
-      .eq("user_id", currentUser.id)
-      .single()
-      .then(({ data: profile }) => {
+    // Fetch profile (async IIFE to avoid blocking)
+    (async () => {
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("name, role")
+          .eq("user_id", currentUser.id)
+          .single();
         if (profile) {
           setUserName(profile.name || "");
           setUserRole(profile.role as "owner" | "tenant");
         }
-      })
-      .catch((e) => console.error("Error loading profile:", e));
+      } catch (e) {
+        console.error("Error loading profile:", e);
+      }
+    })();
 
     // Fetch properties
-    supabase
-      .from("properties")
-      .select("*")
-      .eq("user_id", currentUser.id)
-      .then(({ data: props }) => {
+    (async () => {
+      try {
+        const { data: props } = await supabase
+          .from("properties")
+          .select("*")
+          .eq("user_id", currentUser.id);
         if (props && props.length > 0) {
           setUserPropertiesState(props.map(p => ({
             id: p.id,
@@ -71,16 +75,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             units: p.units ?? 1,
           })));
         }
-      })
-      .catch((e) => console.error("Error loading properties:", e));
+      } catch (e) {
+        console.error("Error loading properties:", e);
+      }
+    })();
 
     // Sync pending properties from localStorage (fallback from registration)
     const pending = localStorage.getItem("pendingProperties");
     if (pending) {
-      try {
-        const pendingRows = JSON.parse(pending) as Array<{ address: string; city: string; zip_code: string; year_built: number; units: number }>;
-        const insertRows = pendingRows.map(r => ({ ...r, user_id: currentUser.id }));
-        supabase.from("properties").insert(insertRows).select().then(({ data: synced }) => {
+      (async () => {
+        try {
+          const pendingRows = JSON.parse(pending) as Array<{ address: string; city: string; zip_code: string; year_built: number; units: number }>;
+          const insertRows = pendingRows.map(r => ({ ...r, user_id: currentUser.id }));
+          const { data: synced } = await supabase.from("properties").insert(insertRows).select();
           if (synced) {
             localStorage.removeItem("pendingProperties");
             setUserPropertiesState(prev => [
@@ -95,12 +102,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
               })),
             ]);
           }
-        });
-      } catch (e) {
-        console.error("Error syncing pending properties:", e);
-      }
-    }
-  };
+        } catch (e) {
+          console.error("Error syncing pending properties:", e);
+        }
+      })();
 
   useEffect(() => {
     // If user chose not to stay logged in, check sessionStorage flag
