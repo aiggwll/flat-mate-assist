@@ -106,6 +106,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           console.error("Error syncing pending properties:", e);
         }
       })();
+    }
+  };
 
   useEffect(() => {
     // If user chose not to stay logged in, check sessionStorage flag
