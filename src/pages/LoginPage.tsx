@@ -141,21 +141,40 @@ const LoginPage = () => {
     setProperties(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handlePropertySubmit = () => {
+  const handlePropertySubmit = async () => {
     const incomplete = properties.some(p => !p.address.trim() || !p.city.trim() || !p.zipCode.trim());
     if (incomplete) {
       toast.error("Bitte füllen Sie mindestens Adresse, Stadt und PLZ aus.");
       return;
     }
-    const mapped = properties.map((p, i) => ({
-      id: `user-p${i + 1}`,
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (!currentUser) {
+      toast.error("Nicht eingeloggt.");
+      return;
+    }
+    const rows = properties.map(p => ({
+      user_id: currentUser.id,
       address: p.address.trim(),
       city: p.city.trim(),
-      zipCode: p.zipCode.trim(),
-      yearBuilt: parseInt(p.yearBuilt) || 0,
+      zip_code: p.zipCode.trim(),
+      year_built: parseInt(p.yearBuilt) || 0,
       units: parseInt(p.units) || 1,
     }));
-    setUserProperties(mapped);
+    const { data: inserted, error } = await supabase.from("properties").insert(rows).select();
+    if (error) {
+      toast.error("Fehler beim Speichern: " + error.message);
+      return;
+    }
+    if (inserted) {
+      setUserProperties(inserted.map(p => ({
+        id: p.id,
+        address: p.address,
+        city: p.city,
+        zipCode: p.zip_code,
+        yearBuilt: p.year_built ?? 0,
+        units: p.units ?? 1,
+      })));
+    }
     toast.success(`${properties.length} ${properties.length === 1 ? "Immobilie" : "Immobilien"} angelegt!`);
     navigate("/dashboard");
   };

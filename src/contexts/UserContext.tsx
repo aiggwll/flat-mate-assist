@@ -32,15 +32,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userName, setUserName] = useState("");
   const [userRole, setUserRole] = useState<"owner" | "tenant" | null>(null);
-  const [userProperties, setUserPropertiesState] = useState<UserProperty[]>(() => {
-    try {
-      const stored = localStorage.getItem("willprop_user_properties");
-      return stored ? JSON.parse(stored) : [];
-    } catch { return []; }
-  });
+  const [userProperties, setUserPropertiesState] = useState<UserProperty[]>([]);
   const setUserProperties = (props: UserProperty[]) => {
     setUserPropertiesState(props);
-    localStorage.setItem("willprop_user_properties", JSON.stringify(props));
   };
   const [isNewUser, setIsNewUser] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,6 +56,23 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         if (profile) {
           setUserName(profile.name || "");
           setUserRole(profile.role as "owner" | "tenant");
+        }
+
+        // Fetch properties from DB
+        const { data: props } = await supabase
+          .from("properties")
+          .select("*")
+          .eq("user_id", currentUser.id);
+
+        if (props && props.length > 0) {
+          setUserPropertiesState(props.map(p => ({
+            id: p.id,
+            address: p.address,
+            city: p.city,
+            zipCode: p.zip_code,
+            yearBuilt: p.year_built ?? 0,
+            units: p.units ?? 1,
+          })));
         }
       } else {
         setUserName("");
