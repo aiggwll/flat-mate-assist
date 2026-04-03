@@ -583,26 +583,37 @@ const LoginPage = () => {
               <p className="text-sm text-destructive">{passwordError}</p>
             )}
             {isLogin && (
-              <button
-                type="button"
-                className="text-sm text-accent hover:underline"
-                onClick={async () => {
-                  if (!email) {
-                    toast.error("Bitte geben Sie Ihre E-Mail-Adresse ein.");
-                    return;
-                  }
-                  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                    redirectTo: window.location.origin,
-                  });
-                  if (error) {
-                    toast.error(`Fehler: ${error.message}`);
-                  } else {
-                    toast.success("Eine E-Mail zum Zurücksetzen des Passworts wurde gesendet.");
-                  }
-                }}
-              >
-                Passwort vergessen?
-              </button>
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={e => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                  />
+                  <span className="text-sm text-muted-foreground">Angemeldet bleiben</span>
+                </label>
+                <button
+                  type="button"
+                  className="text-sm text-accent hover:underline"
+                  onClick={async () => {
+                    if (!email) {
+                      toast.error("Bitte geben Sie Ihre E-Mail-Adresse ein.");
+                      return;
+                    }
+                    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                      redirectTo: window.location.origin,
+                    });
+                    if (error) {
+                      toast.error(`Fehler: ${error.message}`);
+                    } else {
+                      toast.success("Eine E-Mail zum Zurücksetzen des Passworts wurde gesendet.");
+                    }
+                  }}
+                >
+                  Passwort vergessen?
+                </button>
+              </div>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Bitte warten..." : (isLogin ? "Anmelden" : "Registrieren")}
