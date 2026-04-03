@@ -43,8 +43,9 @@ const AppSidebar = () => {
       </div>
 
       <nav className="flex-1 px-3 space-y-1">
-        {navItems.map(({ to, label, icon: Icon, badge }) => {
+        {navItems.map(({ to, label, icon: Icon }) => {
           const isActive = location.pathname.startsWith(to);
+          const badge = to === "/chat" && unreadCount > 0 ? unreadCount : null;
           return (
             <NavLink
               key={to}
