@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS salutation text NOT NULL DEFAULT 'sie';

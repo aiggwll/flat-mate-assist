@@ -77,6 +77,7 @@ export type Database = {
           owner_name: string | null
           property_id: string | null
           role: string
+          salutation: string
           unit_id: string | null
           updated_at: string
           user_id: string
@@ -89,6 +90,7 @@ export type Database = {
           owner_name?: string | null
           property_id?: string | null
           role?: string
+          salutation?: string
           unit_id?: string | null
           updated_at?: string
           user_id: string
@@ -101,6 +103,7 @@ export type Database = {
           owner_name?: string | null
           property_id?: string | null
           role?: string
+          salutation?: string
           unit_id?: string | null
           updated_at?: string
           user_id?: string
