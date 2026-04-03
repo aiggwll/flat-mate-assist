@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 import DocumentManager from "@/components/DocumentManager";
 import TenantAiChat from "@/components/TenantAiChat";
@@ -37,6 +38,8 @@ import {
   X,
   LogOut,
   Upload,
+  Video,
+  Gift,
 } from "lucide-react";
 
 const TenantDashboardPage = () => {
@@ -186,7 +189,7 @@ const TenantDashboardPage = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="messages" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="messages" className="gap-2">
               <MessageSquare className="h-4 w-4" />
               <span className="hidden sm:inline">Nachrichten</span>
@@ -194,6 +197,10 @@ const TenantDashboardPage = () => {
             <TabsTrigger value="documents" className="gap-2">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Dokumente</span>
+            </TabsTrigger>
+            <TabsTrigger value="video360" className="gap-2">
+              <Video className="h-4 w-4" />
+              <span className="hidden sm:inline">360°</span>
             </TabsTrigger>
           </TabsList>
 
@@ -289,6 +296,69 @@ const TenantDashboardPage = () => {
           {/* Documents Tab */}
           <TabsContent value="documents">
             <DocumentManager role="tenant" propertyId={propertyAddress} />
+          </TabsContent>
+
+          {/* 360° Video Tab */}
+          <TabsContent value="video360">
+            <div className="space-y-6">
+              {/* Cashback Banner */}
+              <div className="rounded-xl border border-accent/20 bg-accent/5 p-5 flex items-start gap-4">
+                <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                  <Gift className="h-5 w-5 text-accent" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-sm font-semibold text-foreground">
+                      🎁 Ihr Vermieter bietet Cashback für einen vollständigen Rundgang!
+                    </p>
+                    <Badge variant="secondary" className="text-[10px] shrink-0">Coming Soon</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Laden Sie ein Video oder Fotos Ihrer Wohnung hoch und erhalten Sie eine Gutschrift. Der genaue Betrag wird von Ihrem Vermieter festgelegt.
+                  </p>
+                </div>
+              </div>
+
+              <h3 className="font-heading font-semibold text-foreground">360° Wohnungsrundgang</h3>
+              <p className="text-sm text-muted-foreground">
+                Nehmen Sie ein Video auf oder laden Sie Fotos hoch, um den Zustand Ihrer Wohnung zu dokumentieren.
+              </p>
+
+              {/* Upload area */}
+              <div className="flex gap-3">
+                <label className="flex-1 flex flex-col items-center justify-center cursor-pointer py-10 border-2 border-dashed border-muted-foreground/30 rounded-lg hover:border-accent transition-colors">
+                  <Upload className="h-6 w-6 text-muted-foreground mb-2" />
+                  <span className="text-sm font-medium text-muted-foreground">Video / Fotos hochladen</span>
+                  <span className="text-xs text-muted-foreground/60 mt-1">MP4, MOV, JPG, PNG – max. 500 MB</span>
+                  <input
+                    type="file"
+                    accept="video/*,image/*,.mp4,.mov"
+                    multiple
+                    className="hidden"
+                    onChange={() => {
+                      // TODO: implement file upload to storage
+                      toast("Upload-Funktion wird bald verfügbar sein.");
+                    }}
+                  />
+                </label>
+                <button
+                  onClick={() => toast("Kamera-Aufnahme wird bald verfügbar sein.")}
+                  className="flex-1 flex flex-col items-center justify-center py-10 border-2 border-dashed border-accent/40 rounded-lg hover:border-accent bg-accent/5 transition-colors"
+                >
+                  <Camera className="h-6 w-6 text-accent mb-2" />
+                  <span className="text-sm font-medium text-accent">Video aufnehmen</span>
+                  <span className="text-xs text-accent/60 mt-1">Direkt mit der Kamera</span>
+                </button>
+              </div>
+
+              {/* Tips */}
+              <div className="rounded-lg border border-border/50 px-5 py-4">
+                <p className="text-xs font-medium text-foreground mb-2">💡 Tipps für einen guten Rundgang</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Filmen Sie im Querformat, langsam und mit ruhiger Hand. Zeigen Sie jeden Raum vollständig – inkl. Ecken, Fenster und Böden. Pro Raum genügen 1–3 Minuten.
+                </p>
+              </div>
+            </div>
           </TabsContent>
 
         </Tabs>
