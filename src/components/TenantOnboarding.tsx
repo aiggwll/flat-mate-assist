@@ -11,6 +11,8 @@ interface TenantOnboardingProps {
 
 const TenantOnboarding = ({ open, onComplete }: TenantOnboardingProps) => {
   const [step, setStep] = useState(0);
+  const { salutation } = useUser();
+  const isSie = salutation === "sie";
 
   const finish = () => {
     localStorage.setItem("onboarding_complete_tenant", "true");
