@@ -6,7 +6,7 @@ import {
   Building2,
   MessageSquare,
   CreditCard,
-  ClipboardCheck,
+  
   FileText,
   AlertTriangle,
   LogOut,
