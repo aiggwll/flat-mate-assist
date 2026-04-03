@@ -238,7 +238,7 @@ const TenantDashboardPage = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="messages" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="messages" className="gap-2">
               <MessageSquare className="h-4 w-4" />
               <span className="hidden sm:inline">Nachrichten</span>
@@ -246,10 +246,6 @@ const TenantDashboardPage = () => {
             <TabsTrigger value="documents" className="gap-2">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Dokumente</span>
-            </TabsTrigger>
-            <TabsTrigger value="video360" className="gap-2">
-              <Video className="h-4 w-4" />
-              <span className="hidden sm:inline">360°</span>
             </TabsTrigger>
           </TabsList>
 
