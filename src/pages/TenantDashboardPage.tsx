@@ -144,36 +144,6 @@ const TenantDashboardPage = () => {
     setDamageOpen(false);
   };
 
-  const handleVideoFileSelect = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    setPendingFile(files[0]);
-    setSelectedRoom("");
-  };
-
-  const handleAssignRoom = () => {
-    if (!pendingFile || !selectedRoom) return;
-    setRoomVideos((prev) => ({ ...prev, [selectedRoom]: { file: pendingFile, uploaded: true } }));
-    setPendingFile(null);
-    setSelectedRoom("");
-  };
-
-  const handleRemoveRoomVideo = (room: string) => {
-    setRoomVideos((prev) => {
-      const copy = { ...prev };
-      delete copy[room];
-      return copy;
-    });
-  };
-
-  const handleAddCustomRoom = () => {
-    const name = newCustomRoom.trim();
-    if (!name || allRoomOptions.includes(name)) return;
-    setAllRoomOptions((prev) => [...prev, name]);
-    setCustomRooms((prev) => [...prev, name]);
-    setSelectedRoom(name);
-    setNewCustomRoom("");
-    setShowAddCustom(false);
-  };
 
   const statusColor = (s: string) => {
     if (s === "offen") return "destructive";
