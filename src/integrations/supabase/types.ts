@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      cashback_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          reason: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           created_at: string

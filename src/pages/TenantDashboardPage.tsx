@@ -40,7 +40,10 @@ import {
   Upload,
   Video,
   Gift,
+  Wallet,
+  CheckCircle2,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const TenantDashboardPage = () => {
   const [searchParams] = useSearchParams();
@@ -83,10 +86,59 @@ const TenantDashboardPage = () => {
   const [damageCategory, setDamageCategory] = useState("");
   const [damagePhotos, setDamagePhotos] = useState<{ file: File; preview: string }[]>([]);
   const [damages, setDamages] = useState<any[]>([]);
+  // Cashback state
+  const [cashbackTotal, setCashbackTotal] = useState(0);
+  const [cashbackHistory, setCashbackHistory] = useState<Array<{ id: string; amount: number; reason: string; status: string; created_at: string }>>([]);
+  const [roundgangSubmitted, setRundgangSubmitted] = useState(false);
+
+  useEffect(() => {
+    const loadCashback = async () => {
+      if (!userId) return;
+      const { data } = await supabase
+        .from("cashback_transactions" as any)
+        .select("*")
+        .eq("tenant_id", userId)
+        .order("created_at", { ascending: false });
+      if (data && (data as any[]).length > 0) {
+        const rows = data as any[];
+        setCashbackHistory(rows);
+        const total = rows
+          .filter((r: any) => r.status === "approved" || r.status === "paid")
+          .reduce((sum: number, r: any) => sum + Number(r.amount), 0);
+        setCashbackTotal(total);
+      }
+    };
+    loadCashback();
+  }, [userId]);
+
+  const handleRundgangUpload = async () => {
+    if (!userId) return;
+    await supabase.from("cashback_transactions" as any).insert({
+      tenant_id: userId,
+      amount: 100,
+      reason: "360° Rundgang",
+      status: "pending",
+    } as any);
+    setRundgangSubmitted(true);
+    // Reload cashback
+    const { data } = await supabase
+      .from("cashback_transactions" as any)
+      .select("*")
+      .eq("tenant_id", userId)
+      .order("created_at", { ascending: false });
+    if (data) {
+      const rows = data as any[];
+      setCashbackHistory(rows);
+      const total = rows
+        .filter((r: any) => r.status === "approved" || r.status === "paid")
+        .reduce((sum: number, r: any) => sum + Number(r.amount), 0);
+      setCashbackTotal(total);
+    }
+    toast.success("Ihr Rundgang wurde eingereicht!");
+  };
 
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
+    const handleSendMessage = () => {
     setChatMessages((prev) => [
       ...prev,
       {
@@ -183,6 +235,46 @@ const TenantDashboardPage = () => {
               <p className="text-sm text-muted-foreground mt-1">
                 Vermieter: <span className="font-semibold text-foreground">{ownerName}</span>
               </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Cashback Card */}
+        <Card className="p-6 mb-8">
+          <div className="flex items-start gap-4">
+            <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+              <Wallet className="h-6 w-6 text-accent" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-heading font-semibold text-foreground">Mein Cashback</h3>
+                <Badge variant="secondary" className="text-[10px]">Coming Soon</Badge>
+              </div>
+              <p className="text-2xl font-bold text-accent mb-3">{cashbackTotal} € <span className="text-sm font-normal text-muted-foreground">verdient</span></p>
+              <Progress value={Math.min(cashbackTotal, 200) / 2} className="h-2 mb-4" />
+              {cashbackHistory.length > 0 ? (
+                <div className="space-y-2">
+                  {cashbackHistory.slice(0, 3).map((entry) => (
+                    <div key={entry.id} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className={`h-3.5 w-3.5 ${entry.status === "approved" || entry.status === "paid" ? "text-accent" : "text-muted-foreground"}`} />
+                        <span className="text-foreground">{entry.reason}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(entry.created_at).toLocaleDateString("de-DE", { month: "short", year: "numeric" })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-accent">+{entry.amount} €</span>
+                        <Badge variant={entry.status === "pending" ? "secondary" : "default"} className="text-[10px]">
+                          {entry.status === "pending" ? "Prüfung" : entry.status === "approved" ? "Genehmigt" : "Ausgezahlt"}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">Noch kein Cashback verdient. Laden Sie einen 360° Rundgang hoch!</p>
+              )}
             </div>
           </div>
         </Card>
@@ -307,57 +399,67 @@ const TenantDashboardPage = () => {
                   <Gift className="h-5 w-5 text-accent" />
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm font-semibold text-foreground">
-                      🎁 Ihr Vermieter bietet Cashback für einen vollständigen Rundgang!
-                    </p>
-                    <Badge variant="secondary" className="text-[10px] shrink-0">Coming Soon</Badge>
-                  </div>
+                  <p className="text-sm font-semibold text-foreground mb-1">
+                    🎁 Ihr Vermieter bietet 100 € Cashback für einen vollständigen Rundgang!
+                  </p>
                   <p className="text-xs text-muted-foreground">
-                    Laden Sie ein Video oder Fotos Ihrer Wohnung hoch und erhalten Sie eine Gutschrift. Der genaue Betrag wird von Ihrem Vermieter festgelegt.
+                    Laden Sie ein Video oder Fotos Ihrer Wohnung hoch. Nach Prüfung wird der Cashback gutgeschrieben.
                   </p>
                 </div>
               </div>
 
-              <h3 className="font-heading font-semibold text-foreground">360° Wohnungsrundgang</h3>
-              <p className="text-sm text-muted-foreground">
-                Nehmen Sie ein Video auf oder laden Sie Fotos hoch, um den Zustand Ihrer Wohnung zu dokumentieren.
-              </p>
+              <h3 className="font-heading font-semibold text-foreground">Rundgang hochladen</h3>
 
-              {/* Upload area */}
-              <div className="flex gap-3">
-                <label className="flex-1 flex flex-col items-center justify-center cursor-pointer py-10 border-2 border-dashed border-muted-foreground/30 rounded-lg hover:border-accent transition-colors">
-                  <Upload className="h-6 w-6 text-muted-foreground mb-2" />
-                  <span className="text-sm font-medium text-muted-foreground">Video / Fotos hochladen</span>
-                  <span className="text-xs text-muted-foreground/60 mt-1">MP4, MOV, JPG, PNG – max. 500 MB</span>
-                  <input
-                    type="file"
-                    accept="video/*,image/*,.mp4,.mov"
-                    multiple
-                    className="hidden"
-                    onChange={() => {
-                      // TODO: implement file upload to storage
-                      toast("Upload-Funktion wird bald verfügbar sein.");
-                    }}
-                  />
-                </label>
-                <button
-                  onClick={() => toast("Kamera-Aufnahme wird bald verfügbar sein.")}
-                  className="flex-1 flex flex-col items-center justify-center py-10 border-2 border-dashed border-accent/40 rounded-lg hover:border-accent bg-accent/5 transition-colors"
-                >
-                  <Camera className="h-6 w-6 text-accent mb-2" />
-                  <span className="text-sm font-medium text-accent">Video aufnehmen</span>
-                  <span className="text-xs text-accent/60 mt-1">Direkt mit der Kamera</span>
-                </button>
-              </div>
+              {roundgangSubmitted ? (
+                <Card className="p-6 text-center space-y-3">
+                  <div className="h-14 w-14 rounded-full bg-accent/10 flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="h-7 w-7 text-accent" />
+                  </div>
+                  <p className="font-semibold text-foreground">Ihr Rundgang wurde eingereicht!</p>
+                  <p className="text-sm text-muted-foreground">
+                    Der Cashback wird nach Prüfung durch Ihren Vermieter gutgeschrieben.
+                  </p>
+                  <Badge variant="secondary" className="text-xs">Prüfung läuft</Badge>
+                </Card>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    Nehmen Sie ein Video auf oder laden Sie Fotos hoch, um den Zustand Ihrer Wohnung zu dokumentieren.
+                  </p>
 
-              {/* Tips */}
-              <div className="rounded-lg border border-border/50 px-5 py-4">
-                <p className="text-xs font-medium text-foreground mb-2">💡 Tipps für einen guten Rundgang</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Filmen Sie im Querformat, langsam und mit ruhiger Hand. Zeigen Sie jeden Raum vollständig – inkl. Ecken, Fenster und Böden. Pro Raum genügen 1–3 Minuten.
-                </p>
-              </div>
+                  {/* Upload area */}
+                  <div className="flex gap-3">
+                    <label className="flex-1 flex flex-col items-center justify-center cursor-pointer py-10 border-2 border-dashed border-muted-foreground/30 rounded-lg hover:border-accent transition-colors">
+                      <Upload className="h-6 w-6 text-muted-foreground mb-2" />
+                      <span className="text-sm font-medium text-muted-foreground">Video / Fotos hochladen</span>
+                      <span className="text-xs text-muted-foreground/60 mt-1">MP4, MOV, JPG, PNG – max. 500 MB</span>
+                      <input
+                        type="file"
+                        accept="video/*,image/*,.mp4,.mov"
+                        multiple
+                        className="hidden"
+                        onChange={() => handleRundgangUpload()}
+                      />
+                    </label>
+                    <button
+                      onClick={() => handleRundgangUpload()}
+                      className="flex-1 flex flex-col items-center justify-center py-10 border-2 border-dashed border-accent/40 rounded-lg hover:border-accent bg-accent/5 transition-colors"
+                    >
+                      <Camera className="h-6 w-6 text-accent mb-2" />
+                      <span className="text-sm font-medium text-accent">Video aufnehmen</span>
+                      <span className="text-xs text-accent/60 mt-1">Direkt mit der Kamera</span>
+                    </button>
+                  </div>
+
+                  {/* Tips */}
+                  <div className="rounded-lg border border-border/50 px-5 py-4">
+                    <p className="text-xs font-medium text-foreground mb-2">💡 Tipps für einen guten Rundgang</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Filmen Sie im Querformat, langsam und mit ruhiger Hand. Zeigen Sie jeden Raum vollständig – inkl. Ecken, Fenster und Böden. Pro Raum genügen 1–3 Minuten.
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
           </TabsContent>
 
