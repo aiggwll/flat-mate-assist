@@ -11,7 +11,7 @@ import DashboardPage from "./pages/DashboardPage";
 import TenantDashboardPage from "./pages/TenantDashboardPage";
 import PropertiesPage from "./pages/PropertiesPage";
 import PropertyDetailPage from "./pages/PropertyDetailPage";
-import PaymentsPage from "./pages/PaymentsPage";
+import RentTrackingPage from "./pages/RentTrackingPage";
 import ChatPage from "./pages/ChatPage";
 import DamagesPage from "./pages/DamagesPage";
 import DocumentsPage from "./pages/DocumentsPage";
