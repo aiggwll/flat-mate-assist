@@ -150,8 +150,8 @@ const DamagesPage = () => {
                 <Select value={form.propertyId} onValueChange={v => { update("propertyId", v); update("unitId", ""); }}>
                   <SelectTrigger><SelectValue placeholder="Auswählen" /></SelectTrigger>
                   <SelectContent>
-                    {properties.map(p => (
-                      <SelectItem key={p.id} value={p.id}>{p.address}</SelectItem>
+                    {userProperties.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.address}, {p.city}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
