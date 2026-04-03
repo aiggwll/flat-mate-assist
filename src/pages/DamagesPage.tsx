@@ -16,16 +16,7 @@ interface DamageWithContext extends Damage {
   photos?: string[];
 }
 
-const initialDamages: DamageWithContext[] = properties.flatMap(p =>
-  p.units.flatMap(u =>
-    u.damages.map(d => ({
-      ...d,
-      propertyAddress: p.address,
-      unitNumber: u.number,
-      photos: [],
-    }))
-  )
-);
+const initialDamages: DamageWithContext[] = [];
 
 const statusColor: Record<string, string> = {
   offen: "bg-destructive/10 text-destructive border-0",
