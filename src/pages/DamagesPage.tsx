@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { properties, type Damage } from "@/lib/dummy-data";
+import { useUser } from "@/contexts/UserContext";
+import { type Damage } from "@/lib/dummy-data";
 import { AlertTriangle, Plus, ImagePlus, X, Camera } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,16 +17,7 @@ interface DamageWithContext extends Damage {
   photos?: string[];
 }
 
-const initialDamages: DamageWithContext[] = properties.flatMap(p =>
-  p.units.flatMap(u =>
-    u.damages.map(d => ({
-      ...d,
-      propertyAddress: p.address,
-      unitNumber: u.number,
-      photos: [],
-    }))
-  )
-);
+const initialDamages: DamageWithContext[] = [];
 
 const statusColor: Record<string, string> = {
   offen: "bg-destructive/10 text-destructive border-0",
@@ -41,6 +33,7 @@ const categoryIcon: Record<string, string> = {
 };
 
 const DamagesPage = () => {
+  const { userProperties } = useUser();
   const [damages, setDamages] = useState<DamageWithContext[]>(initialDamages);
   const [open, setOpen] = useState(false);
   const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([]);
@@ -55,8 +48,9 @@ const DamagesPage = () => {
 
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
 
-  const selectedProperty = properties.find(p => p.id === form.propertyId);
-  const availableUnits = selectedProperty?.units ?? [];
+  const selectedProperty = userProperties.find(p => p.id === form.propertyId);
+  const unitCount = selectedProperty?.units ?? 1;
+  const availableUnits = Array.from({ length: unitCount }, (_, i) => ({ id: `${i + 1}`, number: `${i + 1}` }));
 
   const handlePhotos = (files: FileList | null) => {
     if (!files) return;
@@ -80,8 +74,7 @@ const DamagesPage = () => {
       return;
     }
 
-    const property = properties.find(p => p.id === form.propertyId);
-    const unit = property?.units.find(u => u.id === form.unitId);
+    const property = userProperties.find(p => p.id === form.propertyId);
 
     const newDamage: DamageWithContext = {
       id: `dm-new-${Date.now()}`,
@@ -90,9 +83,9 @@ const DamagesPage = () => {
       category: form.category as Damage["category"],
       status: "offen",
       reportedAt: new Date().toISOString().split("T")[0],
-      reportedBy: unit?.tenant?.name ?? "Mieter",
+      reportedBy: "Mieter",
       propertyAddress: property?.address ?? "",
-      unitNumber: unit?.number ?? "",
+      unitNumber: form.unitId,
       photos: photos.map(p => p.preview),
     };
 
@@ -121,25 +114,37 @@ const DamagesPage = () => {
         </Button>
       </div>
 
-      {/* Damage List */}
-      <div className="space-y-3">
-        {openDamages.map(d => (
-          <DamageCard key={d.id} damage={d} />
-        ))}
-      </div>
-
-      {closedDamages.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="font-heading font-semibold text-muted-foreground">
-            Erledigte Meldungen ({closedDamages.length})
-          </h2>
-          {closedDamages.map(d => (
-            <DamageCard key={d.id} damage={d} />
-          ))}
+      {damages.length === 0 ? (
+        <div className="bg-card rounded-2xl border p-14 text-center space-y-4">
+          <div className="h-14 w-14 rounded-2xl bg-primary/8 flex items-center justify-center mx-auto">
+            <AlertTriangle className="h-7 w-7 text-primary" />
+          </div>
+          <p className="text-base font-medium text-foreground">Noch keine Schäden gemeldet</p>
+          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+            Gemeldete Schäden Ihrer Mieter erscheinen hier.
+          </p>
         </div>
-      )}
+      ) : (
+        <>
+          {/* Open Damages */}
+          <div className="space-y-3">
+            {openDamages.map(d => (
+              <DamageCard key={d.id} damage={d} />
+            ))}
+          </div>
 
-      {/* New Damage Dialog */}
+          {closedDamages.length > 0 && (
+            <div className="space-y-3">
+              <h2 className="font-heading font-semibold text-muted-foreground">
+                Erledigte Meldungen ({closedDamages.length})
+              </h2>
+              {closedDamages.map(d => (
+                <DamageCard key={d.id} damage={d} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -157,8 +162,8 @@ const DamagesPage = () => {
                 <Select value={form.propertyId} onValueChange={v => { update("propertyId", v); update("unitId", ""); }}>
                   <SelectTrigger><SelectValue placeholder="Auswählen" /></SelectTrigger>
                   <SelectContent>
-                    {properties.map(p => (
-                      <SelectItem key={p.id} value={p.id}>{p.address}</SelectItem>
+                    {userProperties.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.address}, {p.city}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
