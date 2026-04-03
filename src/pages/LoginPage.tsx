@@ -407,7 +407,7 @@ const LoginPage = () => {
           <div className="w-full max-w-sm">
             <div className="lg:hidden mb-6">
               <h1 className="text-2xl font-heading font-bold text-foreground">
-                Will<span className="text-accent">Prop</span>
+                Dwell<span className="text-accent">o</span>
               </h1>
             </div>
 
