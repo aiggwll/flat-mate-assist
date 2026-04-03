@@ -1,6 +1,14 @@
 import { useState, useRef } from "react";
 import { useUser } from "@/contexts/UserContext";
-import { type Damage } from "@/lib/dummy-data";
+interface Damage {
+  id: string;
+  title: string;
+  description: string;
+  category: "Heizung" | "Wasser" | "Elektrik" | "Sonstiges";
+  status: "offen" | "in Bearbeitung" | "erledigt";
+  reportedAt: string;
+  reportedBy: string;
+}
 import { AlertTriangle, Plus, ImagePlus, X, Camera } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

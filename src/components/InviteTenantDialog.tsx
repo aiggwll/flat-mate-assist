@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserPlus, Copy, Check, Mail } from "lucide-react";
-import { properties as dummyProperties } from "@/lib/dummy-data";
+
 import { toast } from "@/components/ui/sonner";
 import { useUser } from "@/contexts/UserContext";
 
