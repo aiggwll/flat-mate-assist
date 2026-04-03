@@ -262,7 +262,7 @@ const LoginPage = () => {
 
             <h2 className="text-2xl font-heading font-bold text-foreground">Willkommen</h2>
             <p className="text-muted-foreground text-sm mt-1 mb-8">
-              Wie möchten Sie WillProp nutzen?
+              Wie möchten Sie Dwello nutzen?
             </p>
 
             <div className="space-y-4">
