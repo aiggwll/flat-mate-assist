@@ -49,6 +49,7 @@ const InviteTenantDialog = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
       return;
     }
     setLinkGenerated(true);
+    onSuccess?.();
   };
 
   const handleCopy = async () => {
