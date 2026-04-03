@@ -47,35 +47,60 @@ const LoginPage = () => {
 
     try {
       if (isLogin) {
-        // Login — use session from signInWithPassword directly (avoid getUser deadlock)
-        const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });
+        // Login with timeout to prevent hanging
+        const loginPromise = supabase.auth.signInWithPassword({ email, password });
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("TIMEOUT")), 8000)
+        );
+
+        let signInResult;
+        try {
+          signInResult = await Promise.race([loginPromise, timeoutPromise]);
+        } catch (err: any) {
+          if (err?.message === "TIMEOUT") {
+            setPasswordError("Verbindungsfehler. Bitte versuchen Sie es erneut.");
+            console.error("Login timeout after 8s");
+            return;
+          }
+          throw err;
+        }
+
+        const { data: signInData, error } = signInResult;
         if (error) {
+          console.error("Login error:", error);
           setPasswordError(error.message === "Invalid login credentials"
             ? "Ungültige E-Mail oder Passwort."
             : error.message);
-          setLoading(false);
           return;
         }
-        // Store remember-me preference
+
         localStorage.setItem("rememberMe", rememberMe ? "true" : "false");
-        // Use user from sign-in response directly
         const signedInUser = signInData?.user;
+
         if (signedInUser) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("name, role")
-            .eq("user_id", signedInUser.id)
-            .single();
-          if (profile) {
-            setUserName(profile.name);
-            setUserRole(profile.role as Role);
-            navigate(profile.role === "owner" ? "/dashboard" : "/tenant-dashboard");
-          } else {
-            // Fallback: use metadata role
+          // Profile fetch with timeout — navigate even if it fails
+          let targetRoute = (signedInUser.user_metadata?.role === "owner") ? "/dashboard" : "/tenant-dashboard";
+          try {
+            const profilePromise = supabase
+              .from("profiles")
+              .select("name, role")
+              .eq("user_id", signedInUser.id)
+              .single();
+            const profileTimeout = new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error("PROFILE_TIMEOUT")), 5000)
+            );
+            const { data: profile } = await Promise.race([profilePromise, profileTimeout]);
+            if (profile) {
+              setUserName(profile.name);
+              setUserRole(profile.role as Role);
+              targetRoute = profile.role === "owner" ? "/dashboard" : "/tenant-dashboard";
+            }
+          } catch (profileErr) {
+            console.error("Profile fetch failed, using fallback:", profileErr);
             const metaRole = signedInUser.user_metadata?.role as Role || "tenant";
             setUserRole(metaRole);
-            navigate(metaRole === "owner" ? "/dashboard" : "/tenant-dashboard");
           }
+          setTimeout(() => navigate(targetRoute), 100);
         }
       } else {
         // Register
