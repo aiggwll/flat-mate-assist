@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 import DocumentManager from "@/components/DocumentManager";
+import TenantOnboarding from "@/components/TenantOnboarding";
 import TenantAiChat from "@/components/TenantAiChat";
 import { useSearchParams, NavLink, useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
@@ -90,6 +91,9 @@ const TenantDashboardPage = () => {
   const [cashbackTotal, setCashbackTotal] = useState(0);
   const [cashbackHistory, setCashbackHistory] = useState<Array<{ id: string; amount: number; reason: string; status: string; created_at: string }>>([]);
   const [roundgangSubmitted, setRundgangSubmitted] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(
+    () => !localStorage.getItem("onboarding_complete_tenant")
+  );
 
   useEffect(() => {
     const loadCashback = async () => {
@@ -196,6 +200,7 @@ const TenantDashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <TenantOnboarding open={showOnboarding} onComplete={() => setShowOnboarding(false)} />
       {/* Header */}
       <header className="border-b bg-card sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">

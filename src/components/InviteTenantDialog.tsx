@@ -8,7 +8,7 @@ import { properties as dummyProperties } from "@/lib/dummy-data";
 import { toast } from "@/components/ui/sonner";
 import { useUser } from "@/contexts/UserContext";
 
-const InviteTenantDialog = () => {
+const InviteTenantDialog = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
   const { userProperties, userName } = useUser();
   const ownerDisplayName = userName || "Max Kaufmann";
   const [open, setOpen] = useState(false);
@@ -49,6 +49,7 @@ const InviteTenantDialog = () => {
       return;
     }
     setLinkGenerated(true);
+    onSuccess?.();
   };
 
   const handleCopy = async () => {
