@@ -312,6 +312,7 @@ const TenantDashboardPage = () => {
               }}
               tenantName={tenantName}
               landlordName={ownerName}
+              salutation={salutation}
               onEscalate={(msg) => {
                 addMessage({
                   from: tenantName,
