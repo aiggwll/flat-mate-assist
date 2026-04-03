@@ -74,6 +74,32 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             units: p.units ?? 1,
           })));
         }
+
+        // Sync pending properties from localStorage (fallback from registration)
+        const pending = localStorage.getItem("pendingProperties");
+        if (pending) {
+          try {
+            const pendingRows = JSON.parse(pending) as Array<{ address: string; city: string; zip_code: string; year_built: number; units: number }>;
+            const insertRows = pendingRows.map(r => ({ ...r, user_id: currentUser.id }));
+            const { data: synced } = await supabase.from("properties").insert(insertRows).select();
+            if (synced) {
+              localStorage.removeItem("pendingProperties");
+              setUserPropertiesState(prev => [
+                ...prev,
+                ...synced.map(p => ({
+                  id: p.id,
+                  address: p.address,
+                  city: p.city,
+                  zipCode: p.zip_code,
+                  yearBuilt: p.year_built ?? 0,
+                  units: p.units ?? 1,
+                })),
+              ]);
+            }
+          } catch (e) {
+            console.error("Error syncing pending properties:", e);
+          }
+        }
       } else {
         setUserName("");
         setUserRole(null);
