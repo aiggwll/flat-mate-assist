@@ -27,7 +27,7 @@ const InviteTenantDialog = () => {
     : dummyProperties.map(p => ({ id: p.id, label: `${p.address}, ${p.city}`, units: p.units.map(u => ({ id: u.id, number: u.number, size: u.size, rent: u.rent, hasTenant: !!u.tenant })) }));
 
   const selectedProp = propertyList.find(p => p.id === selectedProperty);
-  const availableUnits = selectedProp?.units.filter(u => !u.hasTenant) ?? [];
+  const availableUnits = selectedProp?.units ?? [];
 
   const selectedUnitObj = selectedProp?.units.find(u => u.id === selectedUnit);
 
@@ -109,7 +109,7 @@ const InviteTenantDialog = () => {
           </div>
 
           <div className="space-y-2">
-            <Label>Wohnung (nur unvermietete)</Label>
+            <Label>Wohnung</Label>
             <select
               value={selectedUnit}
               onChange={(e) => { setSelectedUnit(e.target.value); setLinkGenerated(false); }}
