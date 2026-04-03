@@ -7,7 +7,7 @@ import {
   MessageSquare,
   CreditCard,
   Menu,
-  ClipboardCheck,
+  
   FileText,
   LogOut,
   AlertTriangle,
