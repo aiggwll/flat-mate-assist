@@ -21,6 +21,9 @@ const DashboardPage = () => {
   const { messages } = useMessages();
   const displayName = userName || "Eigentümer";
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
+  const [showOnboarding, setShowOnboarding] = useState(
+    () => !localStorage.getItem("onboarding_complete_owner")
+  );
 
   useEffect(() => {
     const loadTenants = async () => {
