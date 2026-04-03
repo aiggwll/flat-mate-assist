@@ -32,7 +32,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userName, setUserName] = useState("");
   const [userRole, setUserRole] = useState<"owner" | "tenant" | null>(null);
-  const [userProperties, setUserProperties] = useState<UserProperty[]>([]);
+  const [userProperties, setUserPropertiesState] = useState<UserProperty[]>(() => {
+    try {
+      const stored = localStorage.getItem("willprop_user_properties");
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
   const [isNewUser, setIsNewUser] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
