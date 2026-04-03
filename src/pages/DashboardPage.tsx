@@ -107,7 +107,7 @@ const DashboardPage = () => {
             {userProperties.map(p => {
               // Find tenants assigned to this property
               const propertyTenants = tenants.filter(t =>
-                t.property_id.includes(p.address)
+                t.property_id === `${p.address}, ${p.city}` || t.property_id.includes(p.address)
               );
 
               return (
