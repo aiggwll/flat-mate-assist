@@ -571,7 +571,7 @@ const LoginPage = () => {
             {isLogin ? "Willkommen zurück" : "Konto erstellen"}
           </h2>
           <p className="text-muted-foreground text-sm mt-1 mb-6">
-            {isLogin ? "Melden Sie sich an, um fortzufahren." : "Erstellen Sie Ihr WillProp Konto."}
+            {isLogin ? "Melden Sie sich an, um fortzufahren." : "Erstellen Sie Ihr Dwello Konto."}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
