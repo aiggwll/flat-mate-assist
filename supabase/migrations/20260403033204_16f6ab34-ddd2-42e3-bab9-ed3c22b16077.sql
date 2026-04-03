@@ -1,0 +1,1 @@
+UPDATE profiles SET property_id = 'Test Weg 1, Hamburg', unit_id = 'Wohnung 1', owner_name = 'Test Vermieter' WHERE email = 'testmieter@willprop.de';
