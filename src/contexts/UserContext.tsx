@@ -49,12 +49,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       try {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("name, role")
+          .select("name, role, salutation")
           .eq("user_id", currentUser.id)
           .single();
         if (profile) {
           setUserName(profile.name || "");
           setUserRole(profile.role as "owner" | "tenant");
+          setSalutation(((profile as any).salutation as "du" | "sie") || "sie");
         }
       } catch (e) {
         console.error("Error loading profile:", e);
