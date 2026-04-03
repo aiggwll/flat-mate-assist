@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useUser } from "@/contexts/UserContext";
 import { type Damage } from "@/lib/dummy-data";
 import { AlertTriangle, Plus, ImagePlus, X, Camera } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
