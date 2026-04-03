@@ -17,6 +17,7 @@ interface TenantAiChatProps {
   landlordName: string;
   onEscalate: (message: string) => void;
   damageButton?: React.ReactNode;
+  salutation?: "du" | "sie";
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tenant-chat`;
