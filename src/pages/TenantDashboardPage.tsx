@@ -32,23 +32,11 @@ import {
   FileText,
   MessageSquare,
   AlertTriangle,
-  Send,
   Plus,
   Camera,
   X,
   LogOut,
-  Video,
   Upload,
-  Smartphone,
-  Footprints,
-  ScanLine,
-  MonitorSmartphone,
-  Lightbulb,
-  Maximize,
-  Focus,
-  ShieldAlert,
-  VolumeX,
-  Timer,
 } from "lucide-react";
 
 const TenantDashboardPage = () => {
