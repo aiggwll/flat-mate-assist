@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Building2, MapPin, Home, Plus, Calendar, Layers, Ruler, AlertTriangle, FileText } from "lucide-react";
+import { Building2, MapPin, Plus, Calendar, Layers, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-
+import InviteTenantDialog from "@/components/InviteTenantDialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/UserContext";
@@ -15,23 +15,11 @@ import { useUser } from "@/contexts/UserContext";
 const PropertiesPage = () => {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
-    address: "",
-    city: "",
-    zipCode: "",
-    yearBuilt: "",
-    type: "",
-    floors: "",
-    totalArea: "",
-    plotSize: "",
-    units: "",
-    parking: "",
-    heating: "",
-    energyClass: "",
-    notes: "",
+    address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "",
+    totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "",
   });
 
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
-
   const { userProperties, setUserProperties } = useUser();
 
   const handleSubmit = async () => {
@@ -40,30 +28,17 @@ const PropertiesPage = () => {
       return;
     }
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast.error("Nicht eingeloggt.");
-      return;
-    }
+    if (!user) { toast.error("Nicht eingeloggt."); return; }
     const { data: inserted, error } = await supabase.from("properties").insert({
-      user_id: user.id,
-      address: form.address.trim(),
-      city: form.city.trim(),
-      zip_code: form.zipCode.trim(),
-      year_built: parseInt(form.yearBuilt) || 0,
+      user_id: user.id, address: form.address.trim(), city: form.city.trim(),
+      zip_code: form.zipCode.trim(), year_built: parseInt(form.yearBuilt) || 0,
       units: parseInt(form.units) || 1,
     }).select().single();
-    if (error) {
-      toast.error("Fehler: " + error.message);
-      return;
-    }
+    if (error) { toast.error("Fehler: " + error.message); return; }
     if (inserted) {
       setUserProperties([...userProperties, {
-        id: inserted.id,
-        address: inserted.address,
-        city: inserted.city,
-        zipCode: inserted.zip_code,
-        yearBuilt: inserted.year_built ?? 0,
-        units: inserted.units ?? 1,
+        id: inserted.id, address: inserted.address, city: inserted.city,
+        zipCode: inserted.zip_code, yearBuilt: inserted.year_built ?? 0, units: inserted.units ?? 1,
       }]);
     }
     toast.success("Immobilie erfolgreich angelegt!");
@@ -72,55 +47,75 @@ const PropertiesPage = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-heading font-bold text-foreground">Immobilien</h1>
-          <p className="text-muted-foreground text-sm mt-1">{userProperties.length} Immobilien verwaltet</p>
+          <h1 className="text-3xl font-heading font-bold text-foreground">Immobilien</h1>
+          <p className="text-muted-foreground text-sm mt-1.5">{userProperties.length} {userProperties.length === 1 ? "Immobilie" : "Immobilien"} verwaltet</p>
         </div>
-        <Button onClick={() => setOpen(true)}>
+        <Button onClick={() => setOpen(true)} size="lg">
           <Plus className="h-4 w-4 mr-2" />
           Neue Immobilie
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {userProperties.map((p) => (
-          <Link
-            key={p.id}
-            to={`/properties/${p.id}`}
-            className="bg-card rounded-xl border hover:border-accent/50 hover:shadow-md transition-all p-5 group"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="h-11 w-11 rounded-lg bg-primary/5 flex items-center justify-center text-primary group-hover:bg-accent/10 group-hover:text-accent transition-colors">
-                  <Building2 className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-heading font-semibold text-foreground">{p.address}</h3>
-                  <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
-                    <MapPin className="h-3 w-3" />
-                    <span className="text-xs">{p.zipCode} {p.city}</span>
+      {userProperties.length === 0 ? (
+        <div className="bg-card rounded-2xl border p-14 text-center space-y-4">
+          <div className="h-14 w-14 rounded-2xl bg-primary/8 flex items-center justify-center mx-auto">
+            <Building2 className="h-7 w-7 text-primary" />
+          </div>
+          <p className="text-base font-medium text-foreground">Noch keine Immobilien angelegt</p>
+          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+            Klicken Sie auf "Neue Immobilie", um Ihre erste Immobilie hinzuzufügen.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {userProperties.map((p) => (
+            <div key={p.id} className="bg-card rounded-2xl border overflow-hidden hover:shadow-md transition-all group">
+              {/* Colored header */}
+              <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-5 py-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-11 w-11 rounded-xl bg-card flex items-center justify-center text-primary shadow-sm">
+                      <Building2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-heading font-semibold text-foreground">{p.address}</h3>
+                      <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
+                        <MapPin className="h-3 w-3" />
+                        <span className="text-xs">{p.zipCode} {p.city}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4 pt-3 border-t">
-              {p.yearBuilt > 0 && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Calendar className="h-3.5 w-3.5 shrink-0" />
-                  <span>Bj. {p.yearBuilt}</span>
+              <div className="px-5 py-4 space-y-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {p.yearBuilt > 0 && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="h-3.5 w-3.5 shrink-0 text-primary/60" />
+                      <span>Bj. {p.yearBuilt}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Layers className="h-3.5 w-3.5 shrink-0 text-primary/60" />
+                    <span>{p.units ?? 1} Wohnungen</span>
+                  </div>
                 </div>
-              )}
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Layers className="h-3.5 w-3.5 shrink-0" />
-                <span>{p.units ?? 1} Wohnungen</span>
+
+                <div className="flex items-center gap-3 pt-3 border-t">
+                  <Link to={`/properties/${p.id}`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full">Details</Button>
+                  </Link>
+                  <InviteTenantDialog />
+                </div>
               </div>
             </div>
-          </Link>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
@@ -128,7 +123,6 @@ const PropertiesPage = () => {
             <DialogTitle>Neue Immobilie anlegen</DialogTitle>
             <DialogDescription>Geben Sie die Details der Immobilie ein.</DialogDescription>
           </DialogHeader>
-
           <div className="grid gap-4 py-2">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Adresse</h3>
             <div className="grid gap-3">
@@ -147,7 +141,6 @@ const PropertiesPage = () => {
                 </div>
               </div>
             </div>
-
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-2">Gebäudedetails</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -184,7 +177,6 @@ const PropertiesPage = () => {
                 <Input id="plotSize" type="number" placeholder="z.B. 800" value={form.plotSize} onChange={e => update("plotSize", e.target.value)} />
               </div>
             </div>
-
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-2">Ausstattung</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -216,13 +208,11 @@ const PropertiesPage = () => {
                 </Select>
               </div>
             </div>
-
             <div className="mt-2">
               <Label htmlFor="notes">Notizen</Label>
               <Textarea id="notes" placeholder="Weitere Informationen zur Immobilie..." value={form.notes} onChange={e => update("notes", e.target.value)} rows={3} />
             </div>
           </div>
-
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>Abbrechen</Button>
             <Button onClick={handleSubmit}>Immobilie anlegen</Button>
