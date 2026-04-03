@@ -538,7 +538,24 @@ const LoginPage = () => {
               <p className="text-sm text-destructive">{passwordError}</p>
             )}
             {isLogin && (
-              <button type="button" className="text-sm text-accent hover:underline">
+              <button
+                type="button"
+                className="text-sm text-accent hover:underline"
+                onClick={async () => {
+                  if (!email) {
+                    toast.error("Bitte geben Sie Ihre E-Mail-Adresse ein.");
+                    return;
+                  }
+                  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: window.location.origin,
+                  });
+                  if (error) {
+                    toast.error(`Fehler: ${error.message}`);
+                  } else {
+                    toast.success("Eine E-Mail zum Zurücksetzen des Passworts wurde gesendet.");
+                  }
+                }}
+              >
                 Passwort vergessen?
               </button>
             )}

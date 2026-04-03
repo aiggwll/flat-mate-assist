@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Building2, ArrowRight, TrendingUp, Info, MapPin, MessageSquare } from "lucide-react";
+import { Building2, ArrowRight, TrendingUp, Info, MapPin, MessageSquare, AlertTriangle } from "lucide-react";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -79,11 +79,11 @@ const DashboardPage = () => {
             {unreadMessages.length === 0 ? "Keine ungelesenen" : "ungelesene Nachrichten"}
           </p>
         </div>
-        <div className="bg-card rounded-xl border p-5">
+        <Link to="/damages" className="bg-card rounded-xl border p-5 hover:border-accent/40 transition-colors block">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">Offene Schäden</p>
           <p className="text-2xl font-heading font-bold mt-1 text-foreground">0</p>
           <p className="text-xs text-muted-foreground mt-0.5">Keine gemeldet</p>
-        </div>
+        </Link>
       </div>
 
       {/* Properties overview */}
@@ -107,7 +107,7 @@ const DashboardPage = () => {
             {userProperties.map(p => {
               // Find tenants assigned to this property
               const propertyTenants = tenants.filter(t =>
-                t.property_id.includes(p.address)
+                t.property_id === `${p.address}, ${p.city}` || t.property_id.includes(p.address)
               );
 
               return (
