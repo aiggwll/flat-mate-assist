@@ -133,18 +133,18 @@ const DamagesPage = () => {
             ))}
           </div>
 
-      {closedDamages.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="font-heading font-semibold text-muted-foreground">
-            Erledigte Meldungen ({closedDamages.length})
-          </h2>
-          {closedDamages.map(d => (
-            <DamageCard key={d.id} damage={d} />
-          ))}
-        </div>
+          {closedDamages.length > 0 && (
+            <div className="space-y-3">
+              <h2 className="font-heading font-semibold text-muted-foreground">
+                Erledigte Meldungen ({closedDamages.length})
+              </h2>
+              {closedDamages.map(d => (
+                <DamageCard key={d.id} damage={d} />
+              ))}
+            </div>
+          )}
+        </>
       )}
-
-      {/* New Damage Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
