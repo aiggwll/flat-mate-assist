@@ -80,6 +80,39 @@ export type Database = {
         }
         Relationships: []
       }
+      properties: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          id: string
+          units: number | null
+          user_id: string
+          year_built: number | null
+          zip_code: string
+        }
+        Insert: {
+          address: string
+          city: string
+          created_at?: string
+          id?: string
+          units?: number | null
+          user_id: string
+          year_built?: number | null
+          zip_code: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          id?: string
+          units?: number | null
+          user_id?: string
+          year_built?: number | null
+          zip_code?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
