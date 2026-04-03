@@ -239,6 +239,46 @@ const TenantDashboardPage = () => {
           </div>
         </Card>
 
+        {/* Cashback Card */}
+        <Card className="p-6 mb-8">
+          <div className="flex items-start gap-4">
+            <div className="h-12 w-12 rounded-xl bg-green-100 flex items-center justify-center shrink-0">
+              <Wallet className="h-6 w-6 text-accent" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-heading font-semibold text-foreground">Mein Cashback</h3>
+                <Badge variant="secondary" className="text-[10px]">Coming Soon</Badge>
+              </div>
+              <p className="text-2xl font-bold text-accent mb-3">{cashbackTotal} € <span className="text-sm font-normal text-muted-foreground">verdient</span></p>
+              <Progress value={Math.min(cashbackTotal, 200) / 2} className="h-2 mb-4" />
+              {cashbackHistory.length > 0 ? (
+                <div className="space-y-2">
+                  {cashbackHistory.slice(0, 3).map((entry) => (
+                    <div key={entry.id} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className={`h-3.5 w-3.5 ${entry.status === "approved" || entry.status === "paid" ? "text-accent" : "text-muted-foreground"}`} />
+                        <span className="text-foreground">{entry.reason}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(entry.created_at).toLocaleDateString("de-DE", { month: "short", year: "numeric" })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-accent">+{entry.amount} €</span>
+                        <Badge variant={entry.status === "pending" ? "secondary" : "default"} className="text-[10px]">
+                          {entry.status === "pending" ? "Prüfung" : entry.status === "approved" ? "Genehmigt" : "Ausgezahlt"}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">Noch kein Cashback verdient. Laden Sie einen 360° Rundgang hoch!</p>
+              )}
+            </div>
+          </div>
+        </Card>
+
         {/* Tabs */}
         <Tabs defaultValue="messages" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
