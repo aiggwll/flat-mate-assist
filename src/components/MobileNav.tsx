@@ -46,7 +46,7 @@ const MobileNav = () => {
     <>
       <header className="fixed top-0 left-0 right-0 h-14 bg-card border-b flex items-center justify-between px-4 z-50 md:hidden">
         <h1 className="text-lg font-heading font-bold text-foreground tracking-tight">
-          Will<span className="text-primary">Prop</span>
+          Dwell<span className="text-primary">o</span>
         </h1>
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
