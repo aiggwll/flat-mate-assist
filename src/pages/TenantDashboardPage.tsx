@@ -48,7 +48,7 @@ import { Progress } from "@/components/ui/progress";
 
 const TenantDashboardPage = () => {
   const [searchParams] = useSearchParams();
-  const { userName, userId, signOut } = useUser();
+  const { userName, userId, signOut, salutation } = useUser();
   const { addMessage } = useMessages();
   const navigate = useNavigate();
 
