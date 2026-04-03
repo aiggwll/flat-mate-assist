@@ -61,6 +61,7 @@ const TenantAiChat = ({ propertyInfo, tenantName, landlordName, onEscalate, dama
         body: JSON.stringify({
           messages: allMessages.map((m) => ({ role: m.role, content: m.content })),
           propertyInfo,
+          salutation,
         }),
       });
 
