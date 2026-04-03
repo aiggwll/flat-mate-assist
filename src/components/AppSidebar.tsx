@@ -35,7 +35,7 @@ const AppSidebar = () => {
     <aside className="fixed left-0 top-0 bottom-0 w-64 bg-sidebar border-r border-sidebar-border flex flex-col z-50">
       <div className="p-6 pb-4">
         <h1 className="text-xl font-heading font-bold text-sidebar-foreground tracking-tight">
-          Will<span className="text-sidebar-primary">Prop</span>
+          Dwell<span className="text-sidebar-primary">o</span>
         </h1>
         
       </div>

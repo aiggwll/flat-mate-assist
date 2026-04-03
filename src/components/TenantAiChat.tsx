@@ -133,7 +133,7 @@ const TenantAiChat = ({ propertyInfo, tenantName, landlordName, onEscalate, dama
         </div>
         <div>
           <p className="font-heading font-semibold text-foreground text-sm">Henrik</p>
-          <p className="text-[10px] text-muted-foreground">WillProp KI-Assistent</p>
+          <p className="text-[10px] text-muted-foreground">Dwello KI-Assistent</p>
         </div>
       </div>
 

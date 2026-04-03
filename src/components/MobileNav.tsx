@@ -57,7 +57,7 @@ const MobileNav = () => {
           <SheetContent side="right" className="w-72 p-0">
             <div className="p-6 border-b">
               <h2 className="text-lg font-heading font-bold text-foreground">
-                Will<span className="text-primary">Prop</span>
+                Dwell<span className="text-primary">o</span>
               </h2>
             </div>
             <nav className="p-3 space-y-0.5">
