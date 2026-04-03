@@ -242,7 +242,7 @@ const TenantDashboardPage = () => {
         {/* Cashback Card */}
         <Card className="p-6 mb-8">
           <div className="flex items-start gap-4">
-            <div className="h-12 w-12 rounded-xl bg-green-100 flex items-center justify-center shrink-0">
+            <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
               <Wallet className="h-6 w-6 text-accent" />
             </div>
             <div className="flex-1">
