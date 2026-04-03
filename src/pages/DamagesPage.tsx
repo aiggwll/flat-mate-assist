@@ -74,8 +74,7 @@ const DamagesPage = () => {
       return;
     }
 
-    const property = properties.find(p => p.id === form.propertyId);
-    const unit = property?.units.find(u => u.id === form.unitId);
+    const property = userProperties.find(p => p.id === form.propertyId);
 
     const newDamage: DamageWithContext = {
       id: `dm-new-${Date.now()}`,
@@ -84,9 +83,9 @@ const DamagesPage = () => {
       category: form.category as Damage["category"],
       status: "offen",
       reportedAt: new Date().toISOString().split("T")[0],
-      reportedBy: unit?.tenant?.name ?? "Mieter",
+      reportedBy: "Mieter",
       propertyAddress: property?.address ?? "",
-      unitNumber: unit?.number ?? "",
+      unitNumber: form.unitId,
       photos: photos.map(p => p.preview),
     };
 
