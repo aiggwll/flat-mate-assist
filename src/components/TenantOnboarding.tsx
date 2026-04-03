@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Home, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useUser } from "@/contexts/UserContext";
 
 interface TenantOnboardingProps {
   open: boolean;
@@ -10,6 +11,8 @@ interface TenantOnboardingProps {
 
 const TenantOnboarding = ({ open, onComplete }: TenantOnboardingProps) => {
   const [step, setStep] = useState(0);
+  const { salutation } = useUser();
+  const isSie = salutation === "sie";
 
   const finish = () => {
     localStorage.setItem("onboarding_complete_tenant", "true");
@@ -46,8 +49,9 @@ const TenantOnboarding = ({ open, onComplete }: TenantOnboardingProps) => {
                 Willkommen in Ihrem Mieterportal! 🏡
               </h2>
               <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
-                Hier verwalten Sie Ihre Wohnung, kommunizieren mit Ihrem
-                Vermieter und verdienen Cashback.
+                {isSie
+                  ? "Hier verwalten Sie Ihre Wohnung, kommunizieren mit Ihrem Vermieter und verdienen Cashback."
+                  : "Hier verwaltest du deine Wohnung, kommunizierst mit deinem Vermieter und verdienst Cashback."}
               </p>
             </div>
             <Button onClick={() => setStep(1)} className="w-full">
@@ -67,8 +71,9 @@ const TenantOnboarding = ({ open, onComplete }: TenantOnboardingProps) => {
                 So funktioniert Cashback 🎁
               </h2>
               <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
-                Laden Sie einen 360°-Rundgang Ihrer Wohnung hoch und erhalten
-                Sie bis zu 100 € Cashback von Ihrem Vermieter.
+                {isSie
+                  ? "Laden Sie einen 360°-Rundgang Ihrer Wohnung hoch und erhalten Sie bis zu 100 € Cashback von Ihrem Vermieter."
+                  : "Lade einen 360°-Rundgang deiner Wohnung hoch und erhalte bis zu 100 € Cashback von deinem Vermieter."}
               </p>
             </div>
             <Button onClick={finish} className="w-full">

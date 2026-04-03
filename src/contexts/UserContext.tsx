@@ -18,6 +18,8 @@ interface UserContextType {
   setUserName: (name: string) => void;
   userRole: "owner" | "tenant" | null;
   setUserRole: (role: "owner" | "tenant" | null) => void;
+  salutation: "du" | "sie";
+  setSalutation: (s: "du" | "sie") => void;
   userProperties: UserProperty[];
   setUserProperties: (props: UserProperty[]) => void;
   isNewUser: boolean;
@@ -32,6 +34,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userName, setUserName] = useState("");
   const [userRole, setUserRole] = useState<"owner" | "tenant" | null>(null);
+  const [salutation, setSalutation] = useState<"du" | "sie">("sie");
   const [userProperties, setUserPropertiesState] = useState<UserProperty[]>([]);
   const setUserProperties = (props: UserProperty[]) => {
     setUserPropertiesState(props);
@@ -46,12 +49,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       try {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("name, role")
+          .select("name, role, salutation")
           .eq("user_id", currentUser.id)
           .single();
         if (profile) {
           setUserName(profile.name || "");
           setUserRole(profile.role as "owner" | "tenant");
+          setSalutation(((profile as any).salutation as "du" | "sie") || "sie");
         }
       } catch (e) {
         console.error("Error loading profile:", e);
@@ -134,6 +138,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setUserName("");
         setUserRole(null);
+        setSalutation("sie");
         setUserProperties([]);
       }
       setIsLoading(false);
@@ -152,6 +157,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setUserName("");
     setUserRole(null);
+    setSalutation("sie");
     setUserProperties([]);
   };
 
@@ -163,6 +169,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setUserName,
       userRole,
       setUserRole,
+      salutation,
+      setSalutation,
       userProperties,
       setUserProperties,
       isNewUser,

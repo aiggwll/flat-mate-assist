@@ -5,6 +5,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import InviteTenantDialog from "./InviteTenantDialog";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "@/contexts/UserContext";
 
 interface LandlordOnboardingProps {
   open: boolean;
@@ -14,6 +15,8 @@ interface LandlordOnboardingProps {
 const LandlordOnboarding = ({ open, onComplete }: LandlordOnboardingProps) => {
   const [step, setStep] = useState(0);
   const navigate = useNavigate();
+  const { salutation } = useUser();
+  const isSie = salutation === "sie";
 
   const finish = () => {
     localStorage.setItem("onboarding_complete_owner", "true");
@@ -51,7 +54,7 @@ const LandlordOnboarding = ({ open, onComplete }: LandlordOnboardingProps) => {
                 Willkommen bei Dwello! 🏠
               </h2>
               <p className="text-sm text-muted-foreground mt-2">
-                In 3 Schritten sind Sie startklar.
+                {isSie ? "In 3 Schritten sind Sie startklar." : "In 3 Schritten bist du startklar."}
               </p>
             </div>
             <Button onClick={() => setStep(1)} className="w-full">
@@ -71,8 +74,9 @@ const LandlordOnboarding = ({ open, onComplete }: LandlordOnboardingProps) => {
                 Erste Immobilie anlegen
               </h2>
               <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
-                Legen Sie Ihre erste Immobilie an, um Mieter einladen und
-                Zahlungen tracken zu können.
+                {isSie
+                  ? "Legen Sie Ihre erste Immobilie an, um Mieter einladen und Zahlungen tracken zu können."
+                  : "Lege deine erste Immobilie an, um Mieter einladen und Zahlungen tracken zu können."}
               </p>
             </div>
             <Button
@@ -104,8 +108,9 @@ const LandlordOnboarding = ({ open, onComplete }: LandlordOnboardingProps) => {
                 Mieter einladen
               </h2>
               <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
-                Laden Sie Ihren ersten Mieter ein. Er erhält einen Link zur
-                Registrierung.
+                {isSie
+                  ? "Laden Sie Ihren ersten Mieter ein. Er erhält einen Link zur Registrierung."
+                  : "Lade deinen ersten Mieter ein. Er erhält einen Link zur Registrierung."}
               </p>
             </div>
             <div className="flex justify-center">

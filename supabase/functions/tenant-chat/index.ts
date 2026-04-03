@@ -10,11 +10,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, propertyInfo } = await req.json();
+    const { messages, propertyInfo, salutation } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    const usesDu = salutation === "du";
     const systemPrompt = `Du bist Henrik, ein freundlicher und hilfsbereiter KI-Assistent für Mieter einer Immobilienverwaltung namens Dwello.
+
+${usesDu ? "WICHTIG: Sprich den Mieter mit \"du\" an (informell)." : "WICHTIG: Sprich den Mieter mit \"Sie\" an (formell)."}
 
 Immobiliendetails des Mieters:
 - Adresse: ${propertyInfo?.address || "unbekannt"}
@@ -38,7 +41,7 @@ Deine Aufgaben:
    - Wenn der Mieter explizit den Vermieter sprechen möchte
 
 3. Wenn du eine Weiterleitung empfiehlst, sage genau:
-   "Dieses Anliegen leite ich am besten an Ihren Vermieter weiter. Möchten Sie, dass ich die Nachricht weiterleite?"
+   ${usesDu ? '"Dieses Anliegen leite ich am besten an deinen Vermieter weiter. Möchtest du, dass ich die Nachricht weiterleite?"' : '"Dieses Anliegen leite ich am besten an Ihren Vermieter weiter. Möchten Sie, dass ich die Nachricht weiterleite?"'}
 
 Antworte immer auf Deutsch, freundlich und präzise. Halte Antworten kurz (2-4 Sätze) wenn möglich.`;
 

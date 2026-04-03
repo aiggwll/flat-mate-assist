@@ -37,8 +37,9 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const navigate = useNavigate();
-  const { user: contextUser, setUserName, setUserProperties, setIsNewUser, setUserRole } = useUser();
+  const { user: contextUser, setUserName, setUserProperties, setIsNewUser, setUserRole, setSalutation } = useUser();
   const [nameField, setNameField] = useState("");
+  const [salutationField, setSalutationField] = useState<"du" | "sie">("sie");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,7 +121,7 @@ const LoginPage = () => {
           email,
           password,
           options: {
-            data: { name: nameField.trim(), role },
+            data: { name: nameField.trim(), role, salutation: salutationField },
             emailRedirectTo: window.location.origin,
           },
         });
@@ -133,6 +134,7 @@ const LoginPage = () => {
 
         setUserName(nameField.trim() || (role === "owner" ? "Eigentümer" : "Mieter"));
         setUserRole(role);
+        setSalutation(salutationField);
         setIsNewUser(true);
 
         // For tenants: save invite property info to profile
@@ -579,6 +581,35 @@ const LoginPage = () => {
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
                 <Input id="name" placeholder="Max Mustermann" required value={nameField} onChange={e => setNameField(e.target.value)} />
+              </div>
+            )}
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label>Wie möchten Sie angesprochen werden?</Label>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSalutationField("du")}
+                    className={`flex-1 py-2.5 px-4 rounded-xl border text-sm font-medium transition-all ${
+                      salutationField === "du"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    Du
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSalutationField("sie")}
+                    className={`flex-1 py-2.5 px-4 rounded-xl border text-sm font-medium transition-all ${
+                      salutationField === "sie"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    Sie
+                  </button>
+                </div>
               </div>
             )}
             <div className="space-y-2">

@@ -17,7 +17,7 @@ interface TenantInfo {
 }
 
 const DashboardPage = () => {
-  const { userName, userProperties } = useUser();
+  const { userName, userProperties, salutation } = useUser();
   const { messages } = useMessages();
   const displayName = userName || "Eigentümer";
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
@@ -56,12 +56,14 @@ const DashboardPage = () => {
         <div className="relative z-10">
           <p className="text-sm text-muted-foreground font-medium">Willkommen zurück</p>
           <h1 className="text-3xl font-heading font-extrabold text-foreground mt-1">
-            Hallo, {displayName.split(" ")[0]} 👋
+            {salutation === "du" ? `Hallo, ${displayName.split(" ")[0]}` : `Guten Tag, ${displayName.split(" ")[0]}`}
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-md">
             {propertyCount === 0
-              ? "Legen Sie Ihre erste Immobilie an, um loszulegen."
-              : `Sie verwalten ${propertyCount} ${propertyCount === 1 ? "Immobilie" : "Immobilien"} mit ${totalUnits} ${totalUnits === 1 ? "Wohneinheit" : "Wohneinheiten"}.`}
+              ? (salutation === "du" ? "Lege deine erste Immobilie an, um loszulegen." : "Legen Sie Ihre erste Immobilie an, um loszulegen.")
+              : (salutation === "du"
+                ? `Du verwaltest ${propertyCount} ${propertyCount === 1 ? "Immobilie" : "Immobilien"} mit ${totalUnits} ${totalUnits === 1 ? "Wohneinheit" : "Wohneinheiten"}.`
+                : `Sie verwalten ${propertyCount} ${propertyCount === 1 ? "Immobilie" : "Immobilien"} mit ${totalUnits} ${totalUnits === 1 ? "Wohneinheit" : "Wohneinheiten"}.`)}
           </p>
           <div className="mt-5">
             <InviteTenantDialog />
