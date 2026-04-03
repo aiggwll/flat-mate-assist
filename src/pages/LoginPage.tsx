@@ -56,6 +56,8 @@ const LoginPage = () => {
           setLoading(false);
           return;
         }
+        // Store remember-me preference
+        localStorage.setItem("rememberMe", rememberMe ? "true" : "false");
         // Fetch profile to determine role
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
