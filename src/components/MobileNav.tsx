@@ -31,7 +31,7 @@ const allNav = [
   { to: "/payments", label: "Miete", icon: CreditCard },
   { to: "/documents", label: "Dokumente", icon: FileText },
   { to: "/chat", label: "Nachrichten", icon: MessageSquare },
-  { to: "/tasks", label: "Aufgaben", icon: ClipboardCheck },
+  
   { to: "/damages", label: "Schäden", icon: AlertTriangle },
 ];
 
