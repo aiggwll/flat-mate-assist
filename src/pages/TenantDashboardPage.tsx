@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 import DocumentManager from "@/components/DocumentManager";
+import TenantOnboarding from "@/components/TenantOnboarding";
 import TenantAiChat from "@/components/TenantAiChat";
 import { useSearchParams, NavLink, useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
