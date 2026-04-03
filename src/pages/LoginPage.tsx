@@ -36,7 +36,7 @@ const LoginPage = () => {
   const [properties, setProperties] = useState<PropertyForm[]>([{ ...emptyProperty }]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { setUserName, setUserProperties, setIsNewUser, setUserRole } = useUser();
+  const { user: contextUser, setUserName, setUserProperties, setIsNewUser, setUserRole } = useUser();
   const [nameField, setNameField] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
