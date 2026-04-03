@@ -40,7 +40,10 @@ import {
   Upload,
   Video,
   Gift,
+  Wallet,
+  CheckCircle2,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const TenantDashboardPage = () => {
   const [searchParams] = useSearchParams();
