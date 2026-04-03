@@ -60,8 +60,10 @@ const DashboardPage = () => {
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-md">
             {propertyCount === 0
-              ? "Legen Sie Ihre erste Immobilie an, um loszulegen."
-              : `Sie verwalten ${propertyCount} ${propertyCount === 1 ? "Immobilie" : "Immobilien"} mit ${totalUnits} ${totalUnits === 1 ? "Wohneinheit" : "Wohneinheiten"}.`}
+              ? (salutation === "du" ? "Lege deine erste Immobilie an, um loszulegen." : "Legen Sie Ihre erste Immobilie an, um loszulegen.")
+              : (salutation === "du"
+                ? `Du verwaltest ${propertyCount} ${propertyCount === 1 ? "Immobilie" : "Immobilien"} mit ${totalUnits} ${totalUnits === 1 ? "Wohneinheit" : "Wohneinheiten"}.`
+                : `Sie verwalten ${propertyCount} ${propertyCount === 1 ? "Immobilie" : "Immobilien"} mit ${totalUnits} ${totalUnits === 1 ? "Wohneinheit" : "Wohneinheiten"}.`)}
           </p>
           <div className="mt-5">
             <InviteTenantDialog />
