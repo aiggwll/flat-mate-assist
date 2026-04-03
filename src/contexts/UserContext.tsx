@@ -59,6 +59,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setUser(currentUser);
 
       if (currentUser) {
+        // Mark active session for "remember me" logic
+        sessionStorage.setItem("activeSession", "true");
         // Fetch profile
         const { data: profile } = await supabase
           .from("profiles")
