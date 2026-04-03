@@ -134,6 +134,7 @@ const LoginPage = () => {
 
         setUserName(nameField.trim() || (role === "owner" ? "Eigentümer" : "Mieter"));
         setUserRole(role);
+        setSalutation(salutationField);
         setIsNewUser(true);
 
         // For tenants: save invite property info to profile
