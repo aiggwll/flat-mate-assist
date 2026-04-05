@@ -8,7 +8,7 @@ import { UserPlus, Copy, Check, Mail } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { useUser } from "@/contexts/UserContext";
 
-const InviteTenantDialog = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
+const InviteTenantDialog = ({ onSuccess, trigger }: { onSuccess?: () => void; trigger?: React.ReactNode } = {}) => {
   const { userProperties, userName } = useUser();
   const ownerDisplayName = userName || "Max Kaufmann";
   const [open, setOpen] = useState(false);
