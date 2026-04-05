@@ -79,10 +79,12 @@ const InviteTenantDialog = ({ onSuccess, trigger }: { onSuccess?: () => void; tr
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) handleReset(); }}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <UserPlus className="h-4 w-4" />
-          Mieter einladen
-        </Button>
+        {trigger || (
+          <Button variant="outline" className="gap-2">
+            <UserPlus className="h-4 w-4" />
+            Mieter einladen
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
