@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Building2, Users, MessageSquare, AlertTriangle, ArrowRight, MapPin, UserPlus } from "lucide-react";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
 import LandlordOnboarding from "@/components/LandlordOnboarding";
+import SetupChecklist from "@/components/SetupChecklist";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/contexts/UserContext";
