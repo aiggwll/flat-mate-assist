@@ -47,6 +47,20 @@ const DashboardPage = () => {
     loadTenants();
   }, []);
 
+  useEffect(() => {
+    if (!userId) return;
+    const checkPayments = async () => {
+      const { count } = await supabase
+        .from("rent_payments")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId);
+      setHasPayments((count ?? 0) > 0);
+    };
+    checkPayments();
+    // Documents: no table yet, so always false for now
+    setHasDocuments(false);
+  }, [userId]);
+
   const propertyCount = userProperties.length;
   const totalUnits = userProperties.reduce((sum, p) => sum + p.units, 0);
   const unreadMessages = messages.filter(m => m.to === displayName && !m.read);
