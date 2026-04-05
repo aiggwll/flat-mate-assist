@@ -18,10 +18,12 @@ interface TenantInfo {
 }
 
 const DashboardPage = () => {
-  const { userName, userProperties, salutation } = useUser();
+  const { userName, userProperties, salutation, userId } = useUser();
   const { messages } = useMessages();
   const displayName = userName || "Eigentümer";
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
+  const [hasPayments, setHasPayments] = useState(false);
+  const [hasDocuments, setHasDocuments] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(
     () => !localStorage.getItem("onboarding_complete_owner")
   );
