@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Building2, Users, MessageSquare, AlertTriangle, ArrowRight, MapPin, UserPlus } from "lucide-react";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
 import LandlordOnboarding from "@/components/LandlordOnboarding";
+import SetupChecklist from "@/components/SetupChecklist";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/contexts/UserContext";
@@ -17,10 +18,12 @@ interface TenantInfo {
 }
 
 const DashboardPage = () => {
-  const { userName, userProperties, salutation } = useUser();
+  const { userName, userProperties, salutation, userId } = useUser();
   const { messages } = useMessages();
   const displayName = userName || "Eigentümer";
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
+  const [hasPayments, setHasPayments] = useState(false);
+  const [hasDocuments, setHasDocuments] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(
     () => !localStorage.getItem("onboarding_complete_owner")
   );
@@ -43,6 +46,20 @@ const DashboardPage = () => {
     };
     loadTenants();
   }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+    const checkPayments = async () => {
+      const { count } = await supabase
+        .from("rent_payments")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId);
+      setHasPayments((count ?? 0) > 0);
+    };
+    checkPayments();
+    // Documents: no table yet, so always false for now
+    setHasDocuments(false);
+  }, [userId]);
 
   const propertyCount = userProperties.length;
   const totalUnits = userProperties.reduce((sum, p) => sum + p.units, 0);
@@ -72,6 +89,14 @@ const DashboardPage = () => {
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="absolute bottom-0 right-16 w-32 h-32 bg-primary/3 rounded-full translate-y-1/2" />
       </div>
+
+      {/* Setup Checklist */}
+      <SetupChecklist
+        hasProperties={userProperties.length > 0}
+        hasTenants={tenants.length > 0}
+        hasPayments={hasPayments}
+        hasDocuments={hasDocuments}
+      />
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
