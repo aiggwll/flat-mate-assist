@@ -90,6 +90,14 @@ const DashboardPage = () => {
         <div className="absolute bottom-0 right-16 w-32 h-32 bg-primary/3 rounded-full translate-y-1/2" />
       </div>
 
+      {/* Setup Checklist */}
+      <SetupChecklist
+        hasProperties={userProperties.length > 0}
+        hasTenants={tenants.length > 0}
+        hasPayments={hasPayments}
+        hasDocuments={hasDocuments}
+      />
+
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div className="bg-card rounded-2xl border p-6 space-y-1">
