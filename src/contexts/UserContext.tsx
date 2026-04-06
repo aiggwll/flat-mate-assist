@@ -20,6 +20,8 @@ interface UserContextType {
   setUserRole: (role: "owner" | "tenant" | null) => void;
   salutation: "du" | "sie";
   setSalutation: (s: "du" | "sie") => void;
+  gender: string | null;
+  lastName: string | null;
   userProperties: UserProperty[];
   setUserProperties: (props: UserProperty[]) => void;
   isNewUser: boolean;
