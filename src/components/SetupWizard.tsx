@@ -99,7 +99,16 @@ const SetupWizard = () => {
     localStorage.setItem("dwello_setup_complete", "true");
     localStorage.setItem("dwello_welcome_seen", "true");
     setSaving(false);
-    navigate("/dashboard");
+    console.log("Navigating to dashboard");
+    try {
+      navigate("/dashboard");
+    } catch {
+      // fallback
+    }
+    // Fallback: force navigation if navigate didn't work
+    setTimeout(() => {
+      window.location.href = "/dashboard";
+    }, 300);
   };
 
   // Step 4 title
