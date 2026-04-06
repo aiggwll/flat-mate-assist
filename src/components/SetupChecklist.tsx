@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Building2, Users, CreditCard, FileText, Check, ChevronRight, PartyPopper } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
 
@@ -13,13 +13,27 @@ interface SetupChecklistProps {
 
 const SetupChecklist = ({ hasProperties, hasTenants, hasPayments, hasDocuments }: SetupChecklistProps) => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [dismissed, setDismissed] = useState(() => localStorage.getItem("setup_complete") === "true");
   const [showConfetti, setShowConfetti] = useState(false);
+  const [highlight, setHighlight] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (searchParams.get("setup") === "1") {
+      setHighlight(true);
+      searchParams.delete("setup");
+      setSearchParams(searchParams, { replace: true });
+      cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const t = setTimeout(() => setHighlight(false), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [searchParams, setSearchParams]);
 
   const steps = [
-    { key: "property", label: "Erste Immobilie anlegen", icon: Building2, done: hasProperties, action: () => navigate("/properties") },
-    { key: "tenant", label: "Ersten Mieter einladen", icon: Users, done: hasTenants, action: "dialog" as const },
-    { key: "payment", label: "Mietbetrag eintragen", icon: CreditCard, done: hasPayments, action: () => navigate("/payments") },
+    { key: "property", label: "Immobilie anlegen", icon: Building2, done: hasProperties, action: () => navigate("/properties") },
+    { key: "tenant", label: "Mieter einladen", icon: Users, done: hasTenants, action: "dialog" as const },
+    { key: "payment", label: "Mietbetrag eintragen", icon: CreditCard, done: hasPayments, action: () => navigate("/rent-tracking") },
     { key: "document", label: "Dokument hochladen", icon: FileText, done: hasDocuments, action: () => navigate("/documents") },
   ];
 
@@ -55,12 +69,16 @@ const SetupChecklist = ({ hasProperties, hasTenants, hasPayments, hasDocuments }
   }
 
   return (
-    <div className="bg-card rounded-2xl border p-6 space-y-5">
+    <div
+      ref={cardRef}
+      className={`bg-card rounded-2xl border p-6 space-y-5 transition-shadow duration-700 ${highlight ? "ring-2 ring-primary/40 shadow-lg animate-pulse" : ""}`}
+    >
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-heading font-semibold text-foreground">Erste Schritte</h3>
+          <h3 className="text-base font-heading font-semibold text-foreground">Daten vervollständigen — so startest du durch</h3>
           <span className="text-xs text-muted-foreground font-medium">{completedCount} von 4 erledigt</span>
         </div>
+        <p className="text-sm text-muted-foreground">Nur noch ein paar Schritte bis du startklar bist.</p>
         <Progress value={progressValue} className="h-2 bg-muted" />
       </div>
 

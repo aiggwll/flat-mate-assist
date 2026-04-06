@@ -37,9 +37,9 @@ const WelcomeSlider = () => {
   const [current, setCurrent] = useState(0);
   const navigate = useNavigate();
 
-  const finish = () => {
+  const finish = (highlight = false) => {
     localStorage.setItem("dwello_welcome_seen", "true");
-    navigate("/dashboard");
+    navigate("/dashboard" + (highlight ? "?setup=1" : ""));
   };
 
   const isLast = current === slides.length - 1;
@@ -48,7 +48,7 @@ const WelcomeSlider = () => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-muted/80">
       {/* Skip link */}
       <button
-        onClick={finish}
+        onClick={() => finish(false)}
         className="absolute top-6 right-6 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         Überspringen
@@ -96,7 +96,7 @@ const WelcomeSlider = () => {
                   {/* Button */}
                   {i === slides.length - 1 ? (
                     <button
-                      onClick={finish}
+                      onClick={() => finish(true)}
                       className="w-full py-3 rounded-xl font-semibold text-white transition-colors"
                       style={{ backgroundColor: "#2D6A4F" }}
                     >
