@@ -218,8 +218,21 @@ const RentTrackingPage = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Wohnungskennung</Label>
-              <Input placeholder="z.B. WE-01" value={form.unit_id} onChange={e => setForm(f => ({ ...f, unit_id: e.target.value }))} />
+              <Label>Immobilie & Wohnung</Label>
+              <Select value={form.unit_id} onValueChange={(val) => setForm(f => ({ ...f, unit_id: val }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Wohnung auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {unitOptions.length === 0 ? (
+                    <SelectItem value="_none" disabled>Keine Immobilien vorhanden</SelectItem>
+                  ) : (
+                    unitOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Mietername</Label>
@@ -227,11 +240,11 @@ const RentTrackingPage = () => {
             </div>
             <div>
               <Label>Monatliche Kaltmiete (€)</Label>
-              <Input type="number" placeholder="600" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
+              <Input type="number" placeholder="z.B. 850" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
             </div>
             <div>
               <Label>Monatliche Warmmiete (€)</Label>
-              <Input type="number" placeholder="750" value={form.warm_rent} onChange={e => setForm(f => ({ ...f, warm_rent: e.target.value }))} />
+              <Input type="number" placeholder="z.B. 950" value={form.warm_rent} onChange={e => setForm(f => ({ ...f, warm_rent: e.target.value }))} />
             </div>
           </div>
           <DialogFooter>
