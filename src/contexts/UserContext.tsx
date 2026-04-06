@@ -58,11 +58,15 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       try {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("name, role, salutation, setup_wizard_complete")
+          .select("name, role, salutation, setup_wizard_complete, gender")
           .eq("user_id", currentUser.id)
           .single();
         if (profile) {
-          setUserName(profile.name || "");
+          const fullName = profile.name || "";
+          setUserName(fullName);
+          const nameParts = fullName.trim().split(/\s+/);
+          setLastName(nameParts.length > 1 ? nameParts[nameParts.length - 1] : null);
+          setGender(profile.gender || null);
           setUserRole(profile.role as "owner" | "tenant");
           const profileSalutation = (profile.salutation as "du" | "sie") || "sie";
           setSalutationState(profileSalutation);
