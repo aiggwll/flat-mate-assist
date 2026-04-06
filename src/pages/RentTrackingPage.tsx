@@ -47,6 +47,20 @@ const RentTrackingPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ unit_id: "", tenant_name: "", cold_rent: "", warm_rent: "" });
 
+  const unitOptions = useMemo(() => {
+    const options: { value: string; label: string }[] = [];
+    userProperties.forEach((prop) => {
+      const unitCount = prop.units || 1;
+      for (let i = 1; i <= unitCount; i++) {
+        options.push({
+          value: `${prop.address}-WE${String(i).padStart(2, "0")}`,
+          label: `${prop.address} – Whg. ${i}`,
+        });
+      }
+    });
+    return options;
+  }, [userProperties]);
+
   const loadPayments = useCallback(async () => {
     if (!user) return;
     const { data, error } = await supabase
