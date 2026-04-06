@@ -41,7 +41,7 @@ const WelcomeSlider = () => {
 
   const finish = (launchWizard = false) => {
     localStorage.setItem("dwello_welcome_seen", "true");
-    if (launchWizard && !localStorage.getItem("dwello_setup_wizard_done")) {
+    if (launchWizard && !localStorage.getItem("dwello_setup_complete")) {
       setShowWizard(true);
     } else {
       navigate("/dashboard");
