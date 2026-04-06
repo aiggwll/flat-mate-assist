@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import DwelloLogo from "@/components/DwelloLogo";
 import { toast } from "sonner";
 
 import DocumentManager from "@/components/DocumentManager";
