@@ -337,7 +337,44 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* Header */}
+      {/* Pflichtdokumente */}
+      {role === "owner" && uploadedRequiredCount < 3 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-heading font-semibold text-foreground">Pflichtdokumente</h2>
+              <p className="text-sm text-muted-foreground">{uploadedRequiredCount} von 3 Pflichtdokumenten hochgeladen</p>
+            </div>
+          </div>
+          <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
+            <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(uploadedRequiredCount / 3) * 100}%` }} />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {REQUIRED_DOCS.map((rd) => {
+              const isUploaded = docs.some(d => d.category === rd.category);
+              return (
+                <div key={rd.category} className="rounded-xl border bg-card p-4 flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{rd.icon}</span>
+                    <span className="text-sm font-semibold text-foreground">{rd.title}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed flex-1">{rd.description}</p>
+                  {isUploaded ? (
+                    <div className="flex items-center gap-1.5 text-primary text-xs font-medium mt-1">
+                      <span>✅</span> Hochgeladen
+                    </div>
+                  ) : (
+                    <Button size="sm" variant="outline" className="mt-1 gap-1.5 text-xs h-8" onClick={() => handleRequiredUpload(rd.category)}>
+                      <Upload className="h-3 w-3" /> Hochladen
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-heading font-bold text-foreground">Dokumente</h1>
