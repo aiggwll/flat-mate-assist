@@ -16,7 +16,7 @@ const sizeConfig = {
 const DwelloLogo = ({ variant = "light", size = "md", showIcon = true }: DwelloLogoProps) => {
   const s = sizeConfig[size];
   const dwellColor = variant === "dark" ? "#FFFFFF" : "#1a1a1a";
-  const oColor = variant === "dark" ? "#E1F5EE" : "#1D9E75";
+  const oColor = variant === "dark" ? "#FFFFFF" : "#1D9E75";
 
   return (
     <div className={`flex items-center ${s.gap}`}>
