@@ -3,6 +3,8 @@ import { Building2, Users, CreditCard, FileText, Check, ChevronRight, PartyPoppe
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
+import { useUser } from "@/contexts/UserContext";
+import { sal } from "@/lib/salutation";
 
 interface SetupChecklistProps {
   hasProperties: boolean;
@@ -13,6 +15,7 @@ interface SetupChecklistProps {
 
 const SetupChecklist = ({ hasProperties, hasTenants, hasPayments, hasDocuments }: SetupChecklistProps) => {
   const navigate = useNavigate();
+  const { salutation } = useUser();
   const [searchParams, setSearchParams] = useSearchParams();
   const [dismissed, setDismissed] = useState(() => localStorage.getItem("setup_complete") === "true");
   const [showConfetti, setShowConfetti] = useState(false);
@@ -75,10 +78,10 @@ const SetupChecklist = ({ hasProperties, hasTenants, hasPayments, hasDocuments }
     >
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-heading font-semibold text-foreground">Daten vervollständigen — so startest du durch</h3>
+          <h3 className="text-base font-heading font-semibold text-foreground">{sal(salutation, "Daten vervollständigen — so starten Sie durch", "Daten vervollständigen — so startest du durch")}</h3>
           <span className="text-xs text-muted-foreground font-medium">{completedCount} von 4 erledigt</span>
         </div>
-        <p className="text-sm text-muted-foreground">Nur noch ein paar Schritte bis du startklar bist.</p>
+        <p className="text-sm text-muted-foreground">{sal(salutation, "Nur noch ein paar Schritte, bis Sie startklar sind.", "Nur noch ein paar Schritte, bis du startklar bist.")}</p>
         <Progress value={progressValue} className="h-2 bg-muted" />
       </div>
 
