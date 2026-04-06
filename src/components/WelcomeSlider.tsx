@@ -37,9 +37,9 @@ const WelcomeSlider = () => {
   const [current, setCurrent] = useState(0);
   const navigate = useNavigate();
 
-  const finish = () => {
+  const finish = (highlight = false) => {
     localStorage.setItem("dwello_welcome_seen", "true");
-    navigate("/dashboard");
+    navigate("/dashboard" + (highlight ? "?setup=1" : ""));
   };
 
   const isLast = current === slides.length - 1;
