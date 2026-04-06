@@ -17,6 +17,7 @@ import DamagesPage from "./pages/DamagesPage";
 import DocumentsPage from "./pages/DocumentsPage";
 import MarketplacePage from "./pages/MarketplacePage";
 import UtilityBillingPage from "./pages/UtilityBillingPage";
+import TaxFolderPage from "./pages/TaxFolderPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
