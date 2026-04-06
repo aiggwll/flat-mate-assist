@@ -16,6 +16,7 @@ import ChatPage from "./pages/ChatPage";
 import DamagesPage from "./pages/DamagesPage";
 import DocumentsPage from "./pages/DocumentsPage";
 import MarketplacePage from "./pages/MarketplacePage";
+import UtilityBillingPage from "./pages/UtilityBillingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

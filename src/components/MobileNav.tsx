@@ -7,10 +7,10 @@ import {
   MessageSquare,
   CreditCard,
   Menu,
-  
   FileText,
   LogOut,
   AlertTriangle,
+  Receipt,
 } from "lucide-react";
 import {
   Sheet,
@@ -29,9 +29,9 @@ const allNav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/properties", label: "Immobilien", icon: Building2 },
   { to: "/payments", label: "Miete", icon: CreditCard },
+  { to: "/utility-billing", label: "Abrechnung", icon: Receipt },
   { to: "/documents", label: "Dokumente", icon: FileText },
   { to: "/chat", label: "Nachrichten", icon: MessageSquare },
-  
   { to: "/damages", label: "Schäden", icon: AlertTriangle },
 ];
 
