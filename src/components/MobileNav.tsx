@@ -11,6 +11,7 @@ import {
   LogOut,
   AlertTriangle,
   Receipt,
+  FolderOpen,
 } from "lucide-react";
 import {
   Sheet,
@@ -30,6 +31,7 @@ const allNav = [
   { to: "/properties", label: "Immobilien", icon: Building2 },
   { to: "/payments", label: "Miete", icon: CreditCard },
   { to: "/utility-billing", label: "Abrechnung", icon: Receipt },
+  { to: "/tax-folder", label: "Steuermappe", icon: FolderOpen },
   { to: "/documents", label: "Dokumente", icon: FileText },
   { to: "/chat", label: "Nachrichten", icon: MessageSquare },
   { to: "/damages", label: "Schäden", icon: AlertTriangle },

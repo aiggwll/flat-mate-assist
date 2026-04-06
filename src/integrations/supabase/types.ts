@@ -179,6 +179,56 @@ export type Database = {
         }
         Relationships: []
       }
+      tax_documents: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          description: string
+          document_date: string | null
+          file_url: string
+          filename: string
+          id: string
+          property_id: string | null
+          user_id: string
+          year: number
+        }
+        Insert: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string
+          document_date?: string | null
+          file_url?: string
+          filename?: string
+          id?: string
+          property_id?: string | null
+          user_id: string
+          year?: number
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string
+          document_date?: string | null
+          file_url?: string
+          filename?: string
+          id?: string
+          property_id?: string | null
+          user_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       utility_costs: {
         Row: {
           category: string
