@@ -389,7 +389,11 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
         <UploadButton />
       </div>
 
-      {/* Filters */}
+      {/* Weitere Dokumente label */}
+      {role === "owner" && (
+        <h2 className="text-lg font-heading font-semibold text-foreground pt-2">Weitere Dokumente</h2>
+      )}
+
       {role === "owner" && (
         <div className="flex flex-col sm:flex-row gap-2.5">
           <div className="relative flex-1">
