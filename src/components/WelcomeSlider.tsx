@@ -37,6 +37,8 @@ const getSlides = (salutation: "sie" | "du") => [
 ];
 
 const WelcomeSlider = () => {
+  const { salutation } = useUser();
+  const slides = getSlides(salutation);
   const [current, setCurrent] = useState(0);
   const [showWizard, setShowWizard] = useState(false);
   const navigate = useNavigate();
