@@ -15,6 +15,7 @@ interface SetupChecklistProps {
 
 const SetupChecklist = ({ hasProperties, hasTenants, hasPayments, hasDocuments }: SetupChecklistProps) => {
   const navigate = useNavigate();
+  const { salutation } = useUser();
   const [searchParams, setSearchParams] = useSearchParams();
   const [dismissed, setDismissed] = useState(() => localStorage.getItem("setup_complete") === "true");
   const [showConfetti, setShowConfetti] = useState(false);
