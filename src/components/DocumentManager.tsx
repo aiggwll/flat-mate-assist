@@ -349,7 +349,6 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
     });
   }
 
-  const [dismissedLocal, setDismissedLocal] = useState<string[]>([]);
   const activeSuggestion = suggestions.find(s => !dismissedLocal.includes(s.key)) || null;
 
   return (
