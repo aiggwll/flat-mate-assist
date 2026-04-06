@@ -10,7 +10,10 @@ import {
   FolderOpen,
   X,
   Loader2,
+  Receipt,
+  Calculator,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +34,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/UserContext";
+import { sal } from "@/lib/salutation";
 import { toast } from "sonner";
 
 interface DocRow {
@@ -77,7 +81,8 @@ function getYear(dateStr: string) {
 }
 
 const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
-  const { userProperties } = useUser();
+  const { userProperties, salutation } = useUser();
+  const navigate = useNavigate();
   const [docs, setDocs] = useState<DocRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -94,6 +99,7 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
   const [uploadFilename, setUploadFilename] = useState("");
   const [uploadCategory, setUploadCategory] = useState<string>("Sonstige Dokumente");
   const [uploadPropertyId, setUploadPropertyId] = useState<string>("none");
+  const [dismissedLocal, setDismissedLocal] = useState<string[]>([]);
 
   const fetchDocs = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -267,21 +273,83 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
     );
   }
 
-  const REQUIRED_DOCS = [
-    { category: "Mietvertrag", icon: "📄", title: "Mietvertrag", description: "Laden Sie den aktuellen Mietvertrag hoch" },
-    { category: "Übergabeprotokoll", icon: "📋", title: "Übergabeprotokoll", description: "Dokumentiert den Zustand der Wohnung bei Einzug" },
-    { category: "Versicherung", icon: "🛡️", title: "Gebäudeversicherung", description: "Nachweis der aktuellen Versicherungspolice" },
-  ];
-
-  const uploadedRequiredCount = REQUIRED_DOCS.filter(rd =>
-    docs.some(d => d.category === rd.category)
-  ).length;
-
   const handleRequiredUpload = (category: string) => {
     setUploadCategory(category);
     pendingCategoryRef.current = category;
     triggerFileInput();
   };
+
+  // Contextual suggestion logic
+  const currentMonth = new Date().getMonth() + 1;
+  const hasMietvertrag = docs.some(d => d.category === "Mietvertrag");
+  const hasReparaturDoc = docs.some(d => d.category === "Reparatur & Handwerker");
+  const hasTenants = userProperties.length > 0; // proxy: has properties with potential tenants
+
+  type Suggestion = {
+    key: string;
+    icon: React.ReactNode;
+    text: string;
+    buttonLabel: string;
+    dismissLabel: string;
+    onAction: () => void;
+    onDismiss: () => void;
+  };
+
+  const dismissedKeys = {
+    mietvertrag: localStorage.getItem("dismissed_suggestion_mietvertrag") === "true",
+    reparatur: localStorage.getItem("dismissed_suggestion_reparatur") === "true",
+    nebenkosten: localStorage.getItem("dismissed_suggestion_nebenkosten") === "true",
+  };
+
+  const suggestions: Suggestion[] = [];
+
+  // Trigger A
+  if (hasTenants && !hasMietvertrag && !dismissedKeys.mietvertrag) {
+    suggestions.push({
+      key: "mietvertrag",
+      icon: <FileText className="h-5 w-5 text-orange-500" />,
+      text: sal(salutation,
+        "Sie haben Mieter eingeladen — haben Sie den Mietvertrag bereits hochgeladen?",
+        "Du hast Mieter eingeladen — hast du den Mietvertrag bereits hochgeladen?"
+      ),
+      buttonLabel: "Jetzt hochladen",
+      dismissLabel: "Erledigt",
+      onAction: () => handleRequiredUpload("Mietvertrag"),
+      onDismiss: () => localStorage.setItem("dismissed_suggestion_mietvertrag", "true"),
+    });
+  }
+
+  // Trigger B
+  if (!hasReparaturDoc && !dismissedKeys.reparatur) {
+    // Show if there could be damage reports (simplified: always show if no repair doc)
+    suggestions.push({
+      key: "reparatur",
+      icon: <Receipt className="h-5 w-5 text-orange-500" />,
+      text: "Offene Schadenmeldung vorhanden — Rechnung vom Handwerker hochladen?",
+      buttonLabel: "Rechnung hochladen",
+      dismissLabel: "Später",
+      onAction: () => handleRequiredUpload("Reparatur & Handwerker"),
+      onDismiss: () => localStorage.setItem("dismissed_suggestion_reparatur", "true"),
+    });
+  }
+
+  // Trigger C
+  if ((currentMonth === 1 || currentMonth === 2) && !dismissedKeys.nebenkosten) {
+    suggestions.push({
+      key: "nebenkosten",
+      icon: <Calculator className="h-5 w-5 text-blue-500" />,
+      text: sal(salutation,
+        "Nebenkostenabrechnung-Saison: Haben Sie alle Belege für das letzte Jahr gesammelt?",
+        "Nebenkostenabrechnung-Saison: Hast du alle Belege für das letzte Jahr gesammelt?"
+      ),
+      buttonLabel: "Zur Steuermappe",
+      dismissLabel: "Erledigt",
+      onAction: () => navigate("/tax-folder"),
+      onDismiss: () => localStorage.setItem("dismissed_suggestion_nebenkosten", "true"),
+    });
+  }
+
+  const activeSuggestion = suggestions.find(s => !dismissedLocal.includes(s.key)) || null;
 
   return (
     <div className="space-y-5">
@@ -341,40 +409,23 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* Pflichtdokumente */}
-      {role === "owner" && uploadedRequiredCount < 3 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-heading font-semibold text-foreground">Pflichtdokumente</h2>
-              <p className="text-sm text-muted-foreground">{uploadedRequiredCount} von 3 Pflichtdokumenten hochgeladen</p>
-            </div>
+      {/* Contextual Suggestion Banner */}
+      {role === "owner" && activeSuggestion && (
+        <div className="flex items-center gap-4 rounded-xl border bg-card p-4">
+          <div className="h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center shrink-0">
+            {activeSuggestion.icon}
           </div>
-          <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
-            <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(uploadedRequiredCount / 3) * 100}%` }} />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {REQUIRED_DOCS.map((rd) => {
-              const isUploaded = docs.some(d => d.category === rd.category);
-              return (
-                <div key={rd.category} className="rounded-xl border bg-card p-4 flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{rd.icon}</span>
-                    <span className="text-sm font-semibold text-foreground">{rd.title}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed flex-1">{rd.description}</p>
-                  {isUploaded ? (
-                    <div className="flex items-center gap-1.5 text-primary text-xs font-medium mt-1">
-                      <span>✅</span> Hochgeladen
-                    </div>
-                  ) : (
-                    <Button size="sm" variant="outline" className="mt-1 gap-1.5 text-xs h-8" onClick={() => handleRequiredUpload(rd.category)}>
-                      <Upload className="h-3 w-3" /> Hochladen
-                    </Button>
-                  )}
-                </div>
-              );
-            })}
+          <p className="text-sm text-foreground flex-1">{activeSuggestion.text}</p>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button size="sm" variant="outline" className="text-xs h-8" onClick={() => {
+              activeSuggestion.onDismiss();
+              setDismissedLocal(prev => [...prev, activeSuggestion.key]);
+            }}>
+              {activeSuggestion.dismissLabel}
+            </Button>
+            <Button size="sm" className="text-xs h-8 gap-1.5" onClick={activeSuggestion.onAction}>
+              {activeSuggestion.buttonLabel}
+            </Button>
           </div>
         </div>
       )}
@@ -388,11 +439,6 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
         </div>
         <UploadButton />
       </div>
-
-      {/* Weitere Dokumente label */}
-      {role === "owner" && (
-        <h2 className="text-lg font-heading font-semibold text-foreground pt-2">Weitere Dokumente</h2>
-      )}
 
       {role === "owner" && (
         <div className="flex flex-col sm:flex-row gap-2.5">
