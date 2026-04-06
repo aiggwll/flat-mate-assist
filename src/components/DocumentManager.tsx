@@ -99,6 +99,7 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
   const [uploadFilename, setUploadFilename] = useState("");
   const [uploadCategory, setUploadCategory] = useState<string>("Sonstige Dokumente");
   const [uploadPropertyId, setUploadPropertyId] = useState<string>("none");
+  const [dismissedLocal, setDismissedLocal] = useState<string[]>([]);
 
   const fetchDocs = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
