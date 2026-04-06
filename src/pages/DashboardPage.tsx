@@ -60,9 +60,16 @@ const DashboardPage = () => {
         .eq("user_id", userId);
       setHasPayments((count ?? 0) > 0);
     };
+    const checkDocuments = async () => {
+      const { data } = await supabase
+        .from("documents")
+        .select("category")
+        .eq("user_id", userId)
+        .in("category", ["Mietvertrag", "Übergabeprotokoll", "Versicherung"]);
+      setHasDocuments((data?.length ?? 0) > 0);
+    };
     checkPayments();
-    // Documents: no table yet, so always false for now
-    setHasDocuments(false);
+    checkDocuments();
   }, [userId]);
 
   const propertyCount = userProperties.length;
