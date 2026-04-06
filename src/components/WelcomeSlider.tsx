@@ -96,7 +96,7 @@ const WelcomeSlider = () => {
                   {/* Button */}
                   {i === slides.length - 1 ? (
                     <button
-                      onClick={finish}
+                      onClick={() => finish(true)}
                       className="w-full py-3 rounded-xl font-semibold text-white transition-colors"
                       style={{ backgroundColor: "#2D6A4F" }}
                     >
