@@ -36,7 +36,7 @@ const SetupChecklist = ({ hasProperties, hasTenants, hasPayments, hasDocuments }
   const steps = [
     { key: "property", label: "Immobilie anlegen", icon: Building2, done: hasProperties, action: () => navigate("/properties") },
     { key: "tenant", label: "Mieter einladen", icon: Users, done: hasTenants, action: "dialog" as const },
-    { key: "payment", label: "Mietbetrag eintragen", icon: CreditCard, done: hasPayments, action: () => navigate("/rent-tracking") },
+    { key: "payment", label: "Mietbetrag eintragen", icon: CreditCard, done: hasPayments, action: () => navigate("/payments") },
     { key: "document", label: "Dokument hochladen", icon: FileText, done: hasDocuments, action: () => navigate("/documents") },
   ];
 
