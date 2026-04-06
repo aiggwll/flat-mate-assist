@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Building2, Users, MessageSquare, AlertTriangle, ArrowRight, MapPin, UserPlus } from "lucide-react";
+import WelcomeSlider from "@/components/WelcomeSlider";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
 import LandlordOnboarding from "@/components/LandlordOnboarding";
 import SetupChecklist from "@/components/SetupChecklist";
@@ -26,6 +27,9 @@ const DashboardPage = () => {
   const [hasDocuments, setHasDocuments] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(
     () => !localStorage.getItem("onboarding_complete_owner")
+  );
+  const [showWelcome, setShowWelcome] = useState(
+    () => !localStorage.getItem("dwello_welcome_seen")
   );
 
   useEffect(() => {
@@ -67,7 +71,8 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-10">
-      <LandlordOnboarding open={showOnboarding} onComplete={() => setShowOnboarding(false)} />
+      {showWelcome && <WelcomeSlider />}
+      <LandlordOnboarding open={showOnboarding && !showWelcome} onComplete={() => setShowOnboarding(false)} />
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-primary/8 to-primary/3 border p-10">
         <div className="relative z-10">
