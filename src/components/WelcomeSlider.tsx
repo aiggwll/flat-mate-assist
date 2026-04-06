@@ -48,7 +48,7 @@ const WelcomeSlider = () => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-muted/80">
       {/* Skip link */}
       <button
-        onClick={finish}
+        onClick={() => finish(false)}
         className="absolute top-6 right-6 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         Überspringen
