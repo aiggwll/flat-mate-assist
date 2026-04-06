@@ -28,7 +28,7 @@ const navItems = [
 const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userName, signOut } = useUser();
+  const { userName, userRole, signOut } = useUser();
   const { messages } = useMessages();
   const initials = userName ? userName.split(" ").map(n => n[0]).join("").toUpperCase() : "??";
 
@@ -74,7 +74,7 @@ const AppSidebar = () => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-sidebar-foreground truncate">{userName || "Eigentümer"}</p>
-            <p className="text-xs text-sidebar-muted truncate">Vermieter</p>
+            <p className="text-xs text-sidebar-muted truncate">{userRole === "tenant" ? "Mieter" : "Vermieter"}</p>
           </div>
           <button onClick={async () => { await signOut(); navigate("/"); }} className="text-sidebar-muted hover:text-sidebar-foreground transition-colors">
             <LogOut className="h-4 w-4" />
