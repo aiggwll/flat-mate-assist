@@ -237,7 +237,7 @@ const UtilityBillingPage = () => {
   const years = Array.from({ length: 5 }, (_, i) => String(currentYear - i));
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-24">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -330,7 +330,7 @@ const UtilityBillingPage = () => {
                         className="scale-75"
                       />
                       <span className="text-[11px] text-muted-foreground whitespace-nowrap">
-                        {costs[idx].perSqm ? "pro m²" : "pro Einh."}
+                        {costs[idx].perSqm ? "pro m²" : "pro Wohnung"}
                       </span>
                     </div>
                   </div>
@@ -427,14 +427,17 @@ const UtilityBillingPage = () => {
             </div>
           </div>
 
-          {/* Finalize button */}
-          <div className="flex justify-end">
+          {/* Sticky bottom save bar */}
+          <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-card border-t px-6 py-4 flex items-center justify-between z-40">
+            <p className="text-sm font-medium text-foreground">
+              Gesamtkosten: <span className="font-bold">{totalCosts.toFixed(2)} €</span>
+            </p>
             <Button
               onClick={handleFinalize}
               disabled={saving || totalCosts === 0}
               className="rounded-xl h-11 px-8 font-semibold"
             >
-              {saving ? "Wird gespeichert..." : "Abrechnung finalisieren"}
+              {saving ? "Wird gespeichert..." : "Abrechnung speichern"}
             </Button>
           </div>
         </>

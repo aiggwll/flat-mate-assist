@@ -41,7 +41,7 @@ const allNav = [
 const MobileNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userName, signOut } = useUser();
+  const { userName, userRole, gender, signOut } = useUser();
   const [open, setOpen] = useState(false);
   const initials = userName ? userName.split(" ").map(n => n[0]).join("").toUpperCase() : "??";
 
@@ -86,7 +86,9 @@ const MobileNav = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{userName || "Eigentümer"}</p>
-                  <p className="text-xs text-muted-foreground truncate">Vermieter</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {userRole === "tenant" ? "Mieter" : gender === "Frau" ? "Eigentümerin" : gender === "Herr" ? "Eigentümer" : "Vermieter"}
+                  </p>
                 </div>
                 <button onClick={async () => { setOpen(false); await signOut(); navigate("/"); }} className="text-muted-foreground hover:text-foreground transition-colors">
                   <LogOut className="h-4 w-4" />
