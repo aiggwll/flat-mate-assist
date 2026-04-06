@@ -1,0 +1,1 @@
+ALTER TABLE public.rent_payments ADD COLUMN IF NOT EXISTS nebenkosten numeric NOT NULL DEFAULT 0;
