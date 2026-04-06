@@ -2,39 +2,43 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlignJustify, MessageSquareMore, FileText, Receipt } from "lucide-react";
 import SetupWizard from "./SetupWizard";
+import { useUser } from "@/contexts/UserContext";
+import { sal } from "@/lib/salutation";
 
-const slides = [
+const getSlides = (salutation: "sie" | "du") => [
   {
     icon: AlignJustify,
     iconBg: "#E8F5E9",
     iconColor: "#2D6A4F",
-    headline: "Deine Immobilien. Vollautomatisch verwaltet.",
+    headline: sal(salutation, "Ihre Immobilien. Einfach verwaltet.", "Deine Immobilien. Einfach verwaltet."),
     subtext: "Alle Wohnungen, Mieter und Dokumente — an einem Ort.",
   },
   {
     icon: MessageSquareMore,
     iconBg: "#F3E8FF",
     iconColor: "#7C3AED",
-    headline: "Dein Mieter schreibt. Dwello antwortet.",
-    subtext: "Der integrierte KI-Agent übernimmt die Kommunikation — du entscheidest nur noch, was wirklich wichtig ist.",
+    headline: sal(salutation, "Ihre Mieter. Alles im Blick.", "Deine Mieter. Alles im Blick."),
+    subtext: sal(salutation, "Der integrierte KI-Agent übernimmt die Kommunikation — Sie entscheiden nur noch, was wirklich wichtig ist.", "Der integrierte KI-Agent übernimmt die Kommunikation — du entscheidest nur noch, was wirklich wichtig ist."),
   },
   {
     icon: FileText,
     iconBg: "#FFF0EB",
     iconColor: "#EA4C2A",
-    headline: "Nebenkostenabrechnung. Ohne Stress.",
-    subtext: "Was früher Stunden gedauert hat, erledigst du jetzt in wenigen Minuten.",
+    headline: sal(salutation, "Ihre Nebenkostenabrechnung. In Minuten erledigt.", "Deine Nebenkostenabrechnung. In Minuten erledigt."),
+    subtext: sal(salutation, "Was früher Stunden gedauert hat, erledigen Sie jetzt in wenigen Minuten.", "Was früher Stunden gedauert hat, erledigst du jetzt in wenigen Minuten."),
   },
   {
     icon: Receipt,
     iconBg: "#FFF8E1",
     iconColor: "#F59E0B",
-    headline: "Steuer-Export. Ein Klick. Fertig.",
-    subtext: "Alle relevanten Belege gesammelt und aufbereitet — direkt für deinen Steuerberater.",
+    headline: sal(salutation, "Ihr Steuer-Export. Ein Klick. Fertig.", "Dein Steuer-Export. Ein Klick. Fertig."),
+    subtext: sal(salutation, "Alle relevanten Belege gesammelt und aufbereitet — direkt für Ihren Steuerberater.", "Alle relevanten Belege gesammelt und aufbereitet — direkt für deinen Steuerberater."),
   },
 ];
 
 const WelcomeSlider = () => {
+  const { salutation } = useUser();
+  const slides = getSlides(salutation);
   const [current, setCurrent] = useState(0);
   const [showWizard, setShowWizard] = useState(false);
   const navigate = useNavigate();
