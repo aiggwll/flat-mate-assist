@@ -427,14 +427,17 @@ const UtilityBillingPage = () => {
             </div>
           </div>
 
-          {/* Finalize button */}
-          <div className="flex justify-end">
+          {/* Sticky bottom save bar */}
+          <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-card border-t px-6 py-4 flex items-center justify-between z-40">
+            <p className="text-sm font-medium text-foreground">
+              Gesamtkosten: <span className="font-bold">{totalCosts.toFixed(2)} €</span>
+            </p>
             <Button
               onClick={handleFinalize}
               disabled={saving || totalCosts === 0}
               className="rounded-xl h-11 px-8 font-semibold"
             >
-              {saving ? "Wird gespeichert..." : "Abrechnung finalisieren"}
+              {saving ? "Wird gespeichert..." : "Abrechnung speichern"}
             </Button>
           </div>
         </>
