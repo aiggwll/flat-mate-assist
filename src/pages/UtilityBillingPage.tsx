@@ -237,7 +237,7 @@ const UtilityBillingPage = () => {
   const years = Array.from({ length: 5 }, (_, i) => String(currentYear - i));
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-24">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
