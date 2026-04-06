@@ -3,6 +3,8 @@ import { Building2, Users, CreditCard, FileText, Check, ChevronRight, PartyPoppe
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
+import { useUser } from "@/contexts/UserContext";
+import { sal } from "@/lib/salutation";
 
 interface SetupChecklistProps {
   hasProperties: boolean;
