@@ -110,19 +110,17 @@ const SetupWizard = () => {
     return `Alles bereit, ${firstName || "du"}${s === "sie" ? "." : "!"}`;
   };
 
-  const tenantSteps = sal(
-    s,
-    [
-      "Sie erfassen die E-Mail-Adresse Ihres Mieters.",
-      "Dwello versendet automatisch eine Einladung.",
-      "Ihr Mieter vervollständigt seine Daten eigenständig — Sie können sich zurücklehnen.",
-    ],
-    [
-      "Du gibst die E-Mail-Adresse deines Mieters ein.",
-      "Dwello versendet automatisch eine Einladung.",
-      "Dein Mieter vervollständigt seine Daten eigenständig — du kannst dich zurücklehnen.",
-    ]
-  ) as string[];
+  const tenantSteps = salutation === "sie"
+    ? [
+        "Sie erfassen die E-Mail-Adresse Ihres Mieters.",
+        "Dwello versendet automatisch eine Einladung.",
+        "Ihr Mieter vervollständigt seine Daten eigenständig — Sie können sich zurücklehnen.",
+      ]
+    : [
+        "Du gibst die E-Mail-Adresse deines Mieters ein.",
+        "Dwello versendet automatisch eine Einladung.",
+        "Dein Mieter vervollständigt seine Daten eigenständig — du kannst dich zurücklehnen.",
+      ];
 
   const toggleBtnStyle = (active: boolean) =>
     active
