@@ -57,9 +57,7 @@ const MobileNav = () => {
           </SheetTrigger>
           <SheetContent side="right" className="w-72 p-0">
             <div className="p-6 border-b">
-              <h2 className="text-lg font-heading font-bold text-foreground">
-                Dwell<span className="text-primary">o</span>
-              </h2>
+              <DwelloLogo variant="light" size="sm" showIcon={false} />
             </div>
             <nav className="p-3 space-y-0.5">
               {allNav.map(({ to, label, icon: Icon }) => {
