@@ -56,23 +56,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       try {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("name, role, salutation")
+          .select("name, role, salutation, setup_wizard_complete")
           .eq("user_id", currentUser.id)
           .single();
         if (profile) {
           setUserName(profile.name || "");
           setUserRole(profile.role as "owner" | "tenant");
-          const sal = ((profile as any).salutation as "du" | "sie") || "sie";
-          setSalutationState(sal);
-          localStorage.setItem("dwello_salutation", sal);
+          const profileSalutation = (profile.salutation as "du" | "sie") || "sie";
+          setSalutationState(profileSalutation);
+          localStorage.setItem("dwello_salutation", profileSalutation);
 
-          // Check setup_wizard_complete from DB (source of truth)
-          const { data: fullProfile } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("user_id", currentUser.id)
-            .single();
-          if (fullProfile && (fullProfile as any).setup_wizard_complete) {
+          if (profile.setup_wizard_complete) {
             setSetupWizardComplete(true);
             localStorage.setItem("dwello_setup_complete", "true");
           }
