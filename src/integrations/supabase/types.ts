@@ -156,6 +156,7 @@ export type Database = {
           created_at: string | null
           due_date: string
           id: string
+          nebenkosten: number
           paid_at: string | null
           status: string
           tenant_name: string
@@ -169,6 +170,7 @@ export type Database = {
           created_at?: string | null
           due_date: string
           id?: string
+          nebenkosten?: number
           paid_at?: string | null
           status?: string
           tenant_name: string
@@ -182,6 +184,7 @@ export type Database = {
           created_at?: string | null
           due_date?: string
           id?: string
+          nebenkosten?: number
           paid_at?: string | null
           status?: string
           tenant_name?: string
