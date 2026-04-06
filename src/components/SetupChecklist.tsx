@@ -78,7 +78,7 @@ const SetupChecklist = ({ hasProperties, hasTenants, hasPayments, hasDocuments }
     >
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-heading font-semibold text-foreground">Daten vervollständigen — so startest du durch</h3>
+          <h3 className="text-base font-heading font-semibold text-foreground">{sal(salutation, "Daten vervollständigen — so starten Sie durch", "Daten vervollständigen — so startest du durch")}</h3>
           <span className="text-xs text-muted-foreground font-medium">{completedCount} von 4 erledigt</span>
         </div>
         <p className="text-sm text-muted-foreground">Nur noch ein paar Schritte bis du startklar bist.</p>
