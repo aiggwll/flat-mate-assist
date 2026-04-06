@@ -26,7 +26,7 @@ const DashboardPage = () => {
   const [hasPayments, setHasPayments] = useState(false);
   const [hasDocuments, setHasDocuments] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(
-    () => !localStorage.getItem("onboarding_complete_owner")
+    () => !localStorage.getItem("onboarding_complete_owner") && !localStorage.getItem("dwello_setup_wizard_done")
   );
   const [showWelcome, setShowWelcome] = useState(
     () => !localStorage.getItem("dwello_welcome_seen")
