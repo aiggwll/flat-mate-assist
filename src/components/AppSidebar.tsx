@@ -12,6 +12,7 @@ import {
   FolderOpen,
   LogOut,
 } from "lucide-react";
+import DwelloLogo from "./DwelloLogo";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
