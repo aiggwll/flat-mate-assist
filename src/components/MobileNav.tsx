@@ -11,6 +11,7 @@ import {
   LogOut,
   AlertTriangle,
   Receipt,
+  FolderOpen,
 } from "lucide-react";
 import {
   Sheet,
