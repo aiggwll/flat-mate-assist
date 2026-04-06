@@ -69,12 +69,16 @@ const SetupChecklist = ({ hasProperties, hasTenants, hasPayments, hasDocuments }
   }
 
   return (
-    <div className="bg-card rounded-2xl border p-6 space-y-5">
+    <div
+      ref={cardRef}
+      className={`bg-card rounded-2xl border p-6 space-y-5 transition-shadow duration-700 ${highlight ? "ring-2 ring-primary/40 shadow-lg animate-pulse" : ""}`}
+    >
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-heading font-semibold text-foreground">Erste Schritte</h3>
+          <h3 className="text-base font-heading font-semibold text-foreground">Daten vervollständigen — so startest du durch</h3>
           <span className="text-xs text-muted-foreground font-medium">{completedCount} von 4 erledigt</span>
         </div>
+        <p className="text-sm text-muted-foreground">Nur noch ein paar Schritte bis du startklar bist.</p>
         <Progress value={progressValue} className="h-2 bg-muted" />
       </div>
 
