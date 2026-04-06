@@ -330,7 +330,7 @@ const UtilityBillingPage = () => {
                         className="scale-75"
                       />
                       <span className="text-[11px] text-muted-foreground whitespace-nowrap">
-                        {costs[idx].perSqm ? "pro m²" : "pro Einh."}
+                        {costs[idx].perSqm ? "pro m²" : "pro Wohnung"}
                       </span>
                     </div>
                   </div>
