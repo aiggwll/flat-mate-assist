@@ -268,6 +268,7 @@ const RentTrackingPage = () => {
             <div>
               <Label>Nebenkosten / Vorauszahlung (€)</Label>
               <Input type="number" placeholder="z.B. 150" value={form.nebenkosten} onChange={e => setForm(f => ({ ...f, nebenkosten: e.target.value }))} />
+              <p className="text-xs text-muted-foreground mt-1">Wenn keine Nebenkosten vereinbart: 0 eingeben</p>
             </div>
             <div>
               <Label>Warmmiete (Gesamt)</Label>
