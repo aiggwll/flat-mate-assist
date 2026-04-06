@@ -171,7 +171,10 @@ const RentTrackingPage = () => {
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    Wohnung: {p.unit_id} · Fällig: {format(new Date(p.due_date), "dd. MMM yyyy", { locale: de })}
+                    Wohnung: {p.unit_id} · Kalt: {Number((p as any).cold_rent || 0).toLocaleString("de-DE")} € · Warm: {Number((p as any).warm_rent || p.amount).toLocaleString("de-DE")} €
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Fällig: {format(new Date(p.due_date), "dd. MMM yyyy", { locale: de })}
                     {p.paid_at && ` · Bezahlt am: ${format(new Date(p.paid_at), "dd. MMM yyyy", { locale: de })}`}
                   </p>
                 </div>
