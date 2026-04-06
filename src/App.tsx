@@ -16,6 +16,7 @@ import ChatPage from "./pages/ChatPage";
 import DamagesPage from "./pages/DamagesPage";
 import DocumentsPage from "./pages/DocumentsPage";
 import MarketplacePage from "./pages/MarketplacePage";
+import UtilityBillingPage from "./pages/UtilityBillingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/properties/:id" element={<PropertyDetailPage />} />
               <Route path="/payments" element={<RentTrackingPage />} />
               <Route path="/documents" element={<DocumentsPage />} />
+              <Route path="/utility-billing" element={<UtilityBillingPage />} />
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/damages" element={<DamagesPage />} />
               

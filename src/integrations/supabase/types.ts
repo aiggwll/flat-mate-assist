@@ -179,6 +179,120 @@ export type Database = {
         }
         Relationships: []
       }
+      utility_costs: {
+        Row: {
+          category: string
+          created_at: string
+          distribution_key: string
+          id: string
+          period_id: string
+          total_amount: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          distribution_key?: string
+          id?: string
+          period_id: string
+          total_amount?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          distribution_key?: string
+          id?: string
+          period_id?: string
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "utility_costs_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "utility_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      utility_periods: {
+        Row: {
+          created_at: string
+          id: string
+          property_id: string
+          status: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          property_id: string
+          status?: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          property_id?: string
+          status?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "utility_periods_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      utility_results: {
+        Row: {
+          advance_paid: number
+          allocated_costs: number
+          balance: number
+          created_at: string
+          id: string
+          period_id: string
+          sqm: number
+          tenant_id: string
+          tenant_name: string
+          unit_id: string
+        }
+        Insert: {
+          advance_paid?: number
+          allocated_costs?: number
+          balance?: number
+          created_at?: string
+          id?: string
+          period_id: string
+          sqm?: number
+          tenant_id: string
+          tenant_name?: string
+          unit_id?: string
+        }
+        Update: {
+          advance_paid?: number
+          allocated_costs?: number
+          balance?: number
+          created_at?: string
+          id?: string
+          period_id?: string
+          sqm?: number
+          tenant_id?: string
+          tenant_name?: string
+          unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "utility_results_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "utility_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
