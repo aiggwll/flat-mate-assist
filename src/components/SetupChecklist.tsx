@@ -13,13 +13,27 @@ interface SetupChecklistProps {
 
 const SetupChecklist = ({ hasProperties, hasTenants, hasPayments, hasDocuments }: SetupChecklistProps) => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [dismissed, setDismissed] = useState(() => localStorage.getItem("setup_complete") === "true");
   const [showConfetti, setShowConfetti] = useState(false);
+  const [highlight, setHighlight] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (searchParams.get("setup") === "1") {
+      setHighlight(true);
+      searchParams.delete("setup");
+      setSearchParams(searchParams, { replace: true });
+      cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const t = setTimeout(() => setHighlight(false), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [searchParams, setSearchParams]);
 
   const steps = [
-    { key: "property", label: "Erste Immobilie anlegen", icon: Building2, done: hasProperties, action: () => navigate("/properties") },
-    { key: "tenant", label: "Ersten Mieter einladen", icon: Users, done: hasTenants, action: "dialog" as const },
-    { key: "payment", label: "Mietbetrag eintragen", icon: CreditCard, done: hasPayments, action: () => navigate("/payments") },
+    { key: "property", label: "Immobilie anlegen", icon: Building2, done: hasProperties, action: () => navigate("/properties") },
+    { key: "tenant", label: "Mieter einladen", icon: Users, done: hasTenants, action: "dialog" as const },
+    { key: "payment", label: "Mietbetrag eintragen", icon: CreditCard, done: hasPayments, action: () => navigate("/rent-tracking") },
     { key: "document", label: "Dokument hochladen", icon: FileText, done: hasDocuments, action: () => navigate("/documents") },
   ];
 
