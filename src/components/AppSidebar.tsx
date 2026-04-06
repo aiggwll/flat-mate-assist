@@ -28,7 +28,7 @@ const navItems = [
 const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userName, userRole, signOut } = useUser();
+  const { userName, userRole, gender, signOut } = useUser();
   const { messages } = useMessages();
   const initials = userName ? userName.split(" ").map(n => n[0]).join("").toUpperCase() : "??";
 
