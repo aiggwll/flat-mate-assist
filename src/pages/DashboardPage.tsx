@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Building2, Users, MessageSquare, AlertTriangle, ArrowRight, MapPin, UserPlus } from "lucide-react";
+import WelcomeSlider from "@/components/WelcomeSlider";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
 import LandlordOnboarding from "@/components/LandlordOnboarding";
 import SetupChecklist from "@/components/SetupChecklist";
