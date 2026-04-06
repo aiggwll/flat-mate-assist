@@ -192,7 +192,7 @@ const RentTrackingPage = () => {
       ) : (
         <div className="space-y-3">
           {payments.map((p) => {
-            const statusInfo = getStatusInfo(p.status, p.due_date);
+            const statusInfo = getStatusInfo(p.paid_at, p.due_date);
             const StatusIcon = statusInfo.icon;
             const warmmiete = p.cold_rent + p.nebenkosten;
             return (
