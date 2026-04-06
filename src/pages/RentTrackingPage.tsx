@@ -41,7 +41,7 @@ const getStatusInfo = (status: string, dueDate: string) => {
 };
 
 const RentTrackingPage = () => {
-  const { user } = useUser();
+  const { user, userProperties } = useUser();
   const [payments, setPayments] = useState<RentPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
