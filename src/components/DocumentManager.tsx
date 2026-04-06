@@ -279,6 +279,7 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
 
   const handleRequiredUpload = (category: string) => {
     setUploadCategory(category);
+    pendingCategoryRef.current = category;
     triggerFileInput();
   };
 
