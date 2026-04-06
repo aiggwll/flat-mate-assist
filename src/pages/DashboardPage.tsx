@@ -29,7 +29,7 @@ const DashboardPage = () => {
     () => !localStorage.getItem("onboarding_complete_owner") && !localStorage.getItem("dwello_setup_complete")
   );
   const [showWelcome, setShowWelcome] = useState(
-    () => !localStorage.getItem("dwello_welcome_seen")
+    () => !localStorage.getItem("dwello_welcome_seen") && !localStorage.getItem("dwello_setup_complete")
   );
 
   useEffect(() => {
