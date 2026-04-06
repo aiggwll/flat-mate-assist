@@ -30,8 +30,8 @@ interface RentPayment {
   created_at: string;
 }
 
-const getStatusInfo = (status: string, dueDate: string) => {
-  if (status === "bezahlt") {
+const getStatusInfo = (paidAt: string | null, dueDate: string) => {
+  if (paidAt) {
     return { label: "Bezahlt", color: "text-green-600 bg-green-50 border-green-200", icon: Check };
   }
   const due = new Date(dueDate);
