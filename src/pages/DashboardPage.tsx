@@ -71,7 +71,8 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-10">
-      <LandlordOnboarding open={showOnboarding} onComplete={() => setShowOnboarding(false)} />
+      {showWelcome && <WelcomeSlider />}
+      <LandlordOnboarding open={showOnboarding && !showWelcome} onComplete={() => setShowOnboarding(false)} />
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-primary/8 to-primary/3 border p-10">
         <div className="relative z-10">
