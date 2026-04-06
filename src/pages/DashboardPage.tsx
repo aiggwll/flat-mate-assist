@@ -281,7 +281,9 @@ const DashboardPage = () => {
         <div className="bg-primary/5 border border-primary/15 rounded-2xl p-8 text-center space-y-2">
           <p className="text-base font-medium text-foreground">Ihre Immobilien wurden angelegt</p>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            Im nächsten Schritt können Sie Mieter einladen, um alle Funktionen wie Nachrichten, Schadenmeldungen und Dokumentenverwaltung zu nutzen.
+            {salutation === "du"
+              ? "Im nächsten Schritt kannst du Mieter einladen, um alle Funktionen wie Nachrichten, Schadenmeldungen und Dokumentenverwaltung zu nutzen."
+              : "Im nächsten Schritt können Sie Mieter einladen, um alle Funktionen wie Nachrichten, Schadenmeldungen und Dokumentenverwaltung zu nutzen."}
           </p>
         </div>
       )}
