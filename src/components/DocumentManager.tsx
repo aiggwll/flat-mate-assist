@@ -5,7 +5,6 @@ import {
   Search,
   Trash2,
   Download,
-  Eye,
   Pencil,
   ChevronRight,
   FolderOpen,
@@ -21,7 +20,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
 
 interface DocRow {
@@ -35,18 +44,19 @@ interface DocRow {
 }
 
 const CATEGORIES = [
-  "Verträge",
-  "Protokolle",
-  "Rechnungen",
-  "Instandhaltung",
-  "Versicherungen",
-  "Versorger",
+  "Mietvertrag",
+  "Nebenkostenabrechnung",
+  "Übergabeprotokoll",
+  "Versicherung",
+  "Grundsteuer",
+  "Reparatur & Handwerker",
+  "Korrespondenz",
   "Sonstige Dokumente",
 ] as const;
 
 type Category = (typeof CATEGORIES)[number];
 
-const TENANT_CATEGORIES: Category[] = ["Verträge", "Protokolle", "Rechnungen"];
+const TENANT_CATEGORIES: Category[] = ["Mietvertrag", "Nebenkostenabrechnung", "Übergabeprotokoll"];
 
 interface DocumentManagerProps {
   role: "owner" | "tenant";
@@ -67,6 +77,7 @@ function getYear(dateStr: string) {
 }
 
 const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
+  const { userProperties } = useUser();
   const [docs, setDocs] = useState<DocRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -76,6 +87,13 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
   const [renameId, setRenameId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Upload dialog state
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [uploadFilename, setUploadFilename] = useState("");
+  const [uploadCategory, setUploadCategory] = useState<string>("Sonstige Dokumente");
+  const [uploadPropertyId, setUploadPropertyId] = useState<string>("none");
 
   const fetchDocs = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -91,40 +109,50 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
 
   const triggerFileInput = () => fileInputRef.current?.click();
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+    const fileList = Array.from(files);
+    setPendingFiles(fileList);
+    setUploadFilename(fileList[0].name);
+    setUploadCategory("Sonstige Dokumente");
+    setUploadPropertyId(propertyId || "none");
+    setShowUploadDialog(true);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleUploadConfirm = async () => {
+    if (pendingFiles.length === 0) return;
     setUploading(true);
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setUploading(false); return; }
 
     try {
-      for (const file of Array.from(files)) {
+      for (const file of pendingFiles) {
         const filePath = `${user.id}/${Date.now()}_${file.name}`;
         const { error: uploadError } = await supabase.storage
           .from("documents")
           .upload(filePath, file);
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage.from("documents").getPublicUrl(filePath);
-
         await supabase.from("documents").insert({
           user_id: user.id,
-          filename: file.name,
+          filename: pendingFiles.length === 1 ? uploadFilename : file.name,
           file_url: filePath,
-          category: "Sonstige Dokumente",
+          category: uploadCategory,
           file_size: file.size,
-          property_id: propertyId || null,
+          property_id: uploadPropertyId === "none" ? null : uploadPropertyId,
         });
       }
       toast.success("Dokument erfolgreich hochgeladen");
+      setShowUploadDialog(false);
+      setPendingFiles([]);
       await fetchDocs();
     } catch (err: any) {
       toast.error(err.message || "Upload fehlgeschlagen");
     } finally {
       setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -185,7 +213,7 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
     </Button>
   );
 
-  const DocRow = ({ doc }: { doc: DocRow }) => (
+  const DocRowItem = ({ doc }: { doc: DocRow }) => (
     <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted/10 transition-colors group">
       <div className="h-8 w-8 rounded-md bg-muted/50 flex items-center justify-center shrink-0">
         <FileText className="h-3.5 w-3.5 text-muted-foreground" />
@@ -240,6 +268,60 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
     <div className="space-y-5">
       <input ref={fileInputRef} type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={handleFileChange} className="hidden" />
 
+      {/* Upload Dialog */}
+      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Dokument hochladen</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="upload-filename" className="text-sm">Dateiname</Label>
+              <Input id="upload-filename" value={uploadFilename} onChange={(e) => setUploadFilename(e.target.value)} className="h-9 text-sm" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm">Kategorie</Label>
+              <Select value={uploadCategory} onValueChange={setUploadCategory}>
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {userProperties.length > 0 && (
+              <div className="space-y-1.5">
+                <Label className="text-sm">Immobilie (optional)</Label>
+                <Select value={uploadPropertyId} onValueChange={setUploadPropertyId}>
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue placeholder="Keine Zuordnung" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Keine Zuordnung</SelectItem>
+                    {userProperties.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.address}, {p.city}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {pendingFiles.length > 1 && (
+              <p className="text-xs text-muted-foreground">{pendingFiles.length} Dateien ausgewählt – Kategorie gilt für alle.</p>
+            )}
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" size="sm" onClick={() => { setShowUploadDialog(false); setPendingFiles([]); }}>Abbrechen</Button>
+            <Button size="sm" onClick={handleUploadConfirm} disabled={uploading} className="gap-2">
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              {uploading ? "Wird hochgeladen…" : "Hochladen"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -284,15 +366,14 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
         </div>
       ) : role === "tenant" ? (
         <div className="space-y-4">
-          {(["Verträge", "Protokolle", "Rechnungen"] as const).map((cat) => {
+          {TENANT_CATEGORIES.map((cat) => {
             const catDocs = filtered.filter((d) => d.category === cat);
             if (catDocs.length === 0) return null;
-            const catLabel = cat === "Verträge" ? "Mietvertrag" : cat === "Protokolle" ? "Übergabeprotokoll" : "Nebenkostenabrechnung";
             return (
               <div key={cat}>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 px-1">{catLabel}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 px-1">{cat}</p>
                 <div className="border rounded-lg divide-y">
-                  {catDocs.map((doc) => <DocRow key={doc.id} doc={doc} />)}
+                  {catDocs.map((doc) => <DocRowItem key={doc.id} doc={doc} />)}
                 </div>
               </div>
             );
@@ -326,7 +407,7 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
                         <div className="divide-y border-t">
                           {groupedByYear[year][cat].map((doc) => (
                             <div key={doc.id} className="px-4">
-                              <DocRow doc={doc} />
+                              <DocRowItem doc={doc} />
                             </div>
                           ))}
                         </div>
