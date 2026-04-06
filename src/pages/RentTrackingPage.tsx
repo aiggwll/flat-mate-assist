@@ -147,8 +147,8 @@ const RentTrackingPage = () => {
     }
   };
 
-  const totalExpected = payments.reduce((s, p) => s + p.amount, 0);
-  const totalPaid = payments.filter(p => p.status === "bezahlt").reduce((s, p) => s + p.amount, 0);
+  const totalExpected = payments.reduce((s, p) => s + (p.cold_rent + p.nebenkosten), 0);
+  const totalPaid = payments.filter(p => p.paid_at !== null).reduce((s, p) => s + (p.cold_rent + p.nebenkosten), 0);
   const totalOpen = totalExpected - totalPaid;
 
   return (
