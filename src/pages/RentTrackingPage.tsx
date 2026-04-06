@@ -220,7 +220,7 @@ const RentTrackingPage = () => {
                   <span className="text-lg font-bold text-foreground whitespace-nowrap">
                     {warmmiete.toLocaleString("de-DE")} €
                   </span>
-                  {p.status !== "bezahlt" && (
+                  {!p.paid_at && (
                     <Button size="sm" variant="outline" onClick={() => markAsPaid(p.id)}>
                       <Check className="h-4 w-4 mr-1" />
                       Bezahlt
