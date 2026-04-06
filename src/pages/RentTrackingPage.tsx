@@ -44,7 +44,7 @@ const RentTrackingPage = () => {
   const [payments, setPayments] = useState<RentPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ unit_id: "", tenant_name: "", amount: "" });
+  const [form, setForm] = useState({ unit_id: "", tenant_name: "", cold_rent: "", warm_rent: "" });
 
   const loadPayments = useCallback(async () => {
     if (!user) return;
@@ -65,7 +65,7 @@ const RentTrackingPage = () => {
   }, [loadPayments]);
 
   const handleAddPayment = async () => {
-    if (!form.unit_id || !form.tenant_name || !form.amount) {
+    if (!form.unit_id || !form.tenant_name || !form.cold_rent || !form.warm_rent) {
       toast.error("Bitte alle Felder ausfüllen.");
       return;
     }
@@ -73,11 +73,16 @@ const RentTrackingPage = () => {
 
     const dueDate = format(startOfMonth(new Date()), "yyyy-MM-dd");
 
+    const coldRent = parseFloat(form.cold_rent);
+    const warmRent = parseFloat(form.warm_rent);
+
     const { error } = await supabase.from("rent_payments").insert({
       user_id: user.id,
       unit_id: form.unit_id.trim(),
       tenant_name: form.tenant_name.trim(),
-      amount: parseFloat(form.amount),
+      amount: warmRent,
+      cold_rent: coldRent,
+      warm_rent: warmRent,
       due_date: dueDate,
       status: "ausstehend",
     });
@@ -86,7 +91,7 @@ const RentTrackingPage = () => {
       toast.error("Fehler beim Anlegen: " + error.message);
     } else {
       toast.success("Mietzahlung angelegt!");
-      setForm({ unit_id: "", tenant_name: "", amount: "" });
+      setForm({ unit_id: "", tenant_name: "", cold_rent: "", warm_rent: "" });
       setDialogOpen(false);
       loadPayments();
     }
@@ -166,7 +171,10 @@ const RentTrackingPage = () => {
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    Wohnung: {p.unit_id} · Fällig: {format(new Date(p.due_date), "dd. MMM yyyy", { locale: de })}
+                    Wohnung: {p.unit_id} · Kalt: {Number((p as any).cold_rent || 0).toLocaleString("de-DE")} € · Warm: {Number((p as any).warm_rent || p.amount).toLocaleString("de-DE")} €
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Fällig: {format(new Date(p.due_date), "dd. MMM yyyy", { locale: de })}
                     {p.paid_at && ` · Bezahlt am: ${format(new Date(p.paid_at), "dd. MMM yyyy", { locale: de })}`}
                   </p>
                 </div>
@@ -203,8 +211,12 @@ const RentTrackingPage = () => {
               <Input placeholder="Max Mustermann" value={form.tenant_name} onChange={e => setForm(f => ({ ...f, tenant_name: e.target.value }))} />
             </div>
             <div>
-              <Label>Monatliche Miete (€)</Label>
-              <Input type="number" placeholder="750" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
+              <Label>Monatliche Kaltmiete (€)</Label>
+              <Input type="number" placeholder="600" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Monatliche Warmmiete (€)</Label>
+              <Input type="number" placeholder="750" value={form.warm_rent} onChange={e => setForm(f => ({ ...f, warm_rent: e.target.value }))} />
             </div>
           </div>
           <DialogFooter>

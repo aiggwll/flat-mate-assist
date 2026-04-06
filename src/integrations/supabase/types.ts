@@ -146,6 +146,7 @@ export type Database = {
       rent_payments: {
         Row: {
           amount: number
+          cold_rent: number
           created_at: string | null
           due_date: string
           id: string
@@ -154,9 +155,11 @@ export type Database = {
           tenant_name: string
           unit_id: string
           user_id: string
+          warm_rent: number
         }
         Insert: {
           amount?: number
+          cold_rent?: number
           created_at?: string | null
           due_date: string
           id?: string
@@ -165,9 +168,11 @@ export type Database = {
           tenant_name: string
           unit_id: string
           user_id: string
+          warm_rent?: number
         }
         Update: {
           amount?: number
+          cold_rent?: number
           created_at?: string | null
           due_date?: string
           id?: string
@@ -176,6 +181,7 @@ export type Database = {
           tenant_name?: string
           unit_id?: string
           user_id?: string
+          warm_rent?: number
         }
         Relationships: []
       }
