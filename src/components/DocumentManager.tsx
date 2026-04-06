@@ -264,6 +264,21 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
     );
   }
 
+  const REQUIRED_DOCS = [
+    { category: "Mietvertrag", icon: "📄", title: "Mietvertrag", description: "Laden Sie den aktuellen Mietvertrag hoch" },
+    { category: "Übergabeprotokoll", icon: "📋", title: "Übergabeprotokoll", description: "Dokumentiert den Zustand der Wohnung bei Einzug" },
+    { category: "Versicherung", icon: "🛡️", title: "Gebäudeversicherung", description: "Nachweis der aktuellen Versicherungspolice" },
+  ];
+
+  const uploadedRequiredCount = REQUIRED_DOCS.filter(rd =>
+    docs.some(d => d.category === rd.category)
+  ).length;
+
+  const handleRequiredUpload = (category: string) => {
+    setUploadCategory(category);
+    triggerFileInput();
+  };
+
   return (
     <div className="space-y-5">
       <input ref={fileInputRef} type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={handleFileChange} className="hidden" />
