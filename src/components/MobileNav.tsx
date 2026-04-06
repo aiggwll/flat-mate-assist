@@ -13,6 +13,7 @@ import {
   Receipt,
   FolderOpen,
 } from "lucide-react";
+import DwelloLogo from "./DwelloLogo";
 import {
   Sheet,
   SheetContent,
