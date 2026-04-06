@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlignJustify, MessageSquareMore, FileText, Receipt } from "lucide-react";
+import SetupWizard from "./SetupWizard";
 
 const slides = [
   {
