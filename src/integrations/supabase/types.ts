@@ -41,6 +41,39 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          category: string
+          created_at: string
+          file_size: number
+          file_url: string
+          filename: string
+          id: string
+          property_id: string | null
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          file_size?: number
+          file_url?: string
+          filename?: string
+          id?: string
+          property_id?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          file_size?: number
+          file_url?: string
+          filename?: string
+          id?: string
+          property_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           created_at: string
