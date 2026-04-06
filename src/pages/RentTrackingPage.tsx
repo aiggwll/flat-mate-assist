@@ -30,8 +30,8 @@ interface RentPayment {
   created_at: string;
 }
 
-const getStatusInfo = (status: string, dueDate: string) => {
-  if (status === "bezahlt") {
+const getStatusInfo = (paidAt: string | null, dueDate: string) => {
+  if (paidAt) {
     return { label: "Bezahlt", color: "text-green-600 bg-green-50 border-green-200", icon: Check };
   }
   const due = new Date(dueDate);
@@ -147,8 +147,8 @@ const RentTrackingPage = () => {
     }
   };
 
-  const totalExpected = payments.reduce((s, p) => s + p.amount, 0);
-  const totalPaid = payments.filter(p => p.status === "bezahlt").reduce((s, p) => s + p.amount, 0);
+  const totalExpected = payments.reduce((s, p) => s + (p.cold_rent + p.nebenkosten), 0);
+  const totalPaid = payments.filter(p => p.paid_at !== null).reduce((s, p) => s + (p.cold_rent + p.nebenkosten), 0);
   const totalOpen = totalExpected - totalPaid;
 
   return (
@@ -192,7 +192,7 @@ const RentTrackingPage = () => {
       ) : (
         <div className="space-y-3">
           {payments.map((p) => {
-            const statusInfo = getStatusInfo(p.status, p.due_date);
+            const statusInfo = getStatusInfo(p.paid_at, p.due_date);
             const StatusIcon = statusInfo.icon;
             const warmmiete = p.cold_rent + p.nebenkosten;
             return (
@@ -220,7 +220,7 @@ const RentTrackingPage = () => {
                   <span className="text-lg font-bold text-foreground whitespace-nowrap">
                     {warmmiete.toLocaleString("de-DE")} €
                   </span>
-                  {p.status !== "bezahlt" && (
+                  {!p.paid_at && (
                     <Button size="sm" variant="outline" onClick={() => markAsPaid(p.id)}>
                       <Check className="h-4 w-4 mr-1" />
                       Bezahlt
@@ -268,6 +268,7 @@ const RentTrackingPage = () => {
             <div>
               <Label>Nebenkosten / Vorauszahlung (€)</Label>
               <Input type="number" placeholder="z.B. 150" value={form.nebenkosten} onChange={e => setForm(f => ({ ...f, nebenkosten: e.target.value }))} />
+              <p className="text-xs text-muted-foreground mt-1">Wenn keine Nebenkosten vereinbart: 0 eingeben</p>
             </div>
             <div>
               <Label>Warmmiete (Gesamt)</Label>
