@@ -19,7 +19,7 @@ interface TenantInfo {
 }
 
 const DashboardPage = () => {
-  const { userName, userProperties, salutation, userId, setupWizardComplete } = useUser();
+  const { userName, userProperties, salutation, userId, setupWizardComplete, gender, lastName } = useUser();
   const { messages } = useMessages();
   const displayName = userName || "Eigentümer";
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
@@ -78,7 +78,11 @@ const DashboardPage = () => {
         <div className="relative z-10">
           <p className="text-sm text-muted-foreground font-medium">Willkommen zurück</p>
           <h1 className="text-3xl font-heading font-extrabold text-foreground mt-1">
-            {salutation === "du" ? `Hallo, ${displayName.split(" ")[0]}` : `Guten Tag, ${displayName.split(" ")[0]}`}
+            {salutation === "du"
+              ? `Hallo, ${displayName.split(" ")[0]}!`
+              : gender && lastName
+                ? `Guten Tag, ${gender === "Frau" ? "Frau" : "Herr"} ${lastName}.`
+                : `Guten Tag, ${displayName.split(" ")[0]}.`}
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-md">
             {propertyCount === 0

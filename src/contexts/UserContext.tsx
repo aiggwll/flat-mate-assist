@@ -20,6 +20,8 @@ interface UserContextType {
   setUserRole: (role: "owner" | "tenant" | null) => void;
   salutation: "du" | "sie";
   setSalutation: (s: "du" | "sie") => void;
+  gender: string | null;
+  lastName: string | null;
   userProperties: UserProperty[];
   setUserProperties: (props: UserProperty[]) => void;
   isNewUser: boolean;
@@ -34,6 +36,8 @@ const UserContext = createContext<UserContextType | null>(null);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userName, setUserName] = useState("");
+  const [gender, setGender] = useState<string | null>(null);
+  const [lastName, setLastName] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<"owner" | "tenant" | null>(null);
   const [salutation, setSalutationState] = useState<"du" | "sie">(
     () => (localStorage.getItem("dwello_salutation") as "du" | "sie") || "sie"
@@ -56,11 +60,15 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       try {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("name, role, salutation, setup_wizard_complete")
+          .select("name, role, salutation, setup_wizard_complete, gender")
           .eq("user_id", currentUser.id)
           .single();
         if (profile) {
-          setUserName(profile.name || "");
+          const fullName = profile.name || "";
+          setUserName(fullName);
+          const nameParts = fullName.trim().split(/\s+/);
+          setLastName(nameParts.length > 1 ? nameParts[nameParts.length - 1] : null);
+          setGender(profile.gender || null);
           setUserRole(profile.role as "owner" | "tenant");
           const profileSalutation = (profile.salutation as "du" | "sie") || "sie";
           setSalutationState(profileSalutation);
@@ -148,6 +156,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUserName("");
         setUserRole(null);
         setSalutationState("sie");
+        setGender(null);
+        setLastName(null);
         setUserProperties([]);
         setSetupWizardComplete(false);
       }
@@ -165,6 +175,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
     setUser(null);
     setUserName("");
+    setGender(null);
+    setLastName(null);
     setUserRole(null);
     setSalutationState("sie");
     setUserProperties([]);
@@ -181,6 +193,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setUserRole,
       salutation,
       setSalutation,
+      gender,
+      lastName,
       userProperties,
       setUserProperties,
       isNewUser,
