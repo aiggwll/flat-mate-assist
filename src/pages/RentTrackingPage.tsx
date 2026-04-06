@@ -208,8 +208,12 @@ const RentTrackingPage = () => {
               <Input placeholder="Max Mustermann" value={form.tenant_name} onChange={e => setForm(f => ({ ...f, tenant_name: e.target.value }))} />
             </div>
             <div>
-              <Label>Monatliche Miete (€)</Label>
-              <Input type="number" placeholder="750" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
+              <Label>Monatliche Kaltmiete (€)</Label>
+              <Input type="number" placeholder="600" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Monatliche Warmmiete (€)</Label>
+              <Input type="number" placeholder="750" value={form.warm_rent} onChange={e => setForm(f => ({ ...f, warm_rent: e.target.value }))} />
             </div>
           </div>
           <DialogFooter>
