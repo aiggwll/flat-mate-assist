@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
@@ -8,6 +8,7 @@ import { Plus, Check, Clock, AlertTriangle, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -40,11 +41,25 @@ const getStatusInfo = (status: string, dueDate: string) => {
 };
 
 const RentTrackingPage = () => {
-  const { user } = useUser();
+  const { user, userProperties } = useUser();
   const [payments, setPayments] = useState<RentPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ unit_id: "", tenant_name: "", cold_rent: "", warm_rent: "" });
+
+  const unitOptions = useMemo(() => {
+    const options: { value: string; label: string }[] = [];
+    userProperties.forEach((prop) => {
+      const unitCount = prop.units || 1;
+      for (let i = 1; i <= unitCount; i++) {
+        options.push({
+          value: `${prop.address}-WE${String(i).padStart(2, "0")}`,
+          label: `${prop.address} – Whg. ${i}`,
+        });
+      }
+    });
+    return options;
+  }, [userProperties]);
 
   const loadPayments = useCallback(async () => {
     if (!user) return;
@@ -203,8 +218,21 @@ const RentTrackingPage = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Wohnungskennung</Label>
-              <Input placeholder="z.B. WE-01" value={form.unit_id} onChange={e => setForm(f => ({ ...f, unit_id: e.target.value }))} />
+              <Label>Immobilie & Wohnung</Label>
+              <Select value={form.unit_id} onValueChange={(val) => setForm(f => ({ ...f, unit_id: val }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Wohnung auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {unitOptions.length === 0 ? (
+                    <SelectItem value="_none" disabled>Keine Immobilien vorhanden</SelectItem>
+                  ) : (
+                    unitOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Mietername</Label>
@@ -212,11 +240,11 @@ const RentTrackingPage = () => {
             </div>
             <div>
               <Label>Monatliche Kaltmiete (€)</Label>
-              <Input type="number" placeholder="600" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
+              <Input type="number" placeholder="z.B. 850" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
             </div>
             <div>
               <Label>Monatliche Warmmiete (€)</Label>
-              <Input type="number" placeholder="750" value={form.warm_rent} onChange={e => setForm(f => ({ ...f, warm_rent: e.target.value }))} />
+              <Input type="number" placeholder="z.B. 950" value={form.warm_rent} onChange={e => setForm(f => ({ ...f, warm_rent: e.target.value }))} />
             </div>
           </div>
           <DialogFooter>
