@@ -81,7 +81,8 @@ function getYear(dateStr: string) {
 }
 
 const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
-  const { userProperties } = useUser();
+  const { userProperties, salutation } = useUser();
+  const navigate = useNavigate();
   const [docs, setDocs] = useState<DocRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
