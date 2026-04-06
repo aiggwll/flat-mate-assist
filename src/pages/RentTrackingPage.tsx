@@ -65,7 +65,7 @@ const RentTrackingPage = () => {
   }, [loadPayments]);
 
   const handleAddPayment = async () => {
-    if (!form.unit_id || !form.tenant_name || !form.amount) {
+    if (!form.unit_id || !form.tenant_name || !form.cold_rent || !form.warm_rent) {
       toast.error("Bitte alle Felder ausfüllen.");
       return;
     }
