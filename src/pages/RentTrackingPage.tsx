@@ -73,11 +73,16 @@ const RentTrackingPage = () => {
 
     const dueDate = format(startOfMonth(new Date()), "yyyy-MM-dd");
 
+    const coldRent = parseFloat(form.cold_rent);
+    const warmRent = parseFloat(form.warm_rent);
+
     const { error } = await supabase.from("rent_payments").insert({
       user_id: user.id,
       unit_id: form.unit_id.trim(),
       tenant_name: form.tenant_name.trim(),
-      amount: parseFloat(form.amount),
+      amount: warmRent,
+      cold_rent: coldRent,
+      warm_rent: warmRent,
       due_date: dueDate,
       status: "ausstehend",
     });
