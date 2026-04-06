@@ -44,7 +44,7 @@ const RentTrackingPage = () => {
   const [payments, setPayments] = useState<RentPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ unit_id: "", tenant_name: "", amount: "" });
+  const [form, setForm] = useState({ unit_id: "", tenant_name: "", cold_rent: "", warm_rent: "" });
 
   const loadPayments = useCallback(async () => {
     if (!user) return;
