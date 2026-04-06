@@ -91,7 +91,7 @@ const RentTrackingPage = () => {
       toast.error("Fehler beim Anlegen: " + error.message);
     } else {
       toast.success("Mietzahlung angelegt!");
-      setForm({ unit_id: "", tenant_name: "", amount: "" });
+      setForm({ unit_id: "", tenant_name: "", cold_rent: "", warm_rent: "" });
       setDialogOpen(false);
       loadPayments();
     }
