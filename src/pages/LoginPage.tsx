@@ -246,9 +246,7 @@ const LoginPage = () => {
       <div className="min-h-screen bg-primary flex">
         <div className="flex-1 hidden lg:flex items-center justify-center p-12">
           <div className="max-w-md">
-            <h1 className="text-4xl font-heading font-bold text-primary-foreground mb-4 tracking-tight">
-              Dwell<span className="text-accent">o</span>
-            </h1>
+            <div className="mb-4"><DwelloLogo variant="dark" size="xl" showIcon={false} /></div>
             <p className="text-primary-foreground/70 text-lg leading-relaxed">
               Die All-in-One Plattform für private Vermieter. Verwalten Sie Ihre Immobilien, kommunizieren Sie mit Mietern und behalten Sie den Überblick.
             </p>
@@ -258,9 +256,7 @@ const LoginPage = () => {
         <div className="flex-1 flex items-center justify-center p-8 bg-background rounded-l-3xl lg:max-w-lg">
           <div className="w-full max-w-sm">
             <div className="lg:hidden mb-8">
-              <h1 className="text-2xl font-heading font-bold text-foreground">
-                Dwell<span className="text-accent">o</span>
-              </h1>
+              <DwelloLogo variant="light" size="lg" showIcon={false} />
             </div>
 
             <h2 className="text-2xl font-heading font-bold text-foreground">Willkommen</h2>
@@ -311,9 +307,7 @@ const LoginPage = () => {
       <div className="min-h-screen bg-primary flex">
         <div className="flex-1 hidden lg:flex items-center justify-center p-12">
           <div className="max-w-md">
-            <h1 className="text-4xl font-heading font-bold text-primary-foreground mb-4 tracking-tight">
-              Dwell<span className="text-accent">o</span>
-            </h1>
+            <div className="mb-4"><DwelloLogo variant="dark" size="xl" showIcon={false} /></div>
             <p className="text-primary-foreground/70 text-lg leading-relaxed">
               Willkommen in Ihrem Mieterportal. Hier finden Sie alle Informationen zu Ihrer Wohnung.
             </p>
@@ -327,9 +321,7 @@ const LoginPage = () => {
         <div className="flex-1 flex items-center justify-center p-8 bg-background rounded-l-3xl lg:max-w-lg">
           <div className="w-full max-w-sm">
             <div className="lg:hidden mb-6">
-              <h1 className="text-2xl font-heading font-bold text-foreground">
-                Dwell<span className="text-accent">o</span>
-              </h1>
+              <DwelloLogo variant="light" size="lg" showIcon={false} />
             </div>
 
             <div className="flex items-center gap-2 mb-2">
@@ -393,9 +385,7 @@ const LoginPage = () => {
       <div className="min-h-screen bg-primary flex">
         <div className="flex-1 hidden lg:flex items-center justify-center p-12">
           <div className="max-w-md">
-            <h1 className="text-4xl font-heading font-bold text-primary-foreground mb-4 tracking-tight">
-              Dwell<span className="text-accent">o</span>
-            </h1>
+            <div className="mb-4"><DwelloLogo variant="dark" size="xl" showIcon={false} /></div>
             <p className="text-primary-foreground/70 text-lg leading-relaxed">
               Legen Sie Ihre Immobilien an, um direkt loslegen zu können. Sie können später jederzeit weitere hinzufügen.
             </p>
@@ -409,9 +399,7 @@ const LoginPage = () => {
         <div className="flex-1 flex items-center justify-center p-8 bg-background rounded-l-3xl lg:max-w-lg">
           <div className="w-full max-w-sm">
             <div className="lg:hidden mb-6">
-              <h1 className="text-2xl font-heading font-bold text-foreground">
-                Dwell<span className="text-accent">o</span>
-              </h1>
+              <DwelloLogo variant="light" size="lg" showIcon={false} />
             </div>
 
             <h2 className="text-2xl font-heading font-bold text-foreground">Immobilie anlegen</h2>
@@ -515,9 +503,7 @@ const LoginPage = () => {
     <div className="min-h-screen bg-primary flex">
       <div className="flex-1 hidden lg:flex items-center justify-center p-12">
         <div className="max-w-md">
-          <h1 className="text-4xl font-heading font-bold text-primary-foreground mb-4 tracking-tight">
-            Dwell<span className="text-accent">o</span>
-          </h1>
+          <div className="mb-4"><DwelloLogo variant="dark" size="xl" showIcon={false} /></div>
           <p className="text-primary-foreground/70 text-lg leading-relaxed">
             {selectedRole === "owner"
               ? "Verwalten Sie Ihre Immobilien, kommunizieren Sie mit Mietern und behalten Sie den Überblick."
@@ -540,9 +526,7 @@ const LoginPage = () => {
       <div className="flex-1 flex items-center justify-center p-8 bg-background rounded-l-3xl lg:max-w-lg">
         <div className="w-full max-w-sm">
           <div className="lg:hidden mb-8">
-            <h1 className="text-2xl font-heading font-bold text-foreground">
-              Dwell<span className="text-accent">o</span>
-            </h1>
+            <DwelloLogo variant="light" size="lg" showIcon={false} />
           </div>
 
           {inviteProperty && !isLogin && (
