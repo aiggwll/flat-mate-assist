@@ -72,12 +72,14 @@ export type Database = {
         Row: {
           created_at: string
           email: string
+          gender: string | null
           id: string
           name: string
           owner_name: string | null
           property_id: string | null
           role: string
           salutation: string
+          setup_wizard_complete: boolean
           unit_id: string | null
           updated_at: string
           user_id: string
@@ -85,12 +87,14 @@ export type Database = {
         Insert: {
           created_at?: string
           email?: string
+          gender?: string | null
           id?: string
           name?: string
           owner_name?: string | null
           property_id?: string | null
           role?: string
           salutation?: string
+          setup_wizard_complete?: boolean
           unit_id?: string | null
           updated_at?: string
           user_id: string
@@ -98,12 +102,14 @@ export type Database = {
         Update: {
           created_at?: string
           email?: string
+          gender?: string | null
           id?: string
           name?: string
           owner_name?: string | null
           property_id?: string | null
           role?: string
           salutation?: string
+          setup_wizard_complete?: boolean
           unit_id?: string | null
           updated_at?: string
           user_id?: string
