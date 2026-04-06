@@ -28,6 +28,9 @@ const DashboardPage = () => {
   const [showOnboarding, setShowOnboarding] = useState(
     () => !localStorage.getItem("onboarding_complete_owner")
   );
+  const [showWelcome, setShowWelcome] = useState(
+    () => !localStorage.getItem("dwello_welcome_seen")
+  );
 
   useEffect(() => {
     const loadTenants = async () => {
