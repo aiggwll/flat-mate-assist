@@ -109,13 +109,16 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
 
   const triggerFileInput = () => fileInputRef.current?.click();
 
+  const pendingCategoryRef = useRef<string | null>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     const fileList = Array.from(files);
     setPendingFiles(fileList);
     setUploadFilename(fileList[0].name);
-    setUploadCategory("Sonstige Dokumente");
+    if (!pendingCategoryRef.current) setUploadCategory("Sonstige Dokumente");
+    pendingCategoryRef.current = null;
     setUploadPropertyId(propertyId || "none");
     setShowUploadDialog(true);
     if (fileInputRef.current) fileInputRef.current.value = "";
