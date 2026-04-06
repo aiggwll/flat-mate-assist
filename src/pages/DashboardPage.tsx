@@ -171,7 +171,9 @@ const DashboardPage = () => {
             <div>
               <p className="text-base font-medium text-foreground">Noch keine Immobilien angelegt</p>
               <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-                Legen Sie Ihre erste Immobilie an, um Mieter einladen und alle Funktionen nutzen zu können.
+                {salutation === "du"
+                  ? "Lege deine erste Immobilie an, um Mieter einladen und alle Funktionen nutzen zu können."
+                  : "Legen Sie Ihre erste Immobilie an, um Mieter einladen und alle Funktionen nutzen zu können."}
               </p>
             </div>
             <Link to="/properties">
