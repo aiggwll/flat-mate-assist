@@ -74,7 +74,9 @@ const AppSidebar = () => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-sidebar-foreground truncate">{userName || "Eigentümer"}</p>
-            <p className="text-xs text-sidebar-muted truncate">{userRole === "tenant" ? "Mieter" : "Vermieter"}</p>
+            <p className="text-xs text-sidebar-muted truncate">
+              {userRole === "tenant" ? "Mieter" : gender === "Frau" ? "Eigentümerin" : gender === "Herr" ? "Eigentümer" : "Vermieter"}
+            </p>
           </div>
           <button onClick={async () => { await signOut(); navigate("/"); }} className="text-sidebar-muted hover:text-sidebar-foreground transition-colors">
             <LogOut className="h-4 w-4" />
