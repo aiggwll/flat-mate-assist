@@ -10,7 +10,7 @@ const getSlides = (salutation: "sie" | "du") => [
     icon: AlignJustify,
     iconBg: "#E8F5E9",
     iconColor: "#2D6A4F",
-    headline: sal(salutation, "Ihre Immobilien. Einfach verwaltet.", "Deine Immobilien. Einfach verwaltet."),
+    headline: sal(salutation, "Ihre Immobilien. Effizient verwaltet.", "Deine Immobilien. Effizient verwaltet."),
     subtext: "Alle Wohnungen, Mieter und Dokumente — an einem Ort.",
   },
   {
