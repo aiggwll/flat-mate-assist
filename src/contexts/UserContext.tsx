@@ -175,6 +175,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
     setUser(null);
     setUserName("");
+    setGender(null);
+    setLastName(null);
     setUserRole(null);
     setSalutationState("sie");
     setUserProperties([]);
