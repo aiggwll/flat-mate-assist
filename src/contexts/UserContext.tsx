@@ -193,6 +193,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setUserRole,
       salutation,
       setSalutation,
+      gender,
+      lastName,
       userProperties,
       setUserProperties,
       isNewUser,
