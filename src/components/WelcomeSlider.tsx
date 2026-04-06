@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlignJustify, MessageSquareMore, FileText, Receipt } from "lucide-react";
+import SetupWizard from "./SetupWizard";
 
 const slides = [
   {
@@ -35,12 +36,19 @@ const slides = [
 
 const WelcomeSlider = () => {
   const [current, setCurrent] = useState(0);
+  const [showWizard, setShowWizard] = useState(false);
   const navigate = useNavigate();
 
-  const finish = (highlight = false) => {
+  const finish = (launchWizard = false) => {
     localStorage.setItem("dwello_welcome_seen", "true");
-    navigate("/dashboard" + (highlight ? "?setup=1" : ""));
+    if (launchWizard && !localStorage.getItem("dwello_setup_wizard_done")) {
+      setShowWizard(true);
+    } else {
+      navigate("/dashboard");
+    }
   };
+
+  if (showWizard) return <SetupWizard />;
 
   const isLast = current === slides.length - 1;
 

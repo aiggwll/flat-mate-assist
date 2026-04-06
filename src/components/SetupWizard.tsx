@@ -1,0 +1,266 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@/contexts/UserContext";
+
+const SetupWizard = () => {
+  const [step, setStep] = useState(0);
+  const [firstName, setFirstName] = useState("");
+  const [address, setAddress] = useState("");
+  const [sqm, setSqm] = useState("");
+  const [coldRent, setColdRent] = useState("");
+  const [saving, setSaving] = useState(false);
+  const navigate = useNavigate();
+  const { user, setUserName, setUserProperties, userProperties } = useUser();
+
+  const progress = [25, 50, 75, 100][step];
+
+  const saveFirstName = async () => {
+    if (!firstName.trim()) return;
+    setSaving(true);
+    try {
+      if (user) {
+        await supabase
+          .from("profiles")
+          .update({ name: firstName.trim() })
+          .eq("user_id", user.id);
+        setUserName(firstName.trim());
+      }
+    } catch (e) {
+      console.error("Error saving name:", e);
+    }
+    setSaving(false);
+    setStep(1);
+  };
+
+  const saveProperty = async () => {
+    if (!address.trim()) return;
+    setSaving(true);
+    try {
+      if (user) {
+        const parts = address.split(",").map((s) => s.trim());
+        const addr = parts[0] || address.trim();
+        const city = parts[1] || "";
+        const { data } = await supabase
+          .from("properties")
+          .insert({
+            user_id: user.id,
+            address: addr,
+            city,
+            zip_code: "",
+            units: 1,
+          })
+          .select();
+        if (data && data.length > 0) {
+          setUserProperties([
+            ...userProperties,
+            ...data.map((p) => ({
+              id: p.id,
+              address: p.address,
+              city: p.city,
+              zipCode: p.zip_code,
+              yearBuilt: p.year_built ?? 0,
+              units: p.units ?? 1,
+            })),
+          ]);
+        }
+      }
+    } catch (e) {
+      console.error("Error saving property:", e);
+    }
+    setSaving(false);
+    setStep(2);
+  };
+
+  const finish = () => {
+    localStorage.setItem("dwello_setup_wizard_done", "true");
+    navigate("/dashboard?setup=1");
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-background">
+      {/* Progress bar */}
+      <div className="w-full h-[3px] bg-muted">
+        <div
+          className="h-full transition-all duration-500 ease-out"
+          style={{ width: `${progress}%`, backgroundColor: "#1D9E75" }}
+        />
+      </div>
+
+      {/* Step indicator */}
+      <p className="text-[13px] text-muted-foreground px-6 pt-5">
+        Schritt {step + 1} von 4
+      </p>
+
+      {/* Content */}
+      <div className="flex-1 flex flex-col px-6 pt-4 pb-6 max-w-lg mx-auto w-full">
+        {step === 0 && (
+          <div className="flex flex-col flex-1">
+            <h1 className="text-[20px] font-medium text-foreground leading-tight">
+              Wie sollen wir dich nennen?
+            </h1>
+            <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed">
+              Damit Dwello dich persönlich ansprechen kann.
+            </p>
+            <div className="mt-8">
+              <label className="text-sm font-medium text-foreground">Vorname</label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="z.B. Thomas"
+                className="mt-1.5 w-full h-9 px-3 text-sm border border-border/50 rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <div className="mt-auto pt-6">
+              <button
+                onClick={saveFirstName}
+                disabled={!firstName.trim() || saving}
+                className="w-full h-11 rounded-xl font-semibold text-sm transition-colors disabled:opacity-40"
+                style={{ backgroundColor: "#1D9E75", color: "#E1F5EE" }}
+              >
+                {saving ? "Wird gespeichert…" : "Weiter"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 1 && (
+          <div className="flex flex-col flex-1">
+            <h1 className="text-[20px] font-medium text-foreground leading-tight">
+              Deine erste Wohnung.
+            </h1>
+            <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed">
+              Nur das Wichtigste — den Rest kannst du später ergänzen.
+            </p>
+            <div className="mt-8 space-y-4">
+              <div>
+                <label className="text-sm font-medium text-foreground">Adresse</label>
+                <input
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Musterstraße 12, Berlin"
+                  className="mt-1.5 w-full h-9 px-3 text-sm border border-border/50 rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-foreground">
+                    Wohnfläche{" "}
+                    <span className="text-muted-foreground font-normal text-xs">optional</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={sqm}
+                    onChange={(e) => setSqm(e.target.value)}
+                    placeholder="72 m²"
+                    className="mt-1.5 w-full h-9 px-3 text-sm border border-border/50 rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">
+                    Kaltmiete{" "}
+                    <span className="text-muted-foreground font-normal text-xs">optional</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={coldRent}
+                    onChange={(e) => setColdRent(e.target.value)}
+                    placeholder="850 €"
+                    className="mt-1.5 w-full h-9 px-3 text-sm border border-border/50 rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="mt-auto pt-6 space-y-3">
+              <button
+                onClick={saveProperty}
+                disabled={!address.trim() || saving}
+                className="w-full h-11 rounded-xl font-semibold text-sm transition-colors disabled:opacity-40"
+                style={{ backgroundColor: "#1D9E75", color: "#E1F5EE" }}
+              >
+                {saving ? "Wird gespeichert…" : "Weiter"}
+              </button>
+              <button
+                onClick={() => setStep(2)}
+                className="w-full h-11 rounded-xl text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Später ergänzen
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="flex flex-col flex-1">
+            <h1 className="text-[20px] font-medium text-foreground leading-tight">
+              Und so lädst du deinen Mieter ein.
+            </h1>
+            <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed">
+              Du musst das jetzt noch nicht tun — schau dir das einfach kurz an.
+            </p>
+            <div
+              className="mt-8 rounded-xl p-5 space-y-4"
+              style={{ backgroundColor: "#EEEDFE", color: "#3C3489" }}
+            >
+              {[
+                "Du gibst die E-Mail deines Mieters ein.",
+                "Dwello schickt ihm automatisch eine Einladung.",
+                "Dein Mieter vervollständigt seine Daten eigenständig — du kannst dich zurücklehnen.",
+              ].map((text, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div
+                    className="h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"
+                    style={{ backgroundColor: "#7F77DD", color: "#fff" }}
+                  >
+                    {i + 1}
+                  </div>
+                  <p className="text-sm leading-relaxed">{text}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-auto pt-6">
+              <button
+                onClick={() => setStep(3)}
+                className="w-full h-11 rounded-xl font-semibold text-sm transition-colors"
+                style={{ backgroundColor: "#1D9E75", color: "#E1F5EE" }}
+              >
+                Weiter
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="flex flex-col flex-1 items-center justify-center text-center">
+            <div
+              className="h-16 w-16 rounded-full flex items-center justify-center mb-6"
+              style={{ backgroundColor: "#E1F5EE" }}
+            >
+              <Check className="h-8 w-8" style={{ color: "#1D9E75" }} />
+            </div>
+            <h1 className="text-[20px] font-medium text-foreground leading-tight">
+              Alles bereit, {firstName || "du"}!
+            </h1>
+            <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed max-w-xs">
+              Deine erste Wohnung ist angelegt. Dwello kümmert sich um den Rest.
+            </p>
+            <div className="w-full mt-10">
+              <button
+                onClick={finish}
+                className="w-full h-11 rounded-xl font-semibold text-sm transition-colors"
+                style={{ backgroundColor: "#1D9E75", color: "#E1F5EE" }}
+              >
+                Zum Dashboard
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default SetupWizard;
