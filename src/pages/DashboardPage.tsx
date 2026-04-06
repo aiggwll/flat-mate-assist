@@ -19,7 +19,7 @@ interface TenantInfo {
 }
 
 const DashboardPage = () => {
-  const { userName, userProperties, salutation, userId, setupWizardComplete } = useUser();
+  const { userName, userProperties, salutation, userId, setupWizardComplete, gender, lastName } = useUser();
   const { messages } = useMessages();
   const displayName = userName || "Eigentümer";
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
