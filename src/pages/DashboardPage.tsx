@@ -19,17 +19,17 @@ interface TenantInfo {
 }
 
 const DashboardPage = () => {
-  const { userName, userProperties, salutation, userId } = useUser();
+  const { userName, userProperties, salutation, userId, setupWizardComplete } = useUser();
   const { messages } = useMessages();
   const displayName = userName || "Eigentümer";
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
   const [hasPayments, setHasPayments] = useState(false);
   const [hasDocuments, setHasDocuments] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(
-    () => !localStorage.getItem("onboarding_complete_owner") && !localStorage.getItem("dwello_setup_complete")
+    () => !localStorage.getItem("onboarding_complete_owner") && !setupWizardComplete
   );
   const [showWelcome, setShowWelcome] = useState(
-    () => !localStorage.getItem("dwello_welcome_seen") && !localStorage.getItem("dwello_setup_complete")
+    () => !localStorage.getItem("dwello_welcome_seen") && !setupWizardComplete
   );
 
   useEffect(() => {

@@ -25,6 +25,7 @@ interface UserContextType {
   isNewUser: boolean;
   setIsNewUser: (v: boolean) => void;
   isLoading: boolean;
+  setupWizardComplete: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -34,17 +35,23 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userName, setUserName] = useState("");
   const [userRole, setUserRole] = useState<"owner" | "tenant" | null>(null);
-  const [salutation, setSalutation] = useState<"du" | "sie">("sie");
+  const [salutation, setSalutationState] = useState<"du" | "sie">(
+    () => (localStorage.getItem("dwello_salutation") as "du" | "sie") || "sie"
+  );
   const [userProperties, setUserPropertiesState] = useState<UserProperty[]>([]);
-  const setUserProperties = (props: UserProperty[]) => {
-    setUserPropertiesState(props);
-  };
+  const setUserProperties = (props: UserProperty[]) => setUserPropertiesState(props);
   const [isNewUser, setIsNewUser] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [setupWizardComplete, setSetupWizardComplete] = useState(
+    () => localStorage.getItem("dwello_setup_complete") === "true"
+  );
 
-  // Helper to load profile & properties (non-blocking, fire-and-forget)
+  const setSalutation = (s: "du" | "sie") => {
+    setSalutationState(s);
+    localStorage.setItem("dwello_salutation", s);
+  };
+
   const loadUserData = (currentUser: User) => {
-    // Fetch profile (async IIFE to avoid blocking)
     (async () => {
       try {
         const { data: profile } = await supabase
@@ -55,14 +62,26 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         if (profile) {
           setUserName(profile.name || "");
           setUserRole(profile.role as "owner" | "tenant");
-          setSalutation(((profile as any).salutation as "du" | "sie") || "sie");
+          const sal = ((profile as any).salutation as "du" | "sie") || "sie";
+          setSalutationState(sal);
+          localStorage.setItem("dwello_salutation", sal);
+
+          // Check setup_wizard_complete from DB (source of truth)
+          const { data: fullProfile } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("user_id", currentUser.id)
+            .single();
+          if (fullProfile && (fullProfile as any).setup_wizard_complete) {
+            setSetupWizardComplete(true);
+            localStorage.setItem("dwello_setup_complete", "true");
+          }
         }
       } catch (e) {
         console.error("Error loading profile:", e);
       }
     })();
 
-    // Fetch properties
     (async () => {
       try {
         const { data: props } = await supabase
@@ -84,7 +103,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
     })();
 
-    // Sync pending properties from localStorage (fallback from registration)
     const pending = localStorage.getItem("pendingProperties");
     if (pending) {
       (async () => {
@@ -114,7 +132,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // If user chose not to stay logged in, check sessionStorage flag
     const rememberMe = localStorage.getItem("rememberMe");
     if (rememberMe === "false") {
       if (!sessionStorage.getItem("activeSession")) {
@@ -126,25 +143,23 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
     }
 
-    // Listen for auth changes — NEVER await inside this callback
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
       if (currentUser) {
         sessionStorage.setItem("activeSession", "true");
-        // Fire-and-forget: load data without blocking the auth event queue
         loadUserData(currentUser);
       } else {
         setUserName("");
         setUserRole(null);
-        setSalutation("sie");
+        setSalutationState("sie");
         setUserProperties([]);
+        setSetupWizardComplete(false);
       }
       setIsLoading(false);
     });
 
-    // Check existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) setIsLoading(false);
     });
@@ -157,8 +172,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setUserName("");
     setUserRole(null);
-    setSalutation("sie");
+    setSalutationState("sie");
     setUserProperties([]);
+    setSetupWizardComplete(false);
   };
 
   return (
@@ -176,6 +192,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       isNewUser,
       setIsNewUser,
       isLoading,
+      setupWizardComplete,
       signOut,
     }}>
       {children}

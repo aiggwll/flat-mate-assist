@@ -1,24 +1,28 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/UserContext";
+import { sal } from "@/lib/salutation";
 
 const SetupWizard = () => {
   const [step, setStep] = useState(0);
-  const [sal, setSal] = useState<"sie" | "du">("sie");
+  const [salutation, setSalutationLocal] = useState<"sie" | "du">("sie");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [gender, setGender] = useState<"" | "Herr" | "Frau">("");
   const [address, setAddress] = useState("");
   const [sqm, setSqm] = useState("");
   const [coldRent, setColdRent] = useState("");
   const [saving, setSaving] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
   const navigate = useNavigate();
   const { user, setUserName, setSalutation, setUserProperties, userProperties } = useUser();
 
   const progress = [25, 50, 75, 100][step];
-  const isSie = sal === "sie";
+  const s = salutation;
+
+  const inputClass =
+    "w-full h-9 px-3 text-sm border border-border/50 rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary";
 
   const saveStep1 = async () => {
     if (!firstName.trim()) return;
@@ -30,10 +34,15 @@ const SetupWizard = () => {
           : firstName.trim();
         await supabase
           .from("profiles")
-          .update({ name: fullName, salutation: sal })
+          .update({
+            name: fullName,
+            salutation,
+            gender: gender || null,
+          } as any)
           .eq("user_id", user.id);
         setUserName(fullName);
-        setSalutation(sal);
+        setSalutation(salutation);
+        localStorage.setItem("dwello_salutation", salutation);
       }
     } catch (e) {
       console.error("Error saving name:", e);
@@ -47,20 +56,14 @@ const SetupWizard = () => {
     setSaving(true);
     try {
       if (user) {
-        const parts = address.split(",").map((s) => s.trim());
+        const parts = address.split(",").map((p) => p.trim());
         const addr = parts[0] || address.trim();
         const city = parts[1] || "";
         const { data } = await supabase
           .from("properties")
-          .insert({
-            user_id: user.id,
-            address: addr,
-            city,
-            zip_code: "",
-            units: 1,
-          })
+          .insert({ user_id: user.id, address: addr, city, zip_code: "", units: 1 })
           .select();
-        if (data && data.length > 0) {
+        if (data?.length) {
           setUserProperties([
             ...userProperties,
             ...data.map((p) => ({
@@ -81,19 +84,33 @@ const SetupWizard = () => {
     setStep(2);
   };
 
-  const finish = () => {
-    setShowConfetti(true);
+  const finish = async () => {
+    setSaving(true);
+    try {
+      if (user) {
+        await supabase
+          .from("profiles")
+          .update({ setup_wizard_complete: true } as any)
+          .eq("user_id", user.id);
+      }
+    } catch (e) {
+      console.error("Error saving wizard completion:", e);
+    }
     localStorage.setItem("dwello_setup_complete", "true");
     localStorage.setItem("dwello_welcome_seen", "true");
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 2000);
+    setSaving(false);
+    navigate("/dashboard");
   };
 
-  const inputClass =
-    "w-full h-9 px-3 text-sm border border-border/50 rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary";
+  // Step 4 title
+  const getStep4Title = () => {
+    if (s === "sie" && gender && lastName.trim()) {
+      return `Alles bereit, ${gender} ${lastName.trim()}.`;
+    }
+    return `Alles bereit, ${firstName || "du"}${s === "sie" ? "." : "!"}`;
+  };
 
-  const tenantSteps = isSie
+  const tenantSteps = salutation === "sie"
     ? [
         "Sie erfassen die E-Mail-Adresse Ihres Mieters.",
         "Dwello versendet automatisch eine Einladung.",
@@ -105,11 +122,13 @@ const SetupWizard = () => {
         "Dein Mieter vervollständigt seine Daten eigenständig — du kannst dich zurücklehnen.",
       ];
 
+  const toggleBtnStyle = (active: boolean) =>
+    active
+      ? { backgroundColor: "#1D9E75", color: "#fff", borderColor: "#1D9E75" }
+      : { backgroundColor: "transparent", color: "inherit", borderColor: "hsl(var(--border))" };
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
-      {/* Confetti overlay */}
-      {showConfetti && <ConfettiOverlay />}
-
       {/* Progress bar */}
       <div className="w-full h-[3px] bg-muted">
         <div
@@ -118,14 +137,12 @@ const SetupWizard = () => {
         />
       </div>
 
-      {/* Step indicator */}
       <p className="text-[13px] text-muted-foreground px-6 pt-5">
         Schritt {step + 1} von 4
       </p>
 
-      {/* Content */}
       <div className="flex-1 flex flex-col px-6 pt-4 pb-6 max-w-lg mx-auto w-full">
-        {/* STEP 1 — Anrede & Name */}
+        {/* STEP 1 */}
         {step === 0 && (
           <div className="flex flex-col flex-1">
             <h1 className="text-[20px] font-medium text-foreground leading-tight">
@@ -135,33 +152,48 @@ const SetupWizard = () => {
               Für eine persönliche Erfahrung in Dwello.
             </p>
 
-            {/* Toggle */}
             <div className="mt-8 grid grid-cols-2 gap-3">
               <button
-                onClick={() => setSal("sie")}
+                onClick={() => setSalutationLocal("sie")}
                 className="h-10 rounded-lg text-sm font-medium transition-colors border"
-                style={
-                  sal === "sie"
-                    ? { backgroundColor: "#1D9E75", color: "#fff", borderColor: "#1D9E75" }
-                    : { backgroundColor: "transparent", color: "inherit", borderColor: "hsl(var(--border))" }
-                }
+                style={toggleBtnStyle(salutation === "sie")}
               >
                 Sie
               </button>
               <button
-                onClick={() => setSal("du")}
+                onClick={() => setSalutationLocal("du")}
                 className="h-10 rounded-lg text-sm font-medium transition-colors border"
-                style={
-                  sal === "du"
-                    ? { backgroundColor: "#1D9E75", color: "#fff", borderColor: "#1D9E75" }
-                    : { backgroundColor: "transparent", color: "inherit", borderColor: "hsl(var(--border))" }
-                }
+                style={toggleBtnStyle(salutation === "du")}
               >
                 Du
               </button>
             </div>
 
             <div className="my-6 h-px bg-border/50" />
+
+            {/* Gender (optional) */}
+            <div className="mb-4">
+              <label className="text-sm font-medium text-foreground">
+                Anrede{" "}
+                <span className="text-muted-foreground font-normal text-xs">optional</span>
+              </label>
+              <div className="mt-1.5 grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setGender(gender === "Herr" ? "" : "Herr")}
+                  className="h-9 rounded-lg text-sm font-medium transition-colors border"
+                  style={toggleBtnStyle(gender === "Herr")}
+                >
+                  Herr
+                </button>
+                <button
+                  onClick={() => setGender(gender === "Frau" ? "" : "Frau")}
+                  className="h-9 rounded-lg text-sm font-medium transition-colors border"
+                  style={toggleBtnStyle(gender === "Frau")}
+                >
+                  Frau
+                </button>
+              </div>
+            </div>
 
             <div className="space-y-4">
               <div>
@@ -202,16 +234,18 @@ const SetupWizard = () => {
           </div>
         )}
 
-        {/* STEP 2 — Erste Immobilie */}
+        {/* STEP 2 */}
         {step === 1 && (
           <div className="flex flex-col flex-1">
             <h1 className="text-[20px] font-medium text-foreground leading-tight">
               Wohnung Nr. 1.
             </h1>
             <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed">
-              {isSie
-                ? "Erfassen Sie Ihre erste Immobilie. Weitere Details können jederzeit ergänzt werden."
-                : "Erfasse deine erste Immobilie. Weitere Details kannst du jederzeit ergänzen."}
+              {sal(
+                s,
+                "Erfassen Sie Ihre erste Immobilie. Weitere Details können jederzeit ergänzt werden.",
+                "Erfasse deine erste Immobilie. Weitere Details kannst du jederzeit ergänzen."
+              )}
             </p>
             <div className="mt-8 space-y-4">
               <div>
@@ -272,16 +306,18 @@ const SetupWizard = () => {
           </div>
         )}
 
-        {/* STEP 3 — Mieter-Vorschau */}
+        {/* STEP 3 */}
         {step === 2 && (
           <div className="flex flex-col flex-1">
             <h1 className="text-[20px] font-medium text-foreground leading-tight">
               Mieter einladen. In Sekunden.
             </h1>
             <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed">
-              {isSie
-                ? "Dwello übernimmt die Kommunikation mit Ihren Mietern — vollständig automatisiert."
-                : "Dwello übernimmt die Kommunikation mit deinen Mietern — vollständig automatisiert."}
+              {sal(
+                s,
+                "Dwello übernimmt die Kommunikation mit Ihren Mietern — vollständig automatisiert.",
+                "Dwello übernimmt die Kommunikation mit deinen Mietern — vollständig automatisiert."
+              )}
             </p>
             <div
               className="mt-8 rounded-xl p-5 space-y-4"
@@ -311,88 +347,41 @@ const SetupWizard = () => {
           </div>
         )}
 
-        {/* STEP 4 — Abschluss */}
+        {/* STEP 4 */}
         {step === 3 && (
           <div className="flex flex-col flex-1 items-center justify-center text-center">
             <div
-              className="h-16 w-16 rounded-full flex items-center justify-center mb-6"
-              style={{ backgroundColor: "#E8F5E9" }}
+              className="h-[72px] w-[72px] rounded-full flex items-center justify-center mb-6"
+              style={{ backgroundColor: "#E1F5EE" }}
             >
-              <Check className="h-8 w-8" style={{ color: "#1D9E75" }} />
+              <Check className="h-8 w-8" style={{ color: "#1D9E75" }} strokeWidth={2.5} />
             </div>
-            <h1 className="text-[22px] font-bold text-foreground leading-tight">
-              Willkommen bei Dwello, {firstName || "du"}.
+            <h1
+              className="text-[20px] leading-tight"
+              style={{ fontWeight: 600, color: "#111" }}
+            >
+              {getStep4Title()}
             </h1>
-            <p className="text-[14px] text-muted-foreground mt-2 leading-relaxed max-w-xs">
-              {isSie
-                ? "Ihr Konto ist eingerichtet. Alles Weitere erledigen Sie in Ihrem eigenen Tempo."
-                : "Dein Konto ist eingerichtet. Alles Weitere erledigst du in deinem eigenen Tempo."}
+            <p className="text-[14px] text-muted-foreground mt-3 leading-relaxed max-w-[280px]">
+              {sal(
+                s,
+                "Willkommen bei Dwello. Ihre Immobilien, jetzt digital verwaltet.",
+                "Willkommen bei Dwello. Deine Immobilien, jetzt digital verwaltet."
+              )}
             </p>
-
-            {/* Feature pills */}
-            <div className="flex gap-2 mt-6 flex-wrap justify-center">
-              {["🏠 Immobilien", "💬 Kommunikation", "📊 Finanzen"].map((label) => (
-                <span
-                  key={label}
-                  className="px-3 py-1 rounded-full text-xs font-medium"
-                  style={{ backgroundColor: "#F0FDF4", color: "#1D9E75" }}
-                >
-                  {label}
-                </span>
-              ))}
-            </div>
-
-            <div className="w-full mt-10">
+            <div className="w-full mt-8">
               <button
                 onClick={finish}
-                className="w-full h-11 rounded-xl font-semibold text-sm transition-colors"
-                style={{ backgroundColor: "#1D9E75", color: "#E1F5EE" }}
+                disabled={saving}
+                className="w-full h-12 rounded-xl text-sm transition-colors disabled:opacity-40"
+                style={{ backgroundColor: "#1D9E75", color: "#fff", fontWeight: 600 }}
               >
-                Zum Dashboard
+                {saving ? "Wird gespeichert…" : "Zum Dashboard"}
               </button>
             </div>
           </div>
         )}
       </div>
-    </div>
-  );
-};
-
-/* Simple confetti animation */
-const ConfettiOverlay = () => {
-  const [particles] = useState(() =>
-    Array.from({ length: 50 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      delay: Math.random() * 0.5,
-      duration: 1.5 + Math.random() * 1.5,
-      color: ["#1D9E75", "#7F77DD", "#F59E0B", "#EA4C2A", "#2D6A4F"][i % 5],
-      size: 6 + Math.random() * 6,
-    }))
-  );
-
-  return (
-    <div className="fixed inset-0 z-[100] pointer-events-none overflow-hidden">
-      {particles.map((p) => (
-        <div
-          key={p.id}
-          className="absolute rounded-sm"
-          style={{
-            left: `${p.x}%`,
-            top: "-10px",
-            width: p.size,
-            height: p.size,
-            backgroundColor: p.color,
-            animation: `confettiFall ${p.duration}s ease-in ${p.delay}s forwards`,
-          }}
-        />
-      ))}
-      <style>{`
-        @keyframes confettiFall {
-          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-          100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
-      `}</style>
     </div>
   );
 };
