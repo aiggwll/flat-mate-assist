@@ -34,6 +34,8 @@ const UserContext = createContext<UserContextType | null>(null);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userName, setUserName] = useState("");
+  const [gender, setGender] = useState<string | null>(null);
+  const [lastName, setLastName] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<"owner" | "tenant" | null>(null);
   const [salutation, setSalutationState] = useState<"du" | "sie">(
     () => (localStorage.getItem("dwello_salutation") as "du" | "sie") || "sie"
