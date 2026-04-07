@@ -22,7 +22,7 @@ const PropertiesPage = () => {
   });
 
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
-  const { userProperties, setUserProperties } = useUser();
+  const { userProperties, setUserProperties, salutation } = useUser();
 
   const handleSubmit = async () => {
     if (!form.address || !form.city || !form.zipCode) {
