@@ -16,8 +16,6 @@ import { useUser } from "@/contexts/UserContext";
 
 const PropertiesPage = () => {
   const [open, setOpen] = useState(false);
-  // ... keep rest of existing destructuring
-  const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "",
     totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "",
