@@ -44,7 +44,7 @@ interface TaxDoc {
 const currentYear = new Date().getFullYear();
 
 const TaxFolderPage = () => {
-  const { userProperties, userId } = useUser();
+  const { userProperties, userId, salutation } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
   const [documents, setDocuments] = useState<TaxDoc[]>([]);
