@@ -43,7 +43,7 @@ interface TenantRow {
 const currentYear = new Date().getFullYear();
 
 const UtilityBillingPage = () => {
-  const { userProperties, userId } = useUser();
+  const { userProperties, userId, salutation } = useUser();
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
   const [selectedPropertyId, setSelectedPropertyId] = useState("");
   const [costs, setCosts] = useState<CostEntry[]>(
