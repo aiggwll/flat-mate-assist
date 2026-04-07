@@ -47,6 +47,7 @@ const App = () => (
               <Route path="/marketplace" element={<MarketplacePage />} />
             </Route>
             <Route path="/tenant-dashboard" element={<TenantDashboardPage />} />
+            <Route path="/unsubscribe" element={<UnsubscribePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
