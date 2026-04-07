@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -49,103 +49,98 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [setupWizardComplete, setSetupWizardComplete] = useState(
     () => localStorage.getItem("dwello_setup_complete") === "true"
   );
+  const dataLoadedForUser = useRef<string | null>(null);
 
   const setSalutation = (s: "du" | "sie") => {
     setSalutationState(s);
     localStorage.setItem("dwello_salutation", s);
   };
 
-  const loadUserData = (currentUser: User) => {
-    (async () => {
-      try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("name, role, salutation, setup_wizard_complete, gender")
-          .eq("user_id", currentUser.id)
-          .single();
-        if (profile) {
-          const fullName = profile.name || "";
-          setUserName(fullName);
-          const nameParts = fullName.trim().split(/\s+/);
-          setLastName(nameParts.length > 1 ? nameParts[nameParts.length - 1] : null);
-          setGender(profile.gender || null);
-          setUserRole(profile.role as "owner" | "tenant");
-          const profileSalutation = (profile.salutation as "du" | "sie") || "sie";
-          setSalutationState(profileSalutation);
-          localStorage.setItem("dwello_salutation", profileSalutation);
+  const loadUserData = async (currentUser: User) => {
+    // Avoid reloading if we already loaded for this user
+    if (dataLoadedForUser.current === currentUser.id) return;
+    dataLoadedForUser.current = currentUser.id;
 
-          if (profile.setup_wizard_complete) {
-            setSetupWizardComplete(true);
-            localStorage.setItem("dwello_setup_complete", "true");
-          }
+    // Load profile
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("name, role, salutation, setup_wizard_complete, gender")
+        .eq("user_id", currentUser.id)
+        .single();
+      if (profile) {
+        const fullName = profile.name || "";
+        setUserName(fullName);
+        const nameParts = fullName.trim().split(/\s+/);
+        setLastName(nameParts.length > 1 ? nameParts[nameParts.length - 1] : null);
+        setGender(profile.gender || null);
+        setUserRole(profile.role as "owner" | "tenant");
+        const profileSalutation = (profile.salutation as "du" | "sie") || "sie";
+        setSalutationState(profileSalutation);
+        localStorage.setItem("dwello_salutation", profileSalutation);
+
+        if (profile.setup_wizard_complete) {
+          setSetupWizardComplete(true);
+          localStorage.setItem("dwello_setup_complete", "true");
         }
-      } catch (e) {
-        console.error("Error loading profile:", e);
       }
-    })();
+    } catch (e) {
+      console.error("Error loading profile:", e);
+    }
 
-    (async () => {
-      try {
-        const { data: props } = await supabase
-          .from("properties")
-          .select("*")
-          .eq("user_id", currentUser.id);
-        if (props && props.length > 0) {
-          setUserPropertiesState(props.map(p => ({
-            id: p.id,
-            address: p.address,
-            city: p.city,
-            zipCode: p.zip_code,
-            yearBuilt: p.year_built ?? 0,
-            units: p.units ?? 1,
-          })));
-        }
-      } catch (e) {
-        console.error("Error loading properties:", e);
+    // Load properties from Supabase (always fresh, never from localStorage)
+    try {
+      const { data: props } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("user_id", currentUser.id);
+      if (props) {
+        setUserPropertiesState(props.map(p => ({
+          id: p.id,
+          address: p.address,
+          city: p.city,
+          zipCode: p.zip_code,
+          yearBuilt: p.year_built ?? 0,
+          units: p.units ?? 1,
+        })));
       }
-    })();
+    } catch (e) {
+      console.error("Error loading properties:", e);
+    }
 
+    // Sync pending properties from registration
     const pending = localStorage.getItem("pendingProperties");
     if (pending) {
-      (async () => {
-        try {
-          const pendingRows = JSON.parse(pending) as Array<{ address: string; city: string; zip_code: string; year_built: number; units: number }>;
-          const insertRows = pendingRows.map(r => ({ ...r, user_id: currentUser.id }));
-          const { data: synced } = await supabase.from("properties").insert(insertRows).select();
-          if (synced) {
-            localStorage.removeItem("pendingProperties");
-            setUserPropertiesState(prev => [
-              ...prev,
-              ...synced.map(p => ({
-                id: p.id,
-                address: p.address,
-                city: p.city,
-                zipCode: p.zip_code,
-                yearBuilt: p.year_built ?? 0,
-                units: p.units ?? 1,
-              })),
-            ]);
-          }
-        } catch (e) {
-          console.error("Error syncing pending properties:", e);
+      try {
+        const pendingRows = JSON.parse(pending) as Array<{ address: string; city: string; zip_code: string; year_built: number; units: number }>;
+        const insertRows = pendingRows.map(r => ({ ...r, user_id: currentUser.id }));
+        const { data: synced } = await supabase.from("properties").insert(insertRows).select();
+        if (synced) {
+          localStorage.removeItem("pendingProperties");
+          setUserPropertiesState(prev => [
+            ...prev,
+            ...synced.map(p => ({
+              id: p.id,
+              address: p.address,
+              city: p.city,
+              zipCode: p.zip_code,
+              yearBuilt: p.year_built ?? 0,
+              units: p.units ?? 1,
+            })),
+          ]);
         }
-      })();
+      } catch (e) {
+        console.error("Error syncing pending properties:", e);
+      }
     }
   };
 
   useEffect(() => {
-    const rememberMe = localStorage.getItem("rememberMe");
-    if (rememberMe === "false") {
-      if (!sessionStorage.getItem("activeSession")) {
-        supabase.auth.signOut().then(() => {
-          localStorage.removeItem("rememberMe");
-          setIsLoading(false);
-        });
-        return;
-      }
-    }
+    let mounted = true;
 
+    // 1. Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
@@ -153,6 +148,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         sessionStorage.setItem("activeSession", "true");
         loadUserData(currentUser);
       } else {
+        dataLoadedForUser.current = null;
         setUserName("");
         setUserRole(null);
         setSalutationState("sie");
@@ -164,14 +160,39 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) setIsLoading(false);
-    });
+    // 2. Check "remember me" preference
+    const rememberMe = localStorage.getItem("rememberMe");
+    if (rememberMe === "false" && !sessionStorage.getItem("activeSession")) {
+      // User chose not to stay logged in and browser was closed
+      supabase.auth.signOut().then(() => {
+        if (mounted) {
+          localStorage.removeItem("rememberMe");
+          setIsLoading(false);
+        }
+      });
+    } else {
+      // 3. Restore existing session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!mounted) return;
+        if (session?.user) {
+          setUser(session.user);
+          sessionStorage.setItem("activeSession", "true");
+          loadUserData(session.user);
+          setIsLoading(false);
+        } else {
+          setIsLoading(false);
+        }
+      });
+    }
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
+    dataLoadedForUser.current = null;
     await supabase.auth.signOut();
     setUser(null);
     setUserName("");
@@ -181,6 +202,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setSalutationState("sie");
     setUserProperties([]);
     setSetupWizardComplete(false);
+    localStorage.removeItem("rememberMe");
   };
 
   return (
