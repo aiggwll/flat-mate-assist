@@ -2,7 +2,9 @@ import { useState, useRef } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { sal } from "@/lib/salutation";
 import EmptyState from "@/components/EmptyState";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, AlertTriangle, Plus, ImagePlus, X, Camera } from "lucide-react";
+
+interface Damage {
   id: string;
   title: string;
   description: string;
@@ -11,7 +13,6 @@ import { CheckCircle } from "lucide-react";
   reportedAt: string;
   reportedBy: string;
 }
-import { AlertTriangle, Plus, ImagePlus, X, Camera } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
