@@ -12,6 +12,8 @@ import {
   Loader2,
   Receipt,
   Calculator,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -45,6 +47,7 @@ interface DocRow {
   file_size: number;
   created_at: string;
   property_id: string | null;
+  shared_with_tenant: boolean;
 }
 
 const CATEGORIES = [
@@ -104,12 +107,21 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
   const fetchDocs = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    let query = supabase.from("documents").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-    if (propertyId) query = query.eq("property_id", propertyId);
+    let query;
+    if (role === "tenant" && propertyId) {
+      // Tenants see only shared docs for their property
+      query = supabase.from("documents").select("*")
+        .eq("property_id", propertyId)
+        .eq("shared_with_tenant", true)
+        .order("created_at", { ascending: false });
+    } else {
+      query = supabase.from("documents").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+      if (propertyId) query = query.eq("property_id", propertyId);
+    }
     const { data } = await query;
     setDocs((data as DocRow[]) || []);
     setLoading(false);
-  }, [propertyId]);
+  }, [propertyId, role]);
 
   useEffect(() => { fetchDocs(); }, [fetchDocs]);
 
@@ -190,6 +202,13 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
     setRenameValue("");
   };
 
+  const handleToggleShare = async (doc: DocRow) => {
+    const newVal = !doc.shared_with_tenant;
+    await supabase.from("documents").update({ shared_with_tenant: newVal } as any).eq("id", doc.id);
+    setDocs((prev) => prev.map((d) => (d.id === doc.id ? { ...d, shared_with_tenant: newVal } : d)));
+    toast.success(newVal ? "Dokument für Mieter freigegeben" : "Zugriff für Mieter entzogen");
+  };
+
   const visibleCategories = role === "tenant" ? TENANT_CATEGORIES : CATEGORIES;
 
   const filtered = docs.filter((d) => {
@@ -243,11 +262,30 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
               <span className="text-xs text-muted-foreground">{new Date(doc.created_at).toLocaleDateString("de-DE")}</span>
               <span className="text-xs text-muted-foreground">·</span>
               <span className="text-xs text-muted-foreground">{formatSize(doc.file_size)}</span>
+              {role === "owner" && doc.shared_with_tenant && (
+                <>
+                  <span className="text-xs text-muted-foreground">·</span>
+                  <span className="text-xs text-primary flex items-center gap-0.5"><Unlock className="h-2.5 w-2.5" /> Geteilt</span>
+                </>
+              )}
             </div>
           </>
         )}
       </div>
       <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        {role === "owner" && (
+          <button
+            onClick={() => handleToggleShare(doc)}
+            title={doc.shared_with_tenant ? "Zugriff für Mieter entziehen" : "Dieses Dokument für Mieter freischalten"}
+            className={`p-1.5 rounded-md transition-colors ${
+              doc.shared_with_tenant
+                ? "text-primary hover:text-primary/80 hover:bg-primary/10"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            {doc.shared_with_tenant ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+          </button>
+        )}
         <button onClick={() => handleDownload(doc)} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
           <Download className="h-3.5 w-3.5" />
         </button>
@@ -439,6 +477,19 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
         </div>
         <UploadButton />
       </div>
+
+      {/* Privacy notice */}
+      {role === "owner" && (
+        <div className="flex items-center gap-2 rounded-lg bg-muted/30 px-3 py-2">
+          <Lock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <p className="text-xs text-muted-foreground">
+            {sal(salutation,
+              "Diese Dokumente sind nur für Sie sichtbar. Sie können einzelne Dokumente gezielt für Ihre Mieter freischalten.",
+              "Diese Dokumente sind nur für dich sichtbar. Du kannst einzelne Dokumente gezielt für deine Mieter freischalten."
+            )}
+          </p>
+        </div>
+      )}
 
       {role === "owner" && (
         <div className="flex flex-col sm:flex-row gap-2.5">
