@@ -107,12 +107,21 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
   const fetchDocs = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    let query = supabase.from("documents").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-    if (propertyId) query = query.eq("property_id", propertyId);
+    let query;
+    if (role === "tenant" && propertyId) {
+      // Tenants see only shared docs for their property
+      query = supabase.from("documents").select("*")
+        .eq("property_id", propertyId)
+        .eq("shared_with_tenant", true)
+        .order("created_at", { ascending: false });
+    } else {
+      query = supabase.from("documents").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+      if (propertyId) query = query.eq("property_id", propertyId);
+    }
     const { data } = await query;
     setDocs((data as DocRow[]) || []);
     setLoading(false);
-  }, [propertyId]);
+  }, [propertyId, role]);
 
   useEffect(() => { fetchDocs(); }, [fetchDocs]);
 
