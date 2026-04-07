@@ -289,7 +289,7 @@ const LoginPage = () => {
           <div className="max-w-md">
             <div className="mb-4"><DwelloLogo variant="dark" size="xl" showIcon={false} /></div>
             <p className="text-primary-foreground/70 text-lg leading-relaxed">
-              Die All-in-One Plattform für private Vermieter. Verwalten Sie Ihre Immobilien, kommunizieren Sie mit Mietern und behalten Sie den Überblick.
+              Dwello vereinfacht die Verwaltung Ihrer Immobilien — strukturiert, sicher und jederzeit verfügbar.
             </p>
           </div>
         </div>
