@@ -47,6 +47,7 @@ interface DocRow {
   file_size: number;
   created_at: string;
   property_id: string | null;
+  shared_with_tenant: boolean;
 }
 
 const CATEGORIES = [
