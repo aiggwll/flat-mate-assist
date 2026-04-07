@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Building2, MapPin, Plus, Calendar, Layers, UserPlus } from "lucide-react";
 import { sal } from "@/lib/salutation";
 import EmptyState from "@/components/EmptyState";
@@ -21,6 +22,7 @@ const PropertiesPage = () => {
     totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "",
   });
 
+  const navigate = useNavigate();
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
   const { userProperties, setUserProperties, salutation } = useUser();
 
@@ -106,9 +108,7 @@ const PropertiesPage = () => {
                 </div>
 
                 <div className="flex items-center gap-3 pt-3 border-t">
-                  <Link to={`/properties/${p.id}`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">Details</Button>
-                  </Link>
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/properties/${p.id}`)}>Details</Button>
                   <InviteTenantDialog />
                 </div>
               </div>
