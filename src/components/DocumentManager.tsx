@@ -253,6 +253,12 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
               <span className="text-xs text-muted-foreground">{new Date(doc.created_at).toLocaleDateString("de-DE")}</span>
               <span className="text-xs text-muted-foreground">·</span>
               <span className="text-xs text-muted-foreground">{formatSize(doc.file_size)}</span>
+              {role === "owner" && doc.shared_with_tenant && (
+                <>
+                  <span className="text-xs text-muted-foreground">·</span>
+                  <span className="text-xs text-primary flex items-center gap-0.5"><Unlock className="h-2.5 w-2.5" /> Geteilt</span>
+                </>
+              )}
             </div>
           </>
         )}
