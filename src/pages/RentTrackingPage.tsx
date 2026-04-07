@@ -186,11 +186,16 @@ const RentTrackingPage = () => {
       {loading ? (
         <p className="text-muted-foreground text-center py-8">Laden...</p>
       ) : payments.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <CreditCard className="h-12 w-12 mx-auto mb-3 opacity-40" />
-          <p>Noch keine Mieteinträge vorhanden.</p>
-          <p className="text-sm mt-1">Klicke auf "Neue Miete" um einen Eintrag anzulegen.</p>
-        </div>
+        <EmptyState
+          icon={Euro}
+          headline="Noch keine Mietzahlungen erfasst"
+          subtext={sal(salutation || "sie",
+            "Tragen Sie Ihre erste Miete ein und behalten Sie jeden Monat den Überblick.",
+            "Trag deine erste Miete ein und behalte jeden Monat den Überblick."
+          )}
+          buttonLabel="Erste Miete eintragen"
+          onAction={() => setDialogOpen(true)}
+        />
       ) : (
         <div className="space-y-3">
           {payments.map((p) => {

@@ -3,6 +3,7 @@ import { useMessages } from "@/contexts/MessagesContext";
 import { useUser } from "@/contexts/UserContext";
 import { sal } from "@/lib/salutation";
 import { Send, ArrowLeft, MessageSquare, PenSquare } from "lucide-react";
+import EmptyState from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
