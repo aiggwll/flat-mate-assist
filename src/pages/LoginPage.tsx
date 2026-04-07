@@ -151,6 +151,47 @@ const LoginPage = () => {
         }
 
         if (role === "owner") {
+          // Send notification & welcome emails asynchronously (don't block UI)
+          const sendEmails = async () => {
+            try {
+              // Count total owners for admin notification
+              const { count } = await supabase
+                .from("profiles")
+                .select("id", { count: "exact", head: true })
+                .eq("role", "owner");
+
+              const registrationId = crypto.randomUUID();
+
+              // Admin notification
+              await supabase.functions.invoke("send-transactional-email", {
+                body: {
+                  templateName: "new-landlord-notification",
+                  recipientEmail: "gina2406@hotmail.de",
+                  idempotencyKey: `new-landlord-notify-${registrationId}`,
+                  templateData: {
+                    name: nameField.trim(),
+                    email,
+                    createdAt: new Date().toLocaleDateString("de-DE"),
+                    totalOwners: count ?? 1,
+                  },
+                },
+              });
+
+              // Welcome email to the new landlord
+              await supabase.functions.invoke("send-transactional-email", {
+                body: {
+                  templateName: "welcome-landlord",
+                  recipientEmail: email,
+                  idempotencyKey: `welcome-landlord-${registrationId}`,
+                  templateData: { name: nameField.trim() },
+                },
+              });
+            } catch (err) {
+              console.error("Email sending failed (non-blocking):", err);
+            }
+          };
+          sendEmails();
+
           setShowPropertySetup(true);
         } else {
           setShowTenantPropertyInfo(true);
