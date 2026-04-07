@@ -111,7 +111,8 @@ const DashboardPage = () => {
         hasProperties={userProperties.length > 0}
         hasTenants={tenants.length > 0}
         hasPayments={hasPayments}
-        hasDocuments={hasDocuments}
+        hasDocuments={false}
+        hasMietvertrag={hasDocuments}
       />
 
       {/* Stat Cards */}

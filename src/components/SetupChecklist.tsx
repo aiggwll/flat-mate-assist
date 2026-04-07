@@ -1,26 +1,46 @@
 import { useState, useEffect, useRef } from "react";
 import { Building2, Users, CreditCard, FileText, Check, ChevronRight, PartyPopper } from "lucide-react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
 import { useUser } from "@/contexts/UserContext";
+import { supabase } from "@/integrations/supabase/client";
 import { sal } from "@/lib/salutation";
+import { toast } from "sonner";
 
 interface SetupChecklistProps {
   hasProperties: boolean;
   hasTenants: boolean;
   hasPayments: boolean;
-  hasDocuments: boolean;
+  hasMietvertrag: boolean;
 }
 
-const SetupChecklist = ({ hasProperties, hasTenants, hasPayments, hasDocuments }: SetupChecklistProps) => {
+const SetupChecklist = ({ hasProperties, hasTenants, hasPayments, hasMietvertrag }: SetupChecklistProps) => {
   const navigate = useNavigate();
-  const { salutation } = useUser();
+  const { salutation, userId } = useUser();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [dismissed, setDismissed] = useState(() => localStorage.getItem("setup_complete") === "true");
+  const [dismissed, setDismissed] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [highlight, setHighlight] = useState(false);
+  const [initiallyComplete, setInitiallyComplete] = useState<boolean | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const toastShownRef = useRef(false);
+
+  // Check if already permanently complete
+  useEffect(() => {
+    if (!userId) return;
+    const check = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("setup_checklist_complete")
+        .eq("user_id", userId)
+        .single();
+      const complete = (data as any)?.setup_checklist_complete === true;
+      setInitiallyComplete(complete);
+      if (complete) setDismissed(true);
+    };
+    check();
+  }, [userId]);
 
   useEffect(() => {
     if (searchParams.get("setup") === "1") {
@@ -37,25 +57,38 @@ const SetupChecklist = ({ hasProperties, hasTenants, hasPayments, hasDocuments }
     { key: "property", label: "Immobilie anlegen", icon: Building2, done: hasProperties, action: () => navigate("/properties") },
     { key: "tenant", label: "Mieter einladen", icon: Users, done: hasTenants, action: "dialog" as const },
     { key: "payment", label: "Mietbetrag eintragen", icon: CreditCard, done: hasPayments, action: () => navigate("/payments") },
-    { key: "document", label: "Dokument hochladen", icon: FileText, done: hasDocuments, action: () => navigate("/documents") },
+    { key: "document", label: "Mietvertrag hochladen", icon: FileText, done: hasMietvertrag, action: () => navigate("/documents") },
   ];
 
   const completedCount = steps.filter(s => s.done).length;
   const allDone = completedCount === 4;
   const progressValue = (completedCount / 4) * 100;
 
+  // When all done → show confetti, persist, toast
   useEffect(() => {
-    if (allDone && !dismissed) {
+    if (allDone && !dismissed && initiallyComplete === false && !toastShownRef.current) {
+      toastShownRef.current = true;
       setShowConfetti(true);
+      toast.success(
+        sal(salutation,
+          "Ihr Konto ist vollständig eingerichtet. Willkommen bei Dwello!",
+          "Dein Konto ist vollständig eingerichtet. Willkommen bei Dwello!"
+        )
+      );
+      // Persist to DB
+      if (userId) {
+        supabase.from("profiles").update({ setup_checklist_complete: true } as any).eq("user_id", userId).then();
+      }
       const timer = setTimeout(() => {
-        localStorage.setItem("setup_complete", "true");
         setDismissed(true);
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [allDone, dismissed]);
+  }, [allDone, dismissed, initiallyComplete, salutation, userId]);
 
-  if (dismissed) return null;
+  // Still loading initial state
+  if (initiallyComplete === null) return null;
+  if (dismissed && !showConfetti) return null;
 
   if (showConfetti) {
     return (
@@ -65,8 +98,12 @@ const SetupChecklist = ({ hasProperties, hasTenants, hasPayments, hasDocuments }
             <PartyPopper className="h-7 w-7 text-primary" />
           </div>
         </div>
-        <p className="text-lg font-heading font-bold text-foreground">🎉 Ihr Konto ist vollständig eingerichtet!</p>
-        <p className="text-sm text-muted-foreground">Sie können jetzt alle Funktionen von Dwello nutzen.</p>
+        <p className="text-lg font-heading font-bold text-foreground">
+          {sal(salutation, "🎉 Ihr Konto ist vollständig eingerichtet!", "🎉 Dein Konto ist vollständig eingerichtet!")}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {sal(salutation, "Sie können jetzt alle Funktionen von Dwello nutzen.", "Du kannst jetzt alle Funktionen von Dwello nutzen.")}
+        </p>
       </div>
     );
   }
@@ -106,11 +143,21 @@ const SetupChecklist = ({ hasProperties, hasTenants, hasPayments, hasDocuments }
                   <Icon className="h-3.5 w-3.5 text-muted-foreground" />
                 )}
               </div>
-              <span className={`text-sm font-medium flex-1 ${
-                step.done ? "line-through text-muted-foreground" : "text-foreground"
-              }`}>
-                {step.label}
-              </span>
+              <div className="flex-1 min-w-0">
+                <span className={`text-sm font-medium ${
+                  step.done ? "line-through text-muted-foreground" : "text-foreground"
+                }`}>
+                  {step.label}
+                </span>
+                {step.key === "document" && !step.done && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {sal(salutation,
+                      "Laden Sie den Mietvertrag hoch, um die Einrichtung abzuschließen.",
+                      "Lade den Mietvertrag hoch, um die Einrichtung abzuschließen."
+                    )}
+                  </p>
+                )}
+              </div>
               {!step.done && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
             </div>
           );
