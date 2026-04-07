@@ -258,6 +258,19 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
         )}
       </div>
       <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        {role === "owner" && (
+          <button
+            onClick={() => handleToggleShare(doc)}
+            title={doc.shared_with_tenant ? "Zugriff für Mieter entziehen" : "Dieses Dokument für Mieter freischalten"}
+            className={`p-1.5 rounded-md transition-colors ${
+              doc.shared_with_tenant
+                ? "text-primary hover:text-primary/80 hover:bg-primary/10"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            {doc.shared_with_tenant ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+          </button>
+        )}
         <button onClick={() => handleDownload(doc)} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
           <Download className="h-3.5 w-3.5" />
         </button>
