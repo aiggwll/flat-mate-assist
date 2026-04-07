@@ -193,6 +193,13 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
     setRenameValue("");
   };
 
+  const handleToggleShare = async (doc: DocRow) => {
+    const newVal = !doc.shared_with_tenant;
+    await supabase.from("documents").update({ shared_with_tenant: newVal } as any).eq("id", doc.id);
+    setDocs((prev) => prev.map((d) => (d.id === doc.id ? { ...d, shared_with_tenant: newVal } : d)));
+    toast.success(newVal ? "Dokument für Mieter freigegeben" : "Zugriff für Mieter entzogen");
+  };
+
   const visibleCategories = role === "tenant" ? TENANT_CATEGORIES : CATEGORIES;
 
   const filtered = docs.filter((d) => {
