@@ -22,6 +22,7 @@ const DashboardPage = () => {
   const { userName, userProperties, salutation, userId, setupWizardComplete, gender, lastName } = useUser();
   const { messages } = useMessages();
   const displayName = userName || "Eigentümer";
+  const effectiveSalutation = salutation || "sie";
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
   const [hasPayments, setHasPayments] = useState(false);
   const [hasDocuments, setHasDocuments] = useState(false);
