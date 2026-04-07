@@ -22,6 +22,7 @@ const PropertiesPage = () => {
     totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "",
   });
 
+  const navigate = useNavigate();
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
   const { userProperties, setUserProperties, salutation } = useUser();
 

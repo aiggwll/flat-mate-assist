@@ -116,7 +116,7 @@ const WelcomeSlider = () => {
                     </button>
                   ) : (
                     <button
-                      onClick={() => setCurrent(i + 1)}
+                      onClick={() => setCurrent(prev => prev + 1)}
                       className="w-full py-3 rounded-xl font-medium border border-border bg-card text-foreground hover:bg-muted transition-colors"
                     >
                       Weiter
