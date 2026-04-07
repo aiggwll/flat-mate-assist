@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Info, Receipt } from "lucide-react";
+import { Plus, Info, Receipt, Calculator } from "lucide-react";
+import EmptyState from "@/components/EmptyState";
+import { sal } from "@/lib/salutation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
