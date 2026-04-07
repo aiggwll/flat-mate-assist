@@ -107,9 +107,7 @@ const PropertiesPage = () => {
                 </div>
 
                 <div className="flex items-center gap-3 pt-3 border-t">
-                  <Link to={`/properties/${p.id}`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">Details</Button>
-                  </Link>
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/properties/${p.id}`)}>Details</Button>
                   <InviteTenantDialog />
                 </div>
               </div>
