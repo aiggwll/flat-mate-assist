@@ -546,15 +546,10 @@ const LoginPage = () => {
         <div className="max-w-md">
           <div className="mb-4"><DwelloLogo variant="dark" size="xl" showIcon={false} /></div>
           <p className="text-primary-foreground/70 text-lg leading-relaxed">
-            {selectedRole === "owner"
-              ? "Verwalten Sie Ihre Immobilien, kommunizieren Sie mit Mietern und behalten Sie den Überblick."
-              : "Kommunizieren Sie mit Ihrem Vermieter, melden Sie Schäden und verwalten Sie Ihre Dokumente."}
+            Dwello vereinfacht die Verwaltung Ihrer Immobilien — strukturiert, sicher und jederzeit verfügbar.
           </p>
           <div className="mt-8 space-y-4">
-            {(selectedRole === "owner"
-              ? ["Immobilien einfach verwalten", "Direkte Kommunikation mit Mietern", "Schadenmeldungen digital organisieren"]
-              : ["Schäden schnell melden", "Direkt mit dem Vermieter kommunizieren", "Dokumente jederzeit einsehen"]
-            ).map((item) => (
+            {["Mietzahlungen im Überblick", "Kommunikation mit Mietern", "Dokumente & Nebenkostenabrechnung"].map((item) => (
               <div key={item} className="flex items-center gap-3 text-primary-foreground/60">
                 <div className="h-1.5 w-1.5 rounded-full bg-accent" />
                 <span className="text-sm">{item}</span>
