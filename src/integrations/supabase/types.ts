@@ -50,6 +50,7 @@ export type Database = {
           filename: string
           id: string
           property_id: string | null
+          shared_with_tenant: boolean
           user_id: string
         }
         Insert: {
@@ -60,6 +61,7 @@ export type Database = {
           filename?: string
           id?: string
           property_id?: string | null
+          shared_with_tenant?: boolean
           user_id: string
         }
         Update: {
@@ -70,6 +72,7 @@ export type Database = {
           filename?: string
           id?: string
           property_id?: string | null
+          shared_with_tenant?: boolean
           user_id?: string
         }
         Relationships: []
