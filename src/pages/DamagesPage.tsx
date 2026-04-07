@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import { useUser } from "@/contexts/UserContext";
-interface Damage {
+import { sal } from "@/lib/salutation";
+import EmptyState from "@/components/EmptyState";
+import { CheckCircle } from "lucide-react";
   id: string;
   title: string;
   description: string;
