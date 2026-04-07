@@ -285,9 +285,16 @@ const UtilityBillingPage = () => {
       )}
 
       {!selectedPropertyId && (
-        <div className="bg-card rounded-2xl border p-8 text-center text-muted-foreground">
-          Bitte legen Sie zuerst eine Immobilie an.
-        </div>
+        <EmptyState
+          icon={Calculator}
+          headline={sal(salutation || "sie",
+            "Erstellen Sie Ihre erste Nebenkostenabrechnung",
+            "Erstelle deine erste Nebenkostenabrechnung"
+          )}
+          subtext="Was früher Stunden gedauert hat, erledigen Sie jetzt in Minuten."
+          buttonLabel="Immobilie anlegen"
+          onAction={() => window.location.href = "/properties"}
+        />
       )}
 
       {selectedPropertyId && !finalized && (

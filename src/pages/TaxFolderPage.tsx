@@ -362,9 +362,16 @@ const TaxFolderPage = () => {
         {loading ? (
           <div className="p-8 text-center text-sm text-muted-foreground">Laden...</div>
         ) : documents.length === 0 ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">
-            Noch keine Belege für {selectedYear} hochgeladen.
-          </div>
+          <EmptyState
+            icon={FileText}
+            headline={sal(salutation || "sie",
+              "Sammeln Sie Ihre Belege für die Steuererklärung",
+              "Sammle deine Belege für die Steuererklärung"
+            )}
+            subtext="Laden Sie Rechnungen, Quittungen und Nachweise hoch — übersichtlich nach Kategorie sortiert."
+            buttonLabel="Beleg hochladen"
+            onAction={() => fileInputRef.current?.click()}
+          />
         ) : (
           <div className="divide-y">
             {documents.map(doc => {
