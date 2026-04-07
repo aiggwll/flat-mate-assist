@@ -469,6 +469,19 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
         <UploadButton />
       </div>
 
+      {/* Privacy notice */}
+      {role === "owner" && (
+        <div className="flex items-center gap-2 rounded-lg bg-muted/30 px-3 py-2">
+          <Lock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <p className="text-xs text-muted-foreground">
+            {sal(salutation,
+              "Diese Dokumente sind nur für Sie sichtbar. Sie können einzelne Dokumente gezielt für Ihre Mieter freischalten.",
+              "Diese Dokumente sind nur für dich sichtbar. Du kannst einzelne Dokumente gezielt für deine Mieter freischalten."
+            )}
+          </p>
+        </div>
+      )}
+
       {role === "owner" && (
         <div className="flex flex-col sm:flex-row gap-2.5">
           <div className="relative flex-1">
