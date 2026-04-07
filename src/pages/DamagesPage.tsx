@@ -1,5 +1,9 @@
 import { useState, useRef } from "react";
 import { useUser } from "@/contexts/UserContext";
+import { sal } from "@/lib/salutation";
+import EmptyState from "@/components/EmptyState";
+import { CheckCircle, AlertTriangle, Plus, ImagePlus, X, Camera } from "lucide-react";
+
 interface Damage {
   id: string;
   title: string;
@@ -9,7 +13,6 @@ interface Damage {
   reportedAt: string;
   reportedBy: string;
 }
-import { AlertTriangle, Plus, ImagePlus, X, Camera } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +44,7 @@ const categoryIcon: Record<string, string> = {
 };
 
 const DamagesPage = () => {
-  const { userProperties } = useUser();
+  const { userProperties, salutation } = useUser();
   const [damages, setDamages] = useState<DamageWithContext[]>(initialDamages);
   const [open, setOpen] = useState(false);
   const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([]);
@@ -123,15 +126,14 @@ const DamagesPage = () => {
       </div>
 
       {damages.length === 0 ? (
-        <div className="bg-card rounded-2xl border p-14 text-center space-y-4">
-          <div className="h-14 w-14 rounded-2xl bg-primary/8 flex items-center justify-center mx-auto">
-            <AlertTriangle className="h-7 w-7 text-primary" />
-          </div>
-          <p className="text-base font-medium text-foreground">Noch keine Schäden gemeldet</p>
-          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-            Gemeldete Schäden Ihrer Mieter erscheinen hier.
-          </p>
-        </div>
+        <EmptyState
+          icon={CheckCircle}
+          headline="Keine offenen Schäden"
+          subtext={sal(salutation || "sie",
+            "Aktuell liegen keine Schadenmeldungen vor. Ihre Immobilien sind in gutem Zustand.",
+            "Aktuell liegen keine Schadenmeldungen vor. Deine Immobilien sind in gutem Zustand."
+          )}
+        />
       ) : (
         <>
           {/* Open Damages */}

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Building2, MapPin, Plus, Calendar, Layers, UserPlus } from "lucide-react";
+import { sal } from "@/lib/salutation";
+import EmptyState from "@/components/EmptyState";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +22,7 @@ const PropertiesPage = () => {
   });
 
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
-  const { userProperties, setUserProperties } = useUser();
+  const { userProperties, setUserProperties, salutation } = useUser();
 
   const handleSubmit = async () => {
     if (!form.address || !form.city || !form.zipCode) {
@@ -60,15 +62,13 @@ const PropertiesPage = () => {
       </div>
 
       {userProperties.length === 0 ? (
-        <div className="bg-card rounded-2xl border p-14 text-center space-y-4">
-          <div className="h-14 w-14 rounded-2xl bg-primary/8 flex items-center justify-center mx-auto">
-            <Building2 className="h-7 w-7 text-primary" />
-          </div>
-          <p className="text-base font-medium text-foreground">Noch keine Immobilien angelegt</p>
-          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-            Klicken Sie auf "Neue Immobilie", um Ihre erste Immobilie hinzuzufügen.
-          </p>
-        </div>
+        <EmptyState
+          icon={Building2}
+          headline={sal(salutation || "sie", "Legen Sie Ihre erste Immobilie an", "Leg deine erste Immobilie an")}
+          subtext="Adresse, Mieter und Dokumente — alles an einem Ort."
+          buttonLabel="Immobilie hinzufügen"
+          onAction={() => setOpen(true)}
+        />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {userProperties.map((p) => (

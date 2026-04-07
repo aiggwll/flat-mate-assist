@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Info, Receipt } from "lucide-react";
+import { Plus, Info, Receipt, Calculator } from "lucide-react";
+import EmptyState from "@/components/EmptyState";
+import { sal } from "@/lib/salutation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +43,7 @@ interface TenantRow {
 const currentYear = new Date().getFullYear();
 
 const UtilityBillingPage = () => {
-  const { userProperties, userId } = useUser();
+  const { userProperties, userId, salutation } = useUser();
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
   const [selectedPropertyId, setSelectedPropertyId] = useState("");
   const [costs, setCosts] = useState<CostEntry[]>(
@@ -283,9 +285,16 @@ const UtilityBillingPage = () => {
       )}
 
       {!selectedPropertyId && (
-        <div className="bg-card rounded-2xl border p-8 text-center text-muted-foreground">
-          Bitte legen Sie zuerst eine Immobilie an.
-        </div>
+        <EmptyState
+          icon={Calculator}
+          headline={sal(salutation || "sie",
+            "Erstellen Sie Ihre erste Nebenkostenabrechnung",
+            "Erstelle deine erste Nebenkostenabrechnung"
+          )}
+          subtext="Was früher Stunden gedauert hat, erledigen Sie jetzt in Minuten."
+          buttonLabel="Immobilie anlegen"
+          onAction={() => window.location.href = "/properties"}
+        />
       )}
 
       {selectedPropertyId && !finalized && (

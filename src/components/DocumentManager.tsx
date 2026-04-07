@@ -511,15 +511,26 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
       {/* Documents */}
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16">
-          <FileText className="h-10 w-10 text-muted-foreground/40 mb-3" />
-          <p className="text-sm font-medium text-foreground mb-1">Noch keine Dokumente vorhanden</p>
-          <p className="text-xs text-muted-foreground mb-4">
-            {role === "tenant" ? "Laden Sie Dokumente hoch oder warten Sie auf Ihren Vermieter." : "Laden Sie Ihr erstes Dokument hoch."}
-          </p>
-          <Button size="sm" className="gap-2" onClick={triggerFileInput} disabled={uploading}>
-            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            Dokumente hochladen
-          </Button>
+          <div className="bg-[#F0FDF4] border border-dashed border-[#C6E8D4] rounded-2xl p-14 text-center space-y-4 w-full">
+            <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+              <FileText className="h-7 w-7 text-primary" />
+            </div>
+            <p className="text-base font-semibold text-foreground">
+              {sal(salutation, "Noch keine Dokumente hochgeladen", "Noch keine Dokumente hochgeladen")}
+            </p>
+            <p className="text-[13px] text-muted-foreground max-w-sm mx-auto">
+              {role === "tenant"
+                ? sal(salutation, "Laden Sie Dokumente hoch oder warten Sie auf Ihren Vermieter.", "Lade Dokumente hoch oder warte auf deinen Vermieter.")
+                : sal(salutation,
+                    "Laden Sie wichtige Unterlagen hoch — sicher gespeichert und jederzeit abrufbar.",
+                    "Lade wichtige Unterlagen hoch — sicher gespeichert und jederzeit abrufbar."
+                  )}
+            </p>
+            <Button className="mt-2 max-w-[240px] w-full" onClick={triggerFileInput} disabled={uploading}>
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+              Dokument hochladen
+            </Button>
+          </div>
         </div>
       ) : role === "tenant" ? (
         <div className="space-y-4">

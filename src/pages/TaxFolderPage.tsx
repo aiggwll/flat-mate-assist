@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import EmptyState from "@/components/EmptyState";
+import { sal } from "@/lib/salutation";
 import { Upload, FileText, Trash2, CalendarIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,7 +44,7 @@ interface TaxDoc {
 const currentYear = new Date().getFullYear();
 
 const TaxFolderPage = () => {
-  const { userProperties, userId } = useUser();
+  const { userProperties, userId, salutation } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
   const [documents, setDocuments] = useState<TaxDoc[]>([]);
@@ -360,9 +362,16 @@ const TaxFolderPage = () => {
         {loading ? (
           <div className="p-8 text-center text-sm text-muted-foreground">Laden...</div>
         ) : documents.length === 0 ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">
-            Noch keine Belege für {selectedYear} hochgeladen.
-          </div>
+          <EmptyState
+            icon={FileText}
+            headline={sal(salutation || "sie",
+              "Sammeln Sie Ihre Belege für die Steuererklärung",
+              "Sammle deine Belege für die Steuererklärung"
+            )}
+            subtext="Laden Sie Rechnungen, Quittungen und Nachweise hoch — übersichtlich nach Kategorie sortiert."
+            buttonLabel="Beleg hochladen"
+            onAction={() => fileInputRef.current?.click()}
+          />
         ) : (
           <div className="divide-y">
             {documents.map(doc => {

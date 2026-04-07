@@ -4,7 +4,9 @@ import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
 import { format, isBefore, startOfMonth } from "date-fns";
 import { de } from "date-fns/locale";
-import { Plus, Check, Clock, AlertTriangle, CreditCard } from "lucide-react";
+import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro } from "lucide-react";
+import EmptyState from "@/components/EmptyState";
+import { sal } from "@/lib/salutation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,7 +45,7 @@ const getStatusInfo = (paidAt: string | null, dueDate: string) => {
 };
 
 const RentTrackingPage = () => {
-  const { user, userProperties } = useUser();
+  const { user, userProperties, salutation } = useUser();
   const [payments, setPayments] = useState<RentPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -184,11 +186,16 @@ const RentTrackingPage = () => {
       {loading ? (
         <p className="text-muted-foreground text-center py-8">Laden...</p>
       ) : payments.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <CreditCard className="h-12 w-12 mx-auto mb-3 opacity-40" />
-          <p>Noch keine Mieteinträge vorhanden.</p>
-          <p className="text-sm mt-1">Klicke auf "Neue Miete" um einen Eintrag anzulegen.</p>
-        </div>
+        <EmptyState
+          icon={Euro}
+          headline="Noch keine Mietzahlungen erfasst"
+          subtext={sal(salutation || "sie",
+            "Tragen Sie Ihre erste Miete ein und behalten Sie jeden Monat den Überblick.",
+            "Trag deine erste Miete ein und behalte jeden Monat den Überblick."
+          )}
+          buttonLabel="Erste Miete eintragen"
+          onAction={() => setDialogOpen(true)}
+        />
       ) : (
         <div className="space-y-3">
           {payments.map((p) => {
