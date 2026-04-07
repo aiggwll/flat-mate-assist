@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 210 17% 97%;
+    --background: 220 14% 97%;
     --foreground: 220 25% 16%;
 
     --card: 0 0% 100%;
@@ -30,21 +30,24 @@
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 18% 90%;
+    --border: 0 0% 91%;
     --input: 214 18% 90%;
     --ring: 153 44% 29%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 100%;
+    --sidebar-background: 210 14% 98%;
     --sidebar-foreground: 220 25% 16%;
     --sidebar-primary: 153 44% 29%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 153 44% 95%;
+    --sidebar-accent: 140 49% 93%;
     --sidebar-accent-foreground: 153 44% 29%;
-    --sidebar-border: 214 18% 92%;
+    --sidebar-border: 0 0% 93%;
     --sidebar-ring: 153 44% 29%;
     --sidebar-muted: 220 10% 55%;
+
+    --empty-state-bg: 138 76% 97%;
+    --empty-state-border: 148 42% 83%;
 
     --success: 153 44% 29%;
     --success-foreground: 0 0% 100%;
@@ -113,5 +116,11 @@
   }
   .pt-18 {
     padding-top: 4.5rem;
+  }
+  .empty-state {
+    @apply bg-[hsl(var(--empty-state-bg))] border border-dashed border-[hsl(var(--empty-state-border))] rounded-xl;
+  }
+  .page-header {
+    @apply pb-4 mb-6 border-b border-border;
   }
 }

@@ -70,6 +70,10 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
           muted: "hsl(var(--sidebar-muted))",
         },
+        "empty-state": {
+          DEFAULT: "hsl(var(--empty-state-bg))",
+          border: "hsl(var(--empty-state-border))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
