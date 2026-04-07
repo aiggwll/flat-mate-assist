@@ -34,13 +34,26 @@ const DashboardPage = () => {
 
   useEffect(() => {
     const loadTenants = async () => {
+      if (userProperties.length === 0) {
+        setTenants([]);
+        return;
+      }
+      // Build property identifiers to match tenant property_id values
+      const propertyIdentifiers = userProperties.flatMap(p => [
+        `${p.address}, ${p.city}`,
+        p.address,
+        p.id,
+      ]);
       const { data } = await supabase
         .from("profiles")
         .select("name, email, property_id, unit_id")
         .eq("role", "tenant")
         .not("property_id", "is", null);
       if (data) {
-        setTenants(data.map(t => ({
+        const filtered = data.filter(t =>
+          propertyIdentifiers.some(pid => t.property_id === pid || (t.property_id && t.property_id.includes(pid)))
+        );
+        setTenants(filtered.map(t => ({
           name: t.name,
           email: t.email,
           property_id: t.property_id || "",
@@ -49,7 +62,7 @@ const DashboardPage = () => {
       }
     };
     loadTenants();
-  }, []);
+  }, [userProperties]);
 
   useEffect(() => {
     if (!userId) return;
