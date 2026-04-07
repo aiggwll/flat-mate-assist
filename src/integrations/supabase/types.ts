@@ -115,6 +115,7 @@ export type Database = {
           property_id: string | null
           role: string
           salutation: string
+          setup_checklist_complete: boolean
           setup_wizard_complete: boolean
           unit_id: string | null
           updated_at: string
@@ -130,6 +131,7 @@ export type Database = {
           property_id?: string | null
           role?: string
           salutation?: string
+          setup_checklist_complete?: boolean
           setup_wizard_complete?: boolean
           unit_id?: string | null
           updated_at?: string
@@ -145,6 +147,7 @@ export type Database = {
           property_id?: string | null
           role?: string
           salutation?: string
+          setup_checklist_complete?: boolean
           setup_wizard_complete?: boolean
           unit_id?: string | null
           updated_at?: string

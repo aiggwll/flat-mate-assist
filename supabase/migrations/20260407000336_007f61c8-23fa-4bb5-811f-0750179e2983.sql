@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS setup_checklist_complete boolean NOT NULL DEFAULT false;
