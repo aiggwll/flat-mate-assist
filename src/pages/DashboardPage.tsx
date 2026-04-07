@@ -61,12 +61,12 @@ const DashboardPage = () => {
       setHasPayments((count ?? 0) > 0);
     };
     const checkDocuments = async () => {
-      const { data } = await supabase
+      const { count } = await supabase
         .from("documents")
-        .select("category")
+        .select("id", { count: "exact", head: true })
         .eq("user_id", userId)
-        .in("category", ["Mietvertrag", "Übergabeprotokoll", "Versicherung"]);
-      setHasDocuments((data?.length ?? 0) > 0);
+        .eq("category", "Mietvertrag");
+      setHasDocuments((count ?? 0) > 0);
     };
     checkPayments();
     checkDocuments();
