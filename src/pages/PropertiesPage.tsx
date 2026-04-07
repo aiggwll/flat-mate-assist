@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Building2, MapPin, Plus, Calendar, Layers, UserPlus } from "lucide-react";
+import { sal } from "@/lib/salutation";
+import EmptyState from "@/components/EmptyState";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
