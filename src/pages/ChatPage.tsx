@@ -333,17 +333,16 @@ const ChatPage = () => {
             Neue Nachricht
           </Button>
         </div>
-        <div className="bg-card rounded-xl border p-12 text-center space-y-3">
-          <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center mx-auto">
-            <MessageSquare className="h-6 w-6 text-muted-foreground" />
-          </div>
-          <p className="text-sm font-medium text-foreground">Noch keine Nachrichten</p>
-          <p className="text-xs text-muted-foreground max-w-xs mx-auto">{emptyText}</p>
-          <Button size="sm" className="gap-2 mt-2" onClick={() => setShowNewDialog(true)}>
-            <PenSquare className="h-4 w-4" />
-            Erste Nachricht senden
-          </Button>
-        </div>
+        <EmptyState
+          icon={MessageSquare}
+          headline={sal(salutation, "Starten Sie das Gespräch", "Starte das Gespräch")}
+          subtext={sal(salutation,
+            "Schreiben Sie Ihren Mietern direkt — strukturiert und nachvollziehbar.",
+            "Schreib deinen Mietern direkt — strukturiert und nachvollziehbar."
+          )}
+          buttonLabel="Neue Nachricht"
+          onAction={() => setShowNewDialog(true)}
+        />
       </div>
     );
   }
