@@ -49,6 +49,7 @@ const TaxFolderPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
   const [documents, setDocuments] = useState<TaxDoc[]>([]);
+  const [availableYears, setAvailableYears] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Upload form state
