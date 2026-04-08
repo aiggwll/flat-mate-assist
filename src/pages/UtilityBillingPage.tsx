@@ -415,10 +415,16 @@ const UtilityBillingPage = () => {
               <p className="text-xs text-muted-foreground mt-0.5">Tragen Sie die jährlichen Gesamtkosten pro Kategorie ein</p>
             </div>
             <div className="divide-y">
-              {CATEGORIES.map((cat, idx) => (
+              {CATEGORIES.map((cat, idx) => {
+                const inputId = cat.key === "wasser" ? "wasserversorgung"
+                  : cat.key === "muell" ? "muellbeseitigung"
+                  : cat.key === "versicherung" ? "gebaeudeversicherung"
+                  : cat.key === "sonstige" ? "sonstige_betriebskosten"
+                  : cat.key;
+                return (
                 <div key={cat.key} className="flex items-center gap-3 px-5 py-3">
                   <div className="flex-1 min-w-0 flex items-center gap-2">
-                    <span className="text-sm font-medium text-foreground truncate">{cat.label}</span>
+                    <label htmlFor={inputId} className="text-sm font-medium text-foreground truncate">{cat.label}</label>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Info className="h-3.5 w-3.5 text-muted-foreground shrink-0 cursor-help" />
@@ -431,6 +437,9 @@ const UtilityBillingPage = () => {
                   <div className="flex items-center gap-3 shrink-0">
                     <div className="relative w-32">
                       <Input
+                        id={inputId}
+                        name={inputId}
+                        aria-label={cat.label}
                         type="number"
                         min="0"
                         step="0.01"
@@ -453,7 +462,8 @@ const UtilityBillingPage = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
