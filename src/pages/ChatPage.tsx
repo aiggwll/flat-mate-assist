@@ -38,7 +38,7 @@ interface TenantOption {
 
 const ChatPage = () => {
   const { userName, userId, salutation } = useUser();
-  const { messages, addMessage, markAsRead } = useMessages();
+  const { messages, addMessage, markAsRead, loadMessages } = useMessages();
   const ownerName = userName || "Eigentümer";
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -73,8 +73,15 @@ const ChatPage = () => {
         }
       }
 
+      const seen = new Set<string>();
+      const deduped = profiles.filter(p => {
+        if (seen.has(p.user_id)) return false;
+        seen.add(p.user_id);
+        return true;
+      });
+
       setTenants(
-        profiles.map(p => ({
+        deduped.map(p => ({
           userId: p.user_id,
           name: p.name || "Unbekannt",
           propertyAddress: p.property_id ? (propertyMap.get(p.property_id) || "") : "",
@@ -161,6 +168,8 @@ const ChatPage = () => {
         timestamp: new Date().toISOString(),
         read: false,
       });
+      // Force reload messages so the contact list updates immediately
+      await loadMessages();
       toast.success("Nachricht gesendet");
       setShowNewDialog(false);
       setNewRecipient("");
