@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   Receipt,
   FolderOpen,
+  Store,
   LogOut,
 } from "lucide-react";
 import DwelloLogo from "./DwelloLogo";
@@ -23,6 +24,7 @@ const navItems = [
   { to: "/documents", label: "Dokumente", icon: FileText },
   { to: "/chat", label: "Nachrichten", icon: MessageSquare },
   { to: "/damages", label: "Schäden", icon: AlertTriangle },
+  { to: "/marketplace", label: "Marktplatz", icon: Store },
 ];
 
 const AppSidebar = () => {

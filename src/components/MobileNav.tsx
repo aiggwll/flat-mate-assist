@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Receipt,
   FolderOpen,
+  Store,
 } from "lucide-react";
 import DwelloLogo from "./DwelloLogo";
 import {
@@ -36,6 +37,7 @@ const allNav = [
   { to: "/documents", label: "Dokumente", icon: FileText },
   { to: "/chat", label: "Nachrichten", icon: MessageSquare },
   { to: "/damages", label: "Schäden", icon: AlertTriangle },
+  { to: "/marketplace", label: "Marktplatz", icon: Store },
 ];
 
 const MobileNav = () => {
