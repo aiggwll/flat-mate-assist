@@ -276,9 +276,9 @@ const RentTrackingPage = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Immobilie & Wohnung</Label>
+              <Label>Immobilie & Wohnung *</Label>
               <Select value={form.unit_id} onValueChange={(val) => setForm(f => ({ ...f, unit_id: val }))}>
-                <SelectTrigger>
+                <SelectTrigger className={errors.unit_id ? "border-destructive" : ""}>
                   <SelectValue placeholder="Wohnung auswählen" />
                 </SelectTrigger>
                 <SelectContent>
@@ -291,18 +291,22 @@ const RentTrackingPage = () => {
                   )}
                 </SelectContent>
               </Select>
+              {errors.unit_id && <p className="text-xs text-destructive mt-1">{errors.unit_id}</p>}
             </div>
             <div>
-              <Label>Mietername</Label>
-              <Input placeholder="Max Mustermann" value={form.tenant_name} onChange={e => setForm(f => ({ ...f, tenant_name: e.target.value }))} />
+              <Label>Mietername *</Label>
+              <Input className={errors.tenant_name ? "border-destructive" : ""} placeholder="Max Mustermann" value={form.tenant_name} onChange={e => setForm(f => ({ ...f, tenant_name: e.target.value }))} />
+              {errors.tenant_name && <p className="text-xs text-destructive mt-1">{errors.tenant_name}</p>}
             </div>
             <div>
-              <Label>Kaltmiete (€)</Label>
-              <Input type="number" placeholder="z.B. 850" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
+              <Label>Kaltmiete (€) *</Label>
+              <Input className={errors.cold_rent ? "border-destructive" : ""} type="number" placeholder="z.B. 850" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
+              {errors.cold_rent && <p className="text-xs text-destructive mt-1">{errors.cold_rent}</p>}
             </div>
             <div>
-              <Label>Nebenkosten / Vorauszahlung (€)</Label>
-              <Input type="number" placeholder="z.B. 150" value={form.nebenkosten} onChange={e => setForm(f => ({ ...f, nebenkosten: e.target.value }))} />
+              <Label>Nebenkosten / Vorauszahlung (€) *</Label>
+              <Input className={errors.nebenkosten ? "border-destructive" : ""} type="number" placeholder="z.B. 150" value={form.nebenkosten} onChange={e => setForm(f => ({ ...f, nebenkosten: e.target.value }))} />
+              {errors.nebenkosten && <p className="text-xs text-destructive mt-1">{errors.nebenkosten}</p>}
               <p className="text-xs text-muted-foreground mt-1">Wenn keine Nebenkosten vereinbart: 0 eingeben</p>
             </div>
             <div>
@@ -314,8 +318,8 @@ const RentTrackingPage = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Abbrechen</Button>
-            <Button onClick={handleAddPayment}>Anlegen</Button>
+            <Button variant="outline" onClick={() => { setDialogOpen(false); setErrors({}); setAttempted(false); }}>Abbrechen</Button>
+            <Button onClick={handleAddPayment} disabled={attempted && !isFormValid}>Anlegen</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

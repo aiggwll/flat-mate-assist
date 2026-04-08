@@ -295,8 +295,8 @@ const DamagesPage = () => {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Abbrechen</Button>
-            <Button onClick={handleSubmit}>Schaden melden</Button>
+            <Button variant="outline" onClick={() => { setOpen(false); setDmgErrors({}); setDmgAttempted(false); }}>Abbrechen</Button>
+            <Button onClick={handleSubmit} disabled={dmgAttempted && !isDmgValid}>Schaden melden</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

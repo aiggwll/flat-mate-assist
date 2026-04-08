@@ -195,16 +195,16 @@ const ChatPage = () => {
   );
 
   const NewMessageDialog = () => (
-    <Dialog open={showNewDialog} onOpenChange={setShowNewDialog}>
+    <Dialog open={showNewDialog} onOpenChange={(open) => { setShowNewDialog(open); if (!open) { setMsgErrors({}); setMsgAttempted(false); } }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Neue Nachricht</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Empfänger</label>
+            <label className="text-sm font-medium text-foreground">Empfänger *</label>
             <Select value={newRecipient} onValueChange={setNewRecipient}>
-              <SelectTrigger className="h-9 text-sm">
+              <SelectTrigger className={`h-9 text-sm ${msgErrors.recipient ? "border-destructive" : ""}`}>
                 <SelectValue placeholder="Mieter auswählen…" />
               </SelectTrigger>
               <SelectContent>
@@ -218,21 +218,23 @@ const ChatPage = () => {
                 )}
               </SelectContent>
             </Select>
+            {msgErrors.recipient && <p className="text-xs text-destructive">{msgErrors.recipient}</p>}
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Nachricht</label>
+            <label className="text-sm font-medium text-foreground">Nachricht *</label>
             <Textarea
               value={newText}
               onChange={(e) => setNewText(e.target.value)}
               placeholder="Ihre Nachricht…"
               rows={4}
-              className="text-sm"
+              className={`text-sm ${msgErrors.text ? "border-destructive" : ""}`}
             />
+            {msgErrors.text && <p className="text-xs text-destructive">{msgErrors.text}</p>}
           </div>
         </div>
         <DialogFooter className="gap-2">
           <Button variant="outline" size="sm" onClick={() => setShowNewDialog(false)}>Abbrechen</Button>
-          <Button size="sm" onClick={handleNewMessage} disabled={sending || !newRecipient || !newText.trim()} className="gap-2">
+          <Button size="sm" onClick={handleNewMessage} disabled={sending || (msgAttempted && !isMsgValid)} className="gap-2">
             <Send className="h-3.5 w-3.5" />
             Senden
           </Button>
