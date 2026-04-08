@@ -234,7 +234,7 @@ const DamagesPage = () => {
             <div>
               <Label>Kategorie *</Label>
               <Select value={form.category} onValueChange={v => update("category", v)}>
-                <SelectTrigger><SelectValue placeholder="Kategorie wählen" /></SelectTrigger>
+                <SelectTrigger className={dmgErrors.category ? "border-destructive" : ""}><SelectValue placeholder="Kategorie wählen" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Heizung">🔥 Heizung</SelectItem>
                   <SelectItem value="Wasser">💧 Wasser</SelectItem>
@@ -242,6 +242,7 @@ const DamagesPage = () => {
                   <SelectItem value="Sonstiges">🔧 Sonstiges</SelectItem>
                 </SelectContent>
               </Select>
+              {dmgErrors.category && <p className="text-xs text-destructive mt-1">{dmgErrors.category}</p>}
             </div>
 
             {/* Description */}
