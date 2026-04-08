@@ -256,18 +256,16 @@ const UtilityBillingPage = () => {
               {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
             </SelectContent>
           </Select>
-          {userProperties.length > 1 && (
-            <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Immobilie wählen" />
-              </SelectTrigger>
-              <SelectContent>
-                {userProperties.map(p => (
-                  <SelectItem key={p.id} value={p.id}>{p.address}, {p.city}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
+            <SelectTrigger className="w-52">
+              <SelectValue placeholder="Immobilie auswählen *" />
+            </SelectTrigger>
+            <SelectContent>
+              {userProperties.map(p => (
+                <SelectItem key={p.id} value={p.id}>{p.address}, {p.city}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {finalized && (
             <Button onClick={handleNewBilling} className="rounded-xl h-11 font-semibold">
               <Plus className="h-4 w-4 mr-2" />
