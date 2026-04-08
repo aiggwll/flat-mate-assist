@@ -262,7 +262,7 @@ const UtilityBillingPage = () => {
       doc.setFont("helvetica", "bold");
       doc.text("Immobilie:", 20, y);
       doc.setFont("helvetica", "normal");
-      doc.text(`${selectedProperty.address}, ${selectedProperty.zip_code} ${selectedProperty.city}`, 55, y);
+      doc.text(`${selectedProperty.address}, ${selectedProperty.zipCode} ${selectedProperty.city}`, 55, y);
       y += 7;
     }
 
