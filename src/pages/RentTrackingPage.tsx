@@ -279,7 +279,7 @@ const RentTrackingPage = () => {
           <h1 className="text-2xl font-heading font-bold text-foreground">Mietübersicht</h1>
           <p className="text-muted-foreground text-sm mt-1">{payments.length} Einträge</p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
+        <Button onClick={openNewDialog}>
           <Plus className="h-4 w-4 mr-2" />
           Neue Miete
         </Button>
