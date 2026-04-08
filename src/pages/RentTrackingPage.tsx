@@ -112,11 +112,27 @@ const RentTrackingPage = () => {
     return cold + nk;
   }, [form.cold_rent, form.nebenkosten]);
 
-  const handleAddPayment = async () => {
-    if (!form.unit_id || !form.tenant_name || !form.cold_rent || !form.nebenkosten) {
-      toast.error("Bitte alle Felder ausfüllen.");
-      return;
+  const validateForm = useCallback(() => {
+    const result = rentSchema.safeParse(form);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach(e => { fieldErrors[e.path[0] as string] = e.message; });
+      setErrors(fieldErrors);
+      return false;
     }
+    setErrors({});
+    return true;
+  }, [form]);
+
+  useEffect(() => {
+    if (attempted) validateForm();
+  }, [form, attempted, validateForm]);
+
+  const isFormValid = rentSchema.safeParse(form).success;
+
+  const handleAddPayment = async () => {
+    setAttempted(true);
+    if (!validateForm()) return;
     if (!user) return;
 
     const dueDate = format(startOfMonth(new Date()), "yyyy-MM-dd");
@@ -141,6 +157,8 @@ const RentTrackingPage = () => {
     } else {
       toast.success("Mietzahlung angelegt!");
       setForm({ unit_id: "", tenant_name: "", cold_rent: "", nebenkosten: "" });
+      setErrors({});
+      setAttempted(false);
       setDialogOpen(false);
       loadPayments();
     }
