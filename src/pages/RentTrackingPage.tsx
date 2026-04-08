@@ -4,7 +4,7 @@ import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
 import { format, isBefore, startOfMonth, addMonths, setMonth, setYear, getMonth, getYear } from "date-fns";
 import { de } from "date-fns/locale";
-import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro, MoreVertical, Undo2, Trash2 } from "lucide-react";
+import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro, MoreVertical, Undo2, Trash2, Pencil } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { sal } from "@/lib/salutation";
 import { Button } from "@/components/ui/button";
@@ -76,6 +76,7 @@ const RentTrackingPage = () => {
   const [payments, setPayments] = useState<RentPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ unit_id: "", tenant_name: "", due_date: defaultDueDate, cold_rent: "", nebenkosten: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [attempted, setAttempted] = useState(false);
@@ -151,38 +152,80 @@ const RentTrackingPage = () => {
 
   const isFormValid = rentSchema.safeParse(form).success;
 
-  const handleAddPayment = async () => {
+  const openEditDialog = (p: RentPayment) => {
+    setEditingId(p.id);
+    setForm({
+      unit_id: p.unit_id,
+      tenant_name: p.tenant_name,
+      due_date: p.due_date,
+      cold_rent: String(p.cold_rent),
+      nebenkosten: String(p.nebenkosten),
+    });
+    setErrors({});
+    setAttempted(false);
+    setDialogOpen(true);
+  };
+
+  const openNewDialog = () => {
+    setEditingId(null);
+    setForm({ unit_id: "", tenant_name: "", due_date: defaultDueDate, cold_rent: "", nebenkosten: "" });
+    setErrors({});
+    setAttempted(false);
+    setDialogOpen(true);
+  };
+
+  const handleSavePayment = async () => {
     setAttempted(true);
     if (!validateForm()) return;
     if (!user) return;
 
-    const dueDate = form.due_date;
     const coldRent = parseFloat(form.cold_rent);
     const nebenkosten = parseFloat(form.nebenkosten);
     const warmmiete = coldRent + nebenkosten;
 
-    const { error } = await supabase.from("rent_payments").insert({
-      user_id: user.id,
-      unit_id: form.unit_id.trim(),
-      tenant_name: form.tenant_name.trim(),
-      amount: warmmiete,
-      cold_rent: coldRent,
-      warm_rent: warmmiete,
-      nebenkosten: nebenkosten,
-      due_date: dueDate,
-      status: "ausstehend",
-    });
+    if (editingId) {
+      const { error } = await supabase.from("rent_payments").update({
+        unit_id: form.unit_id.trim(),
+        tenant_name: form.tenant_name.trim(),
+        amount: warmmiete,
+        cold_rent: coldRent,
+        warm_rent: warmmiete,
+        nebenkosten: nebenkosten,
+        due_date: form.due_date,
+      }).eq("id", editingId);
 
-    if (error) {
-      toast.error("Fehler beim Anlegen: " + error.message);
+      if (error) {
+        toast.error("Fehler beim Speichern: " + error.message);
+      } else {
+        toast.success("Mietzahlung aktualisiert!");
+        setDialogOpen(false);
+        setEditingId(null);
+        loadPayments();
+      }
     } else {
-      toast.success("Mietzahlung angelegt!");
-      setForm({ unit_id: "", tenant_name: "", due_date: defaultDueDate, cold_rent: "", nebenkosten: "" });
-      setErrors({});
-      setAttempted(false);
-      setDialogOpen(false);
-      loadPayments();
+      const { error } = await supabase.from("rent_payments").insert({
+        user_id: user.id,
+        unit_id: form.unit_id.trim(),
+        tenant_name: form.tenant_name.trim(),
+        amount: warmmiete,
+        cold_rent: coldRent,
+        warm_rent: warmmiete,
+        nebenkosten: nebenkosten,
+        due_date: form.due_date,
+        status: "ausstehend",
+      });
+
+      if (error) {
+        toast.error("Fehler beim Anlegen: " + error.message);
+      } else {
+        toast.success("Mietzahlung angelegt!");
+        setDialogOpen(false);
+        loadPayments();
+      }
     }
+    setForm({ unit_id: "", tenant_name: "", due_date: defaultDueDate, cold_rent: "", nebenkosten: "" });
+    setErrors({});
+    setAttempted(false);
   };
 
   const markAsPaid = async (id: string) => {
@@ -236,7 +279,7 @@ const RentTrackingPage = () => {
           <h1 className="text-2xl font-heading font-bold text-foreground">Mietübersicht</h1>
           <p className="text-muted-foreground text-sm mt-1">{payments.length} Einträge</p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
+        <Button onClick={openNewDialog}>
           <Plus className="h-4 w-4 mr-2" />
           Neue Miete
         </Button>
@@ -270,7 +313,7 @@ const RentTrackingPage = () => {
             "Trag deine erste Miete ein und behalte jeden Monat den Überblick."
           )}
           buttonLabel="Erste Miete eintragen"
-          onAction={() => setDialogOpen(true)}
+          onAction={openNewDialog}
         />
       ) : (
         <div className="space-y-3">
@@ -316,10 +359,16 @@ const RentTrackingPage = () => {
                           Als offen markieren
                         </DropdownMenuItem>
                       ) : (
-                        <DropdownMenuItem onClick={() => markAsPaid(p.id)}>
-                          <Check className="h-4 w-4 mr-2" />
-                          Als bezahlt markieren
-                        </DropdownMenuItem>
+                        <>
+                          <DropdownMenuItem onClick={() => openEditDialog(p)}>
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Bearbeiten
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => markAsPaid(p.id)}>
+                            <Check className="h-4 w-4 mr-2" />
+                            Als bezahlt markieren
+                          </DropdownMenuItem>
+                        </>
                       )}
                       <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="text-destructive focus:text-destructive">
                         <Trash2 className="h-4 w-4 mr-2" />
@@ -338,7 +387,7 @@ const RentTrackingPage = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Neue Mietzahlung anlegen</DialogTitle>
+            <DialogTitle>{editingId ? "Mietzahlung bearbeiten" : "Neue Mietzahlung anlegen"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -427,8 +476,8 @@ const RentTrackingPage = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setDialogOpen(false); setErrors({}); setAttempted(false); }}>Abbrechen</Button>
-            <Button onClick={handleAddPayment} disabled={attempted && !isFormValid}>Anlegen</Button>
+            <Button variant="outline" onClick={() => { setDialogOpen(false); setEditingId(null); setErrors({}); setAttempted(false); }}>Abbrechen</Button>
+            <Button onClick={handleSavePayment} disabled={attempted && !isFormValid}>{editingId ? "Speichern" : "Anlegen"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
