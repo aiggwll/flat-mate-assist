@@ -390,7 +390,7 @@ const TaxFolderPage = () => {
                     </div>
                   </div>
                   <span className={cn("text-sm font-semibold shrink-0", cat?.type === "income" ? "text-primary" : "text-destructive")}>
-                    {doc.amount.toFixed(2)} €
+                    {formatCurrency(doc.amount)}
                   </span>
                   <button onClick={() => handleDelete(doc)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0">
                     <Trash2 className="h-4 w-4" />

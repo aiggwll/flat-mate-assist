@@ -440,7 +440,7 @@ const UtilityBillingPage = () => {
           {/* Sticky bottom save bar */}
           <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-card border-t px-6 py-4 flex items-center justify-between z-40">
             <p className="text-sm font-medium text-foreground">
-              Gesamtkosten: <span className="font-bold">{totalCosts.toFixed(2)} €</span>
+              Gesamtkosten: <span className="font-bold">{formatCurrency(totalCosts)}</span>
             </p>
             <Button
               onClick={handleFinalize}
