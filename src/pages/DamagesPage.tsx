@@ -200,24 +200,26 @@ const DamagesPage = () => {
               <div>
                 <Label>Immobilie *</Label>
                 <Select value={form.propertyId} onValueChange={v => { update("propertyId", v); update("unitId", ""); }}>
-                  <SelectTrigger><SelectValue placeholder="Auswählen" /></SelectTrigger>
+                  <SelectTrigger className={dmgErrors.propertyId ? "border-destructive" : ""}><SelectValue placeholder="Auswählen" /></SelectTrigger>
                   <SelectContent>
                     {userProperties.map(p => (
                       <SelectItem key={p.id} value={p.id}>{p.address}, {p.city}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {dmgErrors.propertyId && <p className="text-xs text-destructive mt-1">{dmgErrors.propertyId}</p>}
               </div>
               <div>
                 <Label>Wohnung *</Label>
                 <Select value={form.unitId} onValueChange={v => update("unitId", v)} disabled={!form.propertyId}>
-                  <SelectTrigger><SelectValue placeholder="Auswählen" /></SelectTrigger>
+                  <SelectTrigger className={dmgErrors.unitId ? "border-destructive" : ""}><SelectValue placeholder="Auswählen" /></SelectTrigger>
                   <SelectContent>
                     {availableUnits.map(u => (
                       <SelectItem key={u.id} value={u.id}>Whg. {u.number}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {dmgErrors.unitId && <p className="text-xs text-destructive mt-1">{dmgErrors.unitId}</p>}
               </div>
             </div>
 
