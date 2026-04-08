@@ -79,6 +79,7 @@ const RentTrackingPage = () => {
   const [form, setForm] = useState({ unit_id: "", tenant_name: "", due_date: defaultDueDate, cold_rent: "", nebenkosten: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [attempted, setAttempted] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const unitOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
