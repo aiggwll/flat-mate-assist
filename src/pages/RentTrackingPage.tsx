@@ -470,8 +470,8 @@ const RentTrackingPage = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setDialogOpen(false); setErrors({}); setAttempted(false); }}>Abbrechen</Button>
-            <Button onClick={handleAddPayment} disabled={attempted && !isFormValid}>Anlegen</Button>
+            <Button variant="outline" onClick={() => { setDialogOpen(false); setEditingId(null); setErrors({}); setAttempted(false); }}>Abbrechen</Button>
+            <Button onClick={handleSavePayment} disabled={attempted && !isFormValid}>{editingId ? "Speichern" : "Anlegen"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
