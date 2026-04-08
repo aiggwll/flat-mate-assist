@@ -303,6 +303,48 @@ const RentTrackingPage = () => {
               {errors.tenant_name && <p className="text-xs text-destructive mt-1">{errors.tenant_name}</p>}
             </div>
             <div>
+              <Label>Fälligkeitsdatum *</Label>
+              <div className="flex gap-2">
+                <Select
+                  value={String(getMonth(new Date(form.due_date)))}
+                  onValueChange={(m) => {
+                    const d = new Date(form.due_date);
+                    const updated = startOfMonth(setMonth(d, parseInt(m)));
+                    setForm(f => ({ ...f, due_date: format(updated, "yyyy-MM-dd") }));
+                  }}
+                >
+                  <SelectTrigger className={`flex-1 ${errors.due_date ? "border-destructive" : ""}`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"].map((name, i) => (
+                      <SelectItem key={i} value={String(i)}>{name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={String(getYear(new Date(form.due_date)))}
+                  onValueChange={(y) => {
+                    const d = new Date(form.due_date);
+                    const updated = startOfMonth(setYear(d, parseInt(y)));
+                    setForm(f => ({ ...f, due_date: format(updated, "yyyy-MM-dd") }));
+                  }}
+                >
+                  <SelectTrigger className={`w-24 ${errors.due_date ? "border-destructive" : ""}`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 5 }, (_, i) => getYear(new Date()) + i - 1).map(y => (
+                      <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Fällig am: {format(new Date(form.due_date), "dd. MMMM yyyy", { locale: de })}
+              </p>
+              {errors.due_date && <p className="text-xs text-destructive mt-1">{errors.due_date}</p>}
+            <div>
               <Label>Kaltmiete (€) *</Label>
               <Input className={errors.cold_rent ? "border-destructive" : ""} type="number" min="0.01" step="0.01" placeholder="z.B. 850" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
               {errors.cold_rent && <p className="text-xs text-destructive mt-1">{errors.cold_rent}</p>}
