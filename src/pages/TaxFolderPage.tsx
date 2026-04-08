@@ -48,8 +48,10 @@ const TaxFolderPage = () => {
   const { userProperties, userId, salutation } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
+  const [selectedPropertyId, setSelectedPropertyId] = useState("all");
   const [documents, setDocuments] = useState<TaxDoc[]>([]);
   const [availableYears, setAvailableYears] = useState<string[]>([]);
+  const [rentIncome, setRentIncome] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // Upload form state
@@ -65,15 +67,19 @@ const TaxFolderPage = () => {
   const loadDocuments = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
-    const { data } = await supabase
+    let query = supabase
       .from("tax_documents")
       .select("*")
       .eq("user_id", userId)
       .eq("year", parseInt(selectedYear))
       .order("created_at", { ascending: false });
+    if (selectedPropertyId !== "all") {
+      query = query.eq("property_id", selectedPropertyId);
+    }
+    const { data } = await query;
     setDocuments((data as TaxDoc[]) || []);
     setLoading(false);
-  }, [userId, selectedYear]);
+  }, [userId, selectedYear, selectedPropertyId]);
 
   useEffect(() => { loadDocuments(); }, [loadDocuments]);
 
