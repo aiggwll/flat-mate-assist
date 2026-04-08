@@ -654,7 +654,35 @@ const LoginPage = () => {
             )}
             <div className="space-y-2">
               <Label htmlFor="email">E-Mail</Label>
-              <Input id="email" type="email" placeholder="name@beispiel.de" required value={email} onChange={e => setEmail(e.target.value)} />
+              <div className="relative">
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@beispiel.de"
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  onBlur={() => !isLogin && setEmailTouched(true)}
+                  className={cn(
+                    !isLogin && emailTouched && email && (
+                      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? "border-green-500" : "border-destructive"
+                    )
+                  )}
+                />
+                {!isLogin && emailTouched && email && (
+                  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+                    ? <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+                    : <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-destructive" />
+                )}
+              </div>
+              {!isLogin && emailTouched && email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && (
+                <p className="text-xs text-destructive">Ungültige E-Mail-Adresse</p>
+              )}
+              {!isLogin && emailTouched && email && /\.(con|cmo|gmial|gmal)$/i.test(email) && (
+                <p className="text-xs text-yellow-600">
+                  Meinten Sie {email.replace(/\.(con|cmo)$/i, ".com").replace(/gmial|gmal/i, "gmail")}?
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Passwort</Label>
@@ -665,8 +693,38 @@ const LoginPage = () => {
                 value={password}
                 onChange={e => { setPassword(e.target.value); setPasswordError(""); }}
                 required
-                minLength={6}
+                minLength={isLogin ? 6 : 8}
               />
+              {!isLogin && password.length > 0 && (() => {
+                const hasLen = password.length >= 8;
+                const hasUpper = /[A-Z]/.test(password);
+                const hasNum = /[0-9]/.test(password);
+                const score = [hasLen, hasUpper, hasNum].filter(Boolean).length;
+                const strengthLabel = score <= 1 ? "Schwach" : score === 2 ? "Mittel" : "Stark";
+                const strengthColor = score <= 1 ? "bg-destructive" : score === 2 ? "bg-yellow-500" : "bg-green-500";
+                return (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                        <div className={cn("h-full rounded-full transition-all", strengthColor)} style={{ width: `${(score / 3) * 100}%` }} />
+                      </div>
+                      <span className={cn("text-xs font-medium", score <= 1 ? "text-destructive" : score === 2 ? "text-yellow-600" : "text-green-600")}>{strengthLabel}</span>
+                    </div>
+                    <ul className="space-y-0.5">
+                      {[
+                        { ok: hasLen, text: "Mindestens 8 Zeichen" },
+                        { ok: hasUpper, text: "Großbuchstabe" },
+                        { ok: hasNum, text: "Zahl" },
+                      ].map(r => (
+                        <li key={r.text} className={cn("text-xs flex items-center gap-1.5", r.ok ? "text-green-600" : "text-muted-foreground")}>
+                          {r.ok ? <Check className="h-3 w-3" /> : <span className="h-3 w-3 inline-block text-center">○</span>}
+                          {r.text}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })()}
             </div>
             {!isLogin && (
               <div className="space-y-2">
@@ -678,8 +736,21 @@ const LoginPage = () => {
                   value={passwordConfirm}
                   onChange={e => { setPasswordConfirm(e.target.value); setPasswordError(""); }}
                   required
-                  minLength={6}
+                  minLength={8}
+                  className={cn(
+                    passwordConfirm && (
+                      password === passwordConfirm ? "border-green-500" : "border-destructive"
+                    )
+                  )}
                 />
+                {passwordConfirm && (
+                  <p className={cn("text-xs flex items-center gap-1", password === passwordConfirm ? "text-green-600" : "text-destructive")}>
+                    {password === passwordConfirm
+                      ? <><Check className="h-3 w-3" /> Passwörter stimmen überein</>
+                      : <><AlertCircle className="h-3 w-3" /> Passwörter stimmen nicht überein</>
+                    }
+                  </p>
+                )}
               </div>
             )}
             {passwordError && (
@@ -718,14 +789,22 @@ const LoginPage = () => {
                 </button>
               </div>
             )}
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || (!isLogin && (
+                !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+                password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password) ||
+                password !== passwordConfirm || !nameField.trim()
+              ))}
+            >
               {loading ? "Bitte warten..." : (isLogin ? "Anmelden" : "Registrieren")}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             {isLogin ? "Noch kein Konto?" : "Bereits registriert?"}{" "}
-            <button onClick={() => { setIsLogin(!isLogin); setPasswordError(""); setPassword(""); setPasswordConfirm(""); }} className="text-accent font-medium hover:underline">
+            <button onClick={() => { setIsLogin(!isLogin); setPasswordError(""); setPassword(""); setPasswordConfirm(""); setEmailTouched(false); }} className="text-accent font-medium hover:underline">
               {isLogin ? "Jetzt registrieren" : "Anmelden"}
             </button>
           </p>
