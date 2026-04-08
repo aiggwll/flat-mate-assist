@@ -359,10 +359,16 @@ const RentTrackingPage = () => {
                           Als offen markieren
                         </DropdownMenuItem>
                       ) : (
-                        <DropdownMenuItem onClick={() => markAsPaid(p.id)}>
-                          <Check className="h-4 w-4 mr-2" />
-                          Als bezahlt markieren
-                        </DropdownMenuItem>
+                        <>
+                          <DropdownMenuItem onClick={() => openEditDialog(p)}>
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Bearbeiten
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => markAsPaid(p.id)}>
+                            <Check className="h-4 w-4 mr-2" />
+                            Als bezahlt markieren
+                          </DropdownMenuItem>
+                        </>
                       )}
                       <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="text-destructive focus:text-destructive">
                         <Trash2 className="h-4 w-4 mr-2" />
