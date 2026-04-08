@@ -66,6 +66,9 @@ const DamagesPage = () => {
     unitId: "",
   });
 
+  const [dmgErrors, setDmgErrors] = useState<Record<string, string>>({});
+  const [dmgAttempted, setDmgAttempted] = useState(false);
+
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
 
   const selectedProperty = userProperties.find(p => p.id === form.propertyId);
