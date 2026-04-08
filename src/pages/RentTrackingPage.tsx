@@ -360,8 +360,8 @@ const RentTrackingPage = () => {
               {errors.unit_id && <p className="text-xs text-destructive mt-1">{errors.unit_id}</p>}
             </div>
             <div>
-              <Label>Mietername *</Label>
-              <Input className={errors.tenant_name ? "border-destructive" : ""} placeholder="Max Mustermann" value={form.tenant_name} onChange={e => setForm(f => ({ ...f, tenant_name: e.target.value }))} />
+              <Label htmlFor="mietername">Mietername *</Label>
+              <Input id="mietername" name="mietername" aria-required="true" className={errors.tenant_name ? "border-destructive" : ""} placeholder="Max Mustermann" value={form.tenant_name} onChange={e => setForm(f => ({ ...f, tenant_name: e.target.value }))} />
               {errors.tenant_name && <p className="text-xs text-destructive mt-1">{errors.tenant_name}</p>}
             </div>
             <div>
