@@ -132,7 +132,7 @@ const TenantAiChat = ({ propertyInfo, tenantName, landlordName, onEscalate, dama
   };
 
   return (
-    <Card className="flex flex-col h-[500px]">
+    <Card className="flex flex-col max-h-[calc(100vh-12rem)] min-h-[300px]">
       <div className="p-4 border-b flex items-center gap-3">
         <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center">
           <Bot className="h-4 w-4 text-accent" />
