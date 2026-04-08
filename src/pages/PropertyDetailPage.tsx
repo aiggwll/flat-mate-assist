@@ -16,7 +16,7 @@ interface Damage {
   id: string;
   title: string;
   description: string;
-  category: "Heizung" | "Wasser" | "Elektrik" | "Sonstiges";
+  category: string;
   status: "offen" | "in Bearbeitung" | "erledigt";
   reportedAt: string;
   reportedBy: string;
