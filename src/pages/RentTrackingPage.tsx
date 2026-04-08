@@ -160,7 +160,7 @@ const RentTrackingPage = () => {
       toast.error("Fehler beim Anlegen: " + error.message);
     } else {
       toast.success("Mietzahlung angelegt!");
-      setForm({ unit_id: "", tenant_name: "", cold_rent: "", nebenkosten: "" });
+      setForm({ unit_id: "", tenant_name: "", due_date: defaultDueDate, cold_rent: "", nebenkosten: "" });
       setErrors({});
       setAttempted(false);
       setDialogOpen(false);
