@@ -107,8 +107,9 @@ const RentTrackingPage = () => {
   }, [loadPayments]);
 
   const computedWarmmiete = useMemo(() => {
-    const cold = parseFloat(form.cold_rent) || 0;
-    const nk = parseFloat(form.nebenkosten) || 0;
+    const cold = parseFloat(form.cold_rent);
+    const nk = parseFloat(form.nebenkosten);
+    if (isNaN(cold) || cold <= 0 || isNaN(nk) || nk < 0) return 0;
     return cold + nk;
   }, [form.cold_rent, form.nebenkosten]);
 
