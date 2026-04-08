@@ -198,6 +198,33 @@ const RentTrackingPage = () => {
     }
   };
 
+  const markAsOpen = async (id: string) => {
+    const { error } = await supabase
+      .from("rent_payments")
+      .update({ status: "ausstehend", paid_at: null })
+      .eq("id", id);
+    if (error) {
+      toast.error("Fehler: " + error.message);
+    } else {
+      toast.success("Status zurückgesetzt auf offen.");
+      loadPayments();
+    }
+  };
+
+  const deletePayment = async (id: string) => {
+    const { error } = await supabase
+      .from("rent_payments")
+      .delete()
+      .eq("id", id);
+    if (error) {
+      toast.error("Fehler: " + error.message);
+    } else {
+      toast.success("Eintrag gelöscht.");
+      loadPayments();
+    }
+    setDeleteTarget(null);
+  };
+
   const totalExpected = payments.reduce((s, p) => s + (p.cold_rent + p.nebenkosten), 0);
   const totalPaid = payments.filter(p => p.paid_at !== null).reduce((s, p) => s + (p.cold_rent + p.nebenkosten), 0);
   const totalOpen = totalExpected - totalPaid;
