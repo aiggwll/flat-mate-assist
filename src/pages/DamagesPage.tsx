@@ -249,11 +249,13 @@ const DamagesPage = () => {
             <div>
               <Label>Beschreibung *</Label>
               <Textarea
+                className={dmgErrors.description ? "border-destructive" : ""}
                 placeholder="Beschreiben Sie den Schaden möglichst genau..."
                 value={form.description}
                 onChange={e => update("description", e.target.value)}
                 rows={4}
               />
+              {dmgErrors.description && <p className="text-xs text-destructive mt-1">{dmgErrors.description}</p>}
             </div>
 
             {/* Photo Upload */}
