@@ -179,7 +179,7 @@ const TenantDashboardPage = () => {
       id: `dm-${Date.now()}`,
       title: damageTitle,
       description: damageDesc,
-      category: damageCategory as "Heizung" | "Wasser" | "Elektrik" | "Sonstiges",
+      category: damageCategory,
       status: "offen" as const,
       reportedAt: new Date().toISOString().split("T")[0],
       reportedBy: tenantName,
