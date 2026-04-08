@@ -48,8 +48,8 @@ const getStatusInfo = (paidAt: string | null, dueDate: string) => {
 const rentSchema = z.object({
   unit_id: z.string().min(1, "Bitte Immobilie & Wohnung auswählen"),
   tenant_name: z.string().trim().min(1, "Mietername ist erforderlich"),
-  cold_rent: z.string().refine(v => parseFloat(v) > 0, "Kaltmiete muss größer als 0 sein"),
-  nebenkosten: z.string().refine(v => v !== "" && !isNaN(parseFloat(v)), "Nebenkosten eingeben (oder 0)"),
+  cold_rent: z.string().refine(v => !isNaN(parseFloat(v)) && parseFloat(v) > 0, "Kaltmiete muss eine positive Zahl sein"),
+  nebenkosten: z.string().refine(v => !isNaN(parseFloat(v)) && parseFloat(v) >= 0, "Nebenkosten dürfen nicht negativ sein"),
 });
 
 const RentTrackingPage = () => {
