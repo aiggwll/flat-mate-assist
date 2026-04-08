@@ -18,6 +18,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { z } from "zod";
 
 interface RentPayment {
   id: string;
