@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { sal } from "@/lib/salutation";
 import EmptyState from "@/components/EmptyState";
@@ -21,6 +21,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const damageSchema = z.object({
+  propertyId: z.string().min(1, "Bitte Immobilie auswählen"),
+  unitId: z.string().min(1, "Bitte Wohnung auswählen"),
+  title: z.string().trim().min(1, "Titel ist erforderlich"),
+  category: z.string().min(1, "Bitte Kategorie auswählen"),
+  description: z.string().trim().min(1, "Beschreibung ist erforderlich"),
+});
 
 interface DamageWithContext extends Damage {
   propertyAddress: string;
@@ -57,6 +66,9 @@ const DamagesPage = () => {
     unitId: "",
   });
 
+  const [dmgErrors, setDmgErrors] = useState<Record<string, string>>({});
+  const [dmgAttempted, setDmgAttempted] = useState(false);
+
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
 
   const selectedProperty = userProperties.find(p => p.id === form.propertyId);
@@ -79,11 +91,27 @@ const DamagesPage = () => {
     });
   };
 
-  const handleSubmit = () => {
-    if (!form.title || !form.description || !form.category || !form.propertyId || !form.unitId) {
-      toast.error("Bitte füllen Sie alle Pflichtfelder aus.");
-      return;
+  const validateDamageForm = useCallback(() => {
+    const result = damageSchema.safeParse(form);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach(e => { fieldErrors[e.path[0] as string] = e.message; });
+      setDmgErrors(fieldErrors);
+      return false;
     }
+    setDmgErrors({});
+    return true;
+  }, [form]);
+
+  useEffect(() => {
+    if (dmgAttempted) validateDamageForm();
+  }, [form, dmgAttempted, validateDamageForm]);
+
+  const isDmgValid = damageSchema.safeParse(form).success;
+
+  const handleSubmit = () => {
+    setDmgAttempted(true);
+    if (!validateDamageForm()) return;
 
     const property = userProperties.find(p => p.id === form.propertyId);
 
@@ -104,6 +132,8 @@ const DamagesPage = () => {
     toast.success("Schaden erfolgreich gemeldet!");
     setOpen(false);
     setForm({ title: "", description: "", category: "", propertyId: "", unitId: "" });
+    setDmgErrors({});
+    setDmgAttempted(false);
     setPhotos([]);
   };
 
@@ -170,38 +200,41 @@ const DamagesPage = () => {
               <div>
                 <Label>Immobilie *</Label>
                 <Select value={form.propertyId} onValueChange={v => { update("propertyId", v); update("unitId", ""); }}>
-                  <SelectTrigger><SelectValue placeholder="Auswählen" /></SelectTrigger>
+                  <SelectTrigger className={dmgErrors.propertyId ? "border-destructive" : ""}><SelectValue placeholder="Auswählen" /></SelectTrigger>
                   <SelectContent>
                     {userProperties.map(p => (
                       <SelectItem key={p.id} value={p.id}>{p.address}, {p.city}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {dmgErrors.propertyId && <p className="text-xs text-destructive mt-1">{dmgErrors.propertyId}</p>}
               </div>
               <div>
                 <Label>Wohnung *</Label>
                 <Select value={form.unitId} onValueChange={v => update("unitId", v)} disabled={!form.propertyId}>
-                  <SelectTrigger><SelectValue placeholder="Auswählen" /></SelectTrigger>
+                  <SelectTrigger className={dmgErrors.unitId ? "border-destructive" : ""}><SelectValue placeholder="Auswählen" /></SelectTrigger>
                   <SelectContent>
                     {availableUnits.map(u => (
                       <SelectItem key={u.id} value={u.id}>Whg. {u.number}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {dmgErrors.unitId && <p className="text-xs text-destructive mt-1">{dmgErrors.unitId}</p>}
               </div>
             </div>
 
             {/* Title */}
             <div>
               <Label>Titel *</Label>
-              <Input placeholder="z.B. Heizung defekt" value={form.title} onChange={e => update("title", e.target.value)} />
+              <Input className={dmgErrors.title ? "border-destructive" : ""} placeholder="z.B. Heizung defekt" value={form.title} onChange={e => update("title", e.target.value)} />
+              {dmgErrors.title && <p className="text-xs text-destructive mt-1">{dmgErrors.title}</p>}
             </div>
 
             {/* Category */}
             <div>
               <Label>Kategorie *</Label>
               <Select value={form.category} onValueChange={v => update("category", v)}>
-                <SelectTrigger><SelectValue placeholder="Kategorie wählen" /></SelectTrigger>
+                <SelectTrigger className={dmgErrors.category ? "border-destructive" : ""}><SelectValue placeholder="Kategorie wählen" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Heizung">🔥 Heizung</SelectItem>
                   <SelectItem value="Wasser">💧 Wasser</SelectItem>
@@ -209,17 +242,20 @@ const DamagesPage = () => {
                   <SelectItem value="Sonstiges">🔧 Sonstiges</SelectItem>
                 </SelectContent>
               </Select>
+              {dmgErrors.category && <p className="text-xs text-destructive mt-1">{dmgErrors.category}</p>}
             </div>
 
             {/* Description */}
             <div>
               <Label>Beschreibung *</Label>
               <Textarea
+                className={dmgErrors.description ? "border-destructive" : ""}
                 placeholder="Beschreiben Sie den Schaden möglichst genau..."
                 value={form.description}
                 onChange={e => update("description", e.target.value)}
                 rows={4}
               />
+              {dmgErrors.description && <p className="text-xs text-destructive mt-1">{dmgErrors.description}</p>}
             </div>
 
             {/* Photo Upload */}
@@ -259,8 +295,8 @@ const DamagesPage = () => {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Abbrechen</Button>
-            <Button onClick={handleSubmit}>Schaden melden</Button>
+            <Button variant="outline" onClick={() => { setOpen(false); setDmgErrors({}); setDmgAttempted(false); }}>Abbrechen</Button>
+            <Button onClick={handleSubmit} disabled={dmgAttempted && !isDmgValid}>Schaden melden</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

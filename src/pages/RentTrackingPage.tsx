@@ -18,6 +18,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { z } from "zod";
 
 interface RentPayment {
   id: string;
@@ -44,12 +45,21 @@ const getStatusInfo = (paidAt: string | null, dueDate: string) => {
   return { label: "Ausstehend", color: "text-yellow-600 bg-yellow-50 border-yellow-200", icon: Clock };
 };
 
+const rentSchema = z.object({
+  unit_id: z.string().min(1, "Bitte Immobilie & Wohnung auswählen"),
+  tenant_name: z.string().trim().min(1, "Mietername ist erforderlich"),
+  cold_rent: z.string().refine(v => parseFloat(v) > 0, "Kaltmiete muss größer als 0 sein"),
+  nebenkosten: z.string().refine(v => v !== "" && !isNaN(parseFloat(v)), "Nebenkosten eingeben (oder 0)"),
+});
+
 const RentTrackingPage = () => {
   const { user, userProperties, salutation } = useUser();
   const [payments, setPayments] = useState<RentPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ unit_id: "", tenant_name: "", cold_rent: "", nebenkosten: "" });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [attempted, setAttempted] = useState(false);
 
   const unitOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
@@ -102,11 +112,27 @@ const RentTrackingPage = () => {
     return cold + nk;
   }, [form.cold_rent, form.nebenkosten]);
 
-  const handleAddPayment = async () => {
-    if (!form.unit_id || !form.tenant_name || !form.cold_rent || !form.nebenkosten) {
-      toast.error("Bitte alle Felder ausfüllen.");
-      return;
+  const validateForm = useCallback(() => {
+    const result = rentSchema.safeParse(form);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach(e => { fieldErrors[e.path[0] as string] = e.message; });
+      setErrors(fieldErrors);
+      return false;
     }
+    setErrors({});
+    return true;
+  }, [form]);
+
+  useEffect(() => {
+    if (attempted) validateForm();
+  }, [form, attempted, validateForm]);
+
+  const isFormValid = rentSchema.safeParse(form).success;
+
+  const handleAddPayment = async () => {
+    setAttempted(true);
+    if (!validateForm()) return;
     if (!user) return;
 
     const dueDate = format(startOfMonth(new Date()), "yyyy-MM-dd");
@@ -131,6 +157,8 @@ const RentTrackingPage = () => {
     } else {
       toast.success("Mietzahlung angelegt!");
       setForm({ unit_id: "", tenant_name: "", cold_rent: "", nebenkosten: "" });
+      setErrors({});
+      setAttempted(false);
       setDialogOpen(false);
       loadPayments();
     }
@@ -248,9 +276,9 @@ const RentTrackingPage = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Immobilie & Wohnung</Label>
+              <Label>Immobilie & Wohnung *</Label>
               <Select value={form.unit_id} onValueChange={(val) => setForm(f => ({ ...f, unit_id: val }))}>
-                <SelectTrigger>
+                <SelectTrigger className={errors.unit_id ? "border-destructive" : ""}>
                   <SelectValue placeholder="Wohnung auswählen" />
                 </SelectTrigger>
                 <SelectContent>
@@ -263,18 +291,22 @@ const RentTrackingPage = () => {
                   )}
                 </SelectContent>
               </Select>
+              {errors.unit_id && <p className="text-xs text-destructive mt-1">{errors.unit_id}</p>}
             </div>
             <div>
-              <Label>Mietername</Label>
-              <Input placeholder="Max Mustermann" value={form.tenant_name} onChange={e => setForm(f => ({ ...f, tenant_name: e.target.value }))} />
+              <Label>Mietername *</Label>
+              <Input className={errors.tenant_name ? "border-destructive" : ""} placeholder="Max Mustermann" value={form.tenant_name} onChange={e => setForm(f => ({ ...f, tenant_name: e.target.value }))} />
+              {errors.tenant_name && <p className="text-xs text-destructive mt-1">{errors.tenant_name}</p>}
             </div>
             <div>
-              <Label>Kaltmiete (€)</Label>
-              <Input type="number" placeholder="z.B. 850" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
+              <Label>Kaltmiete (€) *</Label>
+              <Input className={errors.cold_rent ? "border-destructive" : ""} type="number" placeholder="z.B. 850" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
+              {errors.cold_rent && <p className="text-xs text-destructive mt-1">{errors.cold_rent}</p>}
             </div>
             <div>
-              <Label>Nebenkosten / Vorauszahlung (€)</Label>
-              <Input type="number" placeholder="z.B. 150" value={form.nebenkosten} onChange={e => setForm(f => ({ ...f, nebenkosten: e.target.value }))} />
+              <Label>Nebenkosten / Vorauszahlung (€) *</Label>
+              <Input className={errors.nebenkosten ? "border-destructive" : ""} type="number" placeholder="z.B. 150" value={form.nebenkosten} onChange={e => setForm(f => ({ ...f, nebenkosten: e.target.value }))} />
+              {errors.nebenkosten && <p className="text-xs text-destructive mt-1">{errors.nebenkosten}</p>}
               <p className="text-xs text-muted-foreground mt-1">Wenn keine Nebenkosten vereinbart: 0 eingeben</p>
             </div>
             <div>
@@ -286,8 +318,8 @@ const RentTrackingPage = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Abbrechen</Button>
-            <Button onClick={handleAddPayment}>Anlegen</Button>
+            <Button variant="outline" onClick={() => { setDialogOpen(false); setErrors({}); setAttempted(false); }}>Abbrechen</Button>
+            <Button onClick={handleAddPayment} disabled={attempted && !isFormValid}>Anlegen</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

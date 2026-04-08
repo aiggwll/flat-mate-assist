@@ -23,6 +23,12 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const messageSchema = z.object({
+  recipient: z.string().min(1, "Bitte Empfänger auswählen"),
+  text: z.string().trim().min(1, "Nachricht darf nicht leer sein"),
+});
 
 interface TenantOption {
   userId: string;
@@ -121,8 +127,30 @@ const ChatPage = () => {
     setNewMessage("");
   };
 
+  const [msgErrors, setMsgErrors] = useState<Record<string, string>>({});
+  const [msgAttempted, setMsgAttempted] = useState(false);
+
+  const validateNewMessage = () => {
+    const result = messageSchema.safeParse({ recipient: newRecipient, text: newText });
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach(e => { fieldErrors[e.path[0] as string] = e.message; });
+      setMsgErrors(fieldErrors);
+      return false;
+    }
+    setMsgErrors({});
+    return true;
+  };
+
+  useEffect(() => {
+    if (msgAttempted) validateNewMessage();
+  }, [newRecipient, newText, msgAttempted]);
+
+  const isMsgValid = messageSchema.safeParse({ recipient: newRecipient, text: newText }).success;
+
   const handleNewMessage = async () => {
-    if (!newRecipient || !newText.trim()) return;
+    setMsgAttempted(true);
+    if (!validateNewMessage()) return;
     setSending(true);
     const tenant = tenants.find(t => t.userId === newRecipient);
     if (tenant) {
@@ -137,6 +165,8 @@ const ChatPage = () => {
       setShowNewDialog(false);
       setNewRecipient("");
       setNewText("");
+      setMsgErrors({});
+      setMsgAttempted(false);
       setSelectedContact(tenant.name);
     }
     setSending(false);
@@ -165,16 +195,16 @@ const ChatPage = () => {
   );
 
   const NewMessageDialog = () => (
-    <Dialog open={showNewDialog} onOpenChange={setShowNewDialog}>
+    <Dialog open={showNewDialog} onOpenChange={(open) => { setShowNewDialog(open); if (!open) { setMsgErrors({}); setMsgAttempted(false); } }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Neue Nachricht</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Empfänger</label>
+            <label className="text-sm font-medium text-foreground">Empfänger *</label>
             <Select value={newRecipient} onValueChange={setNewRecipient}>
-              <SelectTrigger className="h-9 text-sm">
+              <SelectTrigger className={`h-9 text-sm ${msgErrors.recipient ? "border-destructive" : ""}`}>
                 <SelectValue placeholder="Mieter auswählen…" />
               </SelectTrigger>
               <SelectContent>
@@ -188,21 +218,23 @@ const ChatPage = () => {
                 )}
               </SelectContent>
             </Select>
+            {msgErrors.recipient && <p className="text-xs text-destructive">{msgErrors.recipient}</p>}
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Nachricht</label>
+            <label className="text-sm font-medium text-foreground">Nachricht *</label>
             <Textarea
               value={newText}
               onChange={(e) => setNewText(e.target.value)}
               placeholder="Ihre Nachricht…"
               rows={4}
-              className="text-sm"
+              className={`text-sm ${msgErrors.text ? "border-destructive" : ""}`}
             />
+            {msgErrors.text && <p className="text-xs text-destructive">{msgErrors.text}</p>}
           </div>
         </div>
         <DialogFooter className="gap-2">
           <Button variant="outline" size="sm" onClick={() => setShowNewDialog(false)}>Abbrechen</Button>
-          <Button size="sm" onClick={handleNewMessage} disabled={sending || !newRecipient || !newText.trim()} className="gap-2">
+          <Button size="sm" onClick={handleNewMessage} disabled={sending || (msgAttempted && !isMsgValid)} className="gap-2">
             <Send className="h-3.5 w-3.5" />
             Senden
           </Button>
