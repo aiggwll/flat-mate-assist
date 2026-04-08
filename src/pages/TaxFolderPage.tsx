@@ -347,7 +347,7 @@ const TaxFolderPage = () => {
               <div key={cat.key} className="flex items-center justify-between px-5 py-3">
                 <span className="text-sm font-medium text-foreground">{cat.label}</span>
                 <span className={cn("text-sm font-semibold", cat.type === "income" ? "text-primary" : "text-destructive")}>
-                  {cat.type === "income" ? "+" : "-"}{categoryTotals[cat.key].toFixed(2)} €
+                  {cat.type === "income" ? "+" : "-"}{formatCurrency(categoryTotals[cat.key])}
                 </span>
               </div>
             ))}
