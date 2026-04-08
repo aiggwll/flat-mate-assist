@@ -91,11 +91,27 @@ const DamagesPage = () => {
     });
   };
 
-  const handleSubmit = () => {
-    if (!form.title || !form.description || !form.category || !form.propertyId || !form.unitId) {
-      toast.error("Bitte füllen Sie alle Pflichtfelder aus.");
-      return;
+  const validateDamageForm = useCallback(() => {
+    const result = damageSchema.safeParse(form);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach(e => { fieldErrors[e.path[0] as string] = e.message; });
+      setDmgErrors(fieldErrors);
+      return false;
     }
+    setDmgErrors({});
+    return true;
+  }, [form]);
+
+  useEffect(() => {
+    if (dmgAttempted) validateDamageForm();
+  }, [form, dmgAttempted, validateDamageForm]);
+
+  const isDmgValid = damageSchema.safeParse(form).success;
+
+  const handleSubmit = () => {
+    setDmgAttempted(true);
+    if (!validateDamageForm()) return;
 
     const property = userProperties.find(p => p.id === form.propertyId);
 
@@ -116,6 +132,8 @@ const DamagesPage = () => {
     toast.success("Schaden erfolgreich gemeldet!");
     setOpen(false);
     setForm({ title: "", description: "", category: "", propertyId: "", unitId: "" });
+    setDmgErrors({});
+    setDmgAttempted(false);
     setPhotos([]);
   };
 
