@@ -299,16 +299,34 @@ const RentTrackingPage = () => {
                     {p.paid_at && ` · Bezahlt am: ${format(new Date(p.paid_at), "dd. MMM yyyy", { locale: de })}`}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <span className="text-lg font-bold text-foreground whitespace-nowrap">
                     {warmmiete.toLocaleString("de-DE")} €
                   </span>
-                  {!p.paid_at && (
-                    <Button size="sm" variant="outline" onClick={() => markAsPaid(p.id)}>
-                      <Check className="h-4 w-4 mr-1" />
-                      Bezahlt
-                    </Button>
-                  )}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost" className="h-8 w-8">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {p.paid_at ? (
+                        <DropdownMenuItem onClick={() => markAsOpen(p.id)}>
+                          <Undo2 className="h-4 w-4 mr-2" />
+                          Als offen markieren
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem onClick={() => markAsPaid(p.id)}>
+                          <Check className="h-4 w-4 mr-2" />
+                          Als bezahlt markieren
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="text-destructive focus:text-destructive">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Eintrag löschen
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             );
