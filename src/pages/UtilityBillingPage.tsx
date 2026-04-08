@@ -15,16 +15,16 @@ import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 
 const CATEGORIES = [
-  { key: "grundsteuer", label: "Grundsteuer", info: "Grundsteuer, die auf das Grundstück erhoben wird" },
-  { key: "wasser", label: "Wasserversorgung & Entwässerung", info: "Kosten für Frischwasser, Abwasser und Niederschlagswasser" },
-  { key: "heizung", label: "Heizkosten", info: "Kosten für Heizenergie (Gas, Öl, Fernwärme)" },
-  { key: "warmwasser", label: "Warmwasser", info: "Kosten für die Warmwasserbereitung" },
-  { key: "muell", label: "Müllbeseitigung", info: "Gebühren für Müllabfuhr und Entsorgung" },
-  { key: "versicherung", label: "Gebäudeversicherung", info: "Sach- und Haftpflichtversicherung des Gebäudes" },
-  { key: "hausmeister", label: "Hausmeister", info: "Vergütung für Hausmeisterdienste" },
-  { key: "garten", label: "Gartenpflege", info: "Pflege von Außenanlagen, Rasen, Hecken" },
-  { key: "beleuchtung", label: "Beleuchtung (Gemeinschaftsflächen)", info: "Strom für Treppenhaus, Keller, Außenbeleuchtung" },
-  { key: "sonstige", label: "Sonstige Betriebskosten", info: "Weitere umlagefähige Betriebskosten" },
+  { key: "grundsteuer", label: "Grundsteuer", info: "Grundsteuer wird nach dem Verhältnis der Wohnfläche auf die Mieter umgelegt." },
+  { key: "wasser", label: "Wasserversorgung & Entwässerung", info: "Kosten für Frischwasser, Abwasser und Niederschlagswasser — Verteilung nach Verbrauch oder Wohnfläche." },
+  { key: "heizung", label: "Heizkosten", info: "Heizkosten werden zu 50–70 % nach Verbrauch und 30–50 % nach Wohnfläche umgelegt (§ 7 HeizKV)." },
+  { key: "warmwasser", label: "Warmwasser", info: "Kosten für die Warmwasserbereitung — Verteilung analog zu Heizkosten nach HeizKV." },
+  { key: "muell", label: "Müllbeseitigung", info: "Gebühren für Müllabfuhr und Entsorgung — häufig pro Wohneinheit oder nach Personenzahl." },
+  { key: "versicherung", label: "Gebäudeversicherung", info: "Sach- und Haftpflichtversicherung des Gebäudes — Umlage nach Wohnfläche üblich." },
+  { key: "hausmeister", label: "Hausmeister", info: "Vergütung für Hausmeisterdienste — Umlage nach Wohneinheit oder Wohnfläche." },
+  { key: "garten", label: "Gartenpflege", info: "Pflege von Außenanlagen, Rasen, Hecken — gleichmäßig auf alle Mieter verteilt." },
+  { key: "beleuchtung", label: "Beleuchtung (Gemeinschaftsflächen)", info: "Strom für Treppenhaus, Keller, Außenbeleuchtung — pro Wohneinheit oder Wohnfläche." },
+  { key: "sonstige", label: "Sonstige Betriebskosten", info: "Weitere umlagefähige Betriebskosten nach § 2 BetrKV." },
 ];
 
 interface CostEntry {
@@ -450,16 +450,30 @@ const UtilityBillingPage = () => {
                       />
                       <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">€</span>
                     </div>
-                    <div className="flex items-center gap-1.5 w-24">
-                      <Switch
-                        checked={costs[idx].perSqm}
-                        onCheckedChange={v => updateCost(idx, "perSqm", v)}
-                        className="scale-75"
-                      />
-                      <span className="text-[11px] text-muted-foreground whitespace-nowrap">
-                        {costs[idx].perSqm ? "pro m²" : "pro Wohnung"}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-1.5 w-24 cursor-help">
+                          <Switch
+                            checked={costs[idx].perSqm}
+                            onCheckedChange={v => updateCost(idx, "perSqm", v)}
+                            className="scale-75"
+                          />
+                          <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                            {costs[idx].perSqm ? "pro m²" : "pro Whg."}
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-xs text-xs">
+                        {costs[idx].perSqm
+                          ? "Betrag wird anteilig nach Wohnfläche (m²) auf die Mieter verteilt"
+                          : "Betrag wird gleichmäßig auf alle Wohneinheiten verteilt"}
+                      </TooltipContent>
+                    </Tooltip>
+                    {costs[idx].perSqm && totalSqm > 0 && parseFloat(costs[idx].amount) > 0 && (
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                        = {formatCurrency(parseFloat(costs[idx].amount) / totalSqm)}/m²
                       </span>
-                    </div>
+                    )}
                   </div>
                 </div>
                 );
