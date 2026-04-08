@@ -219,8 +219,8 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
     return matchSearch && matchYear && matchCat;
   });
 
-  const years = [...new Set(docs.map((d) => getYear(d.created_at)))].sort((a, b) => b.localeCompare(a));
-  const allYears = [...new Set([...years, "2026", "2025", "2024"])].sort((a, b) => b.localeCompare(a));
+  const currentYearStr = new Date().getFullYear().toString();
+  const allYears = [...new Set([...docs.map((d) => getYear(d.created_at)), currentYearStr])].sort((a, b) => b.localeCompare(a));
 
   const groupedByYear: Record<string, Record<string, DocRow[]>> = {};
   filtered.forEach((d) => {
