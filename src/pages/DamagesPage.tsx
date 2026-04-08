@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { sal } from "@/lib/salutation";
 import EmptyState from "@/components/EmptyState";
@@ -21,6 +21,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const damageSchema = z.object({
+  propertyId: z.string().min(1, "Bitte Immobilie auswählen"),
+  unitId: z.string().min(1, "Bitte Wohnung auswählen"),
+  title: z.string().trim().min(1, "Titel ist erforderlich"),
+  category: z.string().min(1, "Bitte Kategorie auswählen"),
+  description: z.string().trim().min(1, "Beschreibung ist erforderlich"),
+});
 
 interface DamageWithContext extends Damage {
   propertyAddress: string;
