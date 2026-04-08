@@ -322,7 +322,7 @@ const TaxFolderPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-card rounded-2xl border p-5 space-y-1">
           <p className="text-xs text-muted-foreground font-medium">Gesamteinnahmen</p>
-          <p className="text-xl font-bold text-primary">{summary.income.toFixed(2)} €</p>
+          <p className="text-xl font-bold text-primary">{formatCurrency(summary.income)}</p>
         </div>
         <div className="bg-card rounded-2xl border p-5 space-y-1">
           <p className="text-xs text-muted-foreground font-medium">Gesamtausgaben / Werbungskosten</p>
