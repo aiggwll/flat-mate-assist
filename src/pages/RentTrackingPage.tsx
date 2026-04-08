@@ -152,38 +152,80 @@ const RentTrackingPage = () => {
 
   const isFormValid = rentSchema.safeParse(form).success;
 
-  const handleAddPayment = async () => {
+  const openEditDialog = (p: RentPayment) => {
+    setEditingId(p.id);
+    setForm({
+      unit_id: p.unit_id,
+      tenant_name: p.tenant_name,
+      due_date: p.due_date,
+      cold_rent: String(p.cold_rent),
+      nebenkosten: String(p.nebenkosten),
+    });
+    setErrors({});
+    setAttempted(false);
+    setDialogOpen(true);
+  };
+
+  const openNewDialog = () => {
+    setEditingId(null);
+    setForm({ unit_id: "", tenant_name: "", due_date: defaultDueDate, cold_rent: "", nebenkosten: "" });
+    setErrors({});
+    setAttempted(false);
+    setDialogOpen(true);
+  };
+
+  const handleSavePayment = async () => {
     setAttempted(true);
     if (!validateForm()) return;
     if (!user) return;
 
-    const dueDate = form.due_date;
     const coldRent = parseFloat(form.cold_rent);
     const nebenkosten = parseFloat(form.nebenkosten);
     const warmmiete = coldRent + nebenkosten;
 
-    const { error } = await supabase.from("rent_payments").insert({
-      user_id: user.id,
-      unit_id: form.unit_id.trim(),
-      tenant_name: form.tenant_name.trim(),
-      amount: warmmiete,
-      cold_rent: coldRent,
-      warm_rent: warmmiete,
-      nebenkosten: nebenkosten,
-      due_date: dueDate,
-      status: "ausstehend",
-    });
+    if (editingId) {
+      const { error } = await supabase.from("rent_payments").update({
+        unit_id: form.unit_id.trim(),
+        tenant_name: form.tenant_name.trim(),
+        amount: warmmiete,
+        cold_rent: coldRent,
+        warm_rent: warmmiete,
+        nebenkosten: nebenkosten,
+        due_date: form.due_date,
+      }).eq("id", editingId);
 
-    if (error) {
-      toast.error("Fehler beim Anlegen: " + error.message);
+      if (error) {
+        toast.error("Fehler beim Speichern: " + error.message);
+      } else {
+        toast.success("Mietzahlung aktualisiert!");
+        setDialogOpen(false);
+        setEditingId(null);
+        loadPayments();
+      }
     } else {
-      toast.success("Mietzahlung angelegt!");
-      setForm({ unit_id: "", tenant_name: "", due_date: defaultDueDate, cold_rent: "", nebenkosten: "" });
-      setErrors({});
-      setAttempted(false);
-      setDialogOpen(false);
-      loadPayments();
+      const { error } = await supabase.from("rent_payments").insert({
+        user_id: user.id,
+        unit_id: form.unit_id.trim(),
+        tenant_name: form.tenant_name.trim(),
+        amount: warmmiete,
+        cold_rent: coldRent,
+        warm_rent: warmmiete,
+        nebenkosten: nebenkosten,
+        due_date: form.due_date,
+        status: "ausstehend",
+      });
+
+      if (error) {
+        toast.error("Fehler beim Anlegen: " + error.message);
+      } else {
+        toast.success("Mietzahlung angelegt!");
+        setDialogOpen(false);
+        loadPayments();
+      }
     }
+    setForm({ unit_id: "", tenant_name: "", due_date: defaultDueDate, cold_rent: "", nebenkosten: "" });
+    setErrors({});
+    setAttempted(false);
   };
 
   const markAsPaid = async (id: string) => {
