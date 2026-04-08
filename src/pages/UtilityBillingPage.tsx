@@ -399,7 +399,7 @@ const UtilityBillingPage = () => {
                       </div>
                       <div className="space-y-1">
                         <label className="text-[11px] text-muted-foreground font-medium">Vorausz. gesamt</label>
-                        <p className="text-sm font-medium text-foreground pt-2">{t.advancePaid.toFixed(2)} €</p>
+                        <p className="text-sm font-medium text-foreground pt-2">{formatCurrency(t.advancePaid)}</p>
                       </div>
                       <div className="space-y-1">
                         <label className="text-[11px] text-muted-foreground font-medium">Anteil Kosten</label>
