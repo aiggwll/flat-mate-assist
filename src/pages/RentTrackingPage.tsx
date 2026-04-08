@@ -313,7 +313,7 @@ const RentTrackingPage = () => {
             "Trag deine erste Miete ein und behalte jeden Monat den Überblick."
           )}
           buttonLabel="Erste Miete eintragen"
-          onAction={() => setDialogOpen(true)}
+          onAction={openNewDialog}
         />
       ) : (
         <div className="space-y-3">
