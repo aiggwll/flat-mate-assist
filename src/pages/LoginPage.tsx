@@ -307,30 +307,37 @@ const LoginPage = () => {
 
             <div className="space-y-4">
               <button
-                onClick={() => setSelectedRole("owner")}
+                onClick={() => { setSelectedRole("owner"); setIsLogin(false); }}
                 className="w-full flex items-center gap-4 p-5 rounded-xl border-2 border-border bg-card hover:border-accent hover:bg-accent/5 transition-all text-left group"
               >
                 <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
                   <Building2 className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="font-heading font-semibold text-foreground">Vermieter</p>
+                  <p className="font-heading font-semibold text-foreground">Als Vermieter registrieren</p>
                   <p className="text-sm text-muted-foreground">Immobilien verwalten & Mieter managen</p>
                 </div>
               </button>
 
               <button
-                onClick={() => setSelectedRole("tenant")}
+                onClick={() => { setSelectedRole("tenant"); setIsLogin(false); }}
                 className="w-full flex items-center gap-4 p-5 rounded-xl border-2 border-border bg-card hover:border-accent hover:bg-accent/5 transition-all text-left group"
               >
                 <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
                   <Home className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="font-heading font-semibold text-foreground">Mieter</p>
+                  <p className="font-heading font-semibold text-foreground">Als Mieter registrieren</p>
                   <p className="text-sm text-muted-foreground">Schäden melden & mit Vermieter kommunizieren</p>
                 </div>
               </button>
+
+              <p className="text-center text-sm text-muted-foreground mt-4">
+                Bereits registriert?{" "}
+                <button onClick={() => { setSelectedRole("owner"); setIsLogin(true); }} className="text-accent font-medium hover:underline">
+                  Anmelden
+                </button>
+              </p>
             </div>
           </div>
         </div>
