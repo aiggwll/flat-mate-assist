@@ -382,10 +382,14 @@ const UtilityBillingPage = () => {
       </div>
 
       {finalized && (
-        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center space-y-2">
+        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center space-y-3">
           <Receipt className="h-8 w-8 text-primary mx-auto" />
           <p className="text-lg font-heading font-bold text-foreground">Abrechnung {selectedYear} finalisiert</p>
           <p className="text-sm text-muted-foreground">Die Nebenkostenabrechnung wurde gespeichert.</p>
+          <Button onClick={handlePdfExport} variant="outline" className="mt-2">
+            <Download className="h-4 w-4 mr-2" />
+            Als PDF herunterladen
+          </Button>
         </div>
       )}
 
