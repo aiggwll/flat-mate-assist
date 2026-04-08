@@ -4,7 +4,7 @@ import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
 import { format, isBefore, startOfMonth, addMonths, setMonth, setYear, getMonth, getYear } from "date-fns";
 import { de } from "date-fns/locale";
-import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro } from "lucide-react";
+import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro, MoreVertical, Undo2, Trash2 } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { sal } from "@/lib/salutation";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,22 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { z } from "zod";
 
 interface RentPayment {
@@ -63,6 +79,7 @@ const RentTrackingPage = () => {
   const [form, setForm] = useState({ unit_id: "", tenant_name: "", due_date: defaultDueDate, cold_rent: "", nebenkosten: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [attempted, setAttempted] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const unitOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
@@ -181,6 +198,33 @@ const RentTrackingPage = () => {
     }
   };
 
+  const markAsOpen = async (id: string) => {
+    const { error } = await supabase
+      .from("rent_payments")
+      .update({ status: "ausstehend", paid_at: null })
+      .eq("id", id);
+    if (error) {
+      toast.error("Fehler: " + error.message);
+    } else {
+      toast.success("Status zurückgesetzt auf offen.");
+      loadPayments();
+    }
+  };
+
+  const deletePayment = async (id: string) => {
+    const { error } = await supabase
+      .from("rent_payments")
+      .delete()
+      .eq("id", id);
+    if (error) {
+      toast.error("Fehler: " + error.message);
+    } else {
+      toast.success("Eintrag gelöscht.");
+      loadPayments();
+    }
+    setDeleteTarget(null);
+  };
+
   const totalExpected = payments.reduce((s, p) => s + (p.cold_rent + p.nebenkosten), 0);
   const totalPaid = payments.filter(p => p.paid_at !== null).reduce((s, p) => s + (p.cold_rent + p.nebenkosten), 0);
   const totalOpen = totalExpected - totalPaid;
@@ -255,16 +299,34 @@ const RentTrackingPage = () => {
                     {p.paid_at && ` · Bezahlt am: ${format(new Date(p.paid_at), "dd. MMM yyyy", { locale: de })}`}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <span className="text-lg font-bold text-foreground whitespace-nowrap">
                     {warmmiete.toLocaleString("de-DE")} €
                   </span>
-                  {!p.paid_at && (
-                    <Button size="sm" variant="outline" onClick={() => markAsPaid(p.id)}>
-                      <Check className="h-4 w-4 mr-1" />
-                      Bezahlt
-                    </Button>
-                  )}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost" className="h-8 w-8">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {p.paid_at ? (
+                        <DropdownMenuItem onClick={() => markAsOpen(p.id)}>
+                          <Undo2 className="h-4 w-4 mr-2" />
+                          Als offen markieren
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem onClick={() => markAsPaid(p.id)}>
+                          <Check className="h-4 w-4 mr-2" />
+                          Als bezahlt markieren
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="text-destructive focus:text-destructive">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Eintrag löschen
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             );
@@ -370,6 +432,24 @@ const RentTrackingPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eintrag wirklich löschen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Diese Aktion kann nicht rückgängig gemacht werden. Der Mietzahlungseintrag wird dauerhaft entfernt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction onClick={() => deleteTarget && deletePayment(deleteTarget)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
