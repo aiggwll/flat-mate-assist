@@ -49,6 +49,7 @@ const TaxFolderPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
   const [documents, setDocuments] = useState<TaxDoc[]>([]);
+  const [availableYears, setAvailableYears] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Upload form state
@@ -75,6 +76,21 @@ const TaxFolderPage = () => {
   }, [userId, selectedYear]);
 
   useEffect(() => { loadDocuments(); }, [loadDocuments]);
+
+  // Load available years from all tax documents
+  useEffect(() => {
+    if (!userId) return;
+    const loadYears = async () => {
+      const { data } = await supabase
+        .from("tax_documents")
+        .select("year")
+        .eq("user_id", userId);
+      const yearSet = new Set((data || []).map(d => String(d.year)));
+      yearSet.add(String(currentYear));
+      setAvailableYears([...yearSet].sort((a, b) => b.localeCompare(a)));
+    };
+    loadYears();
+  }, [userId]);
 
   useEffect(() => {
     if (userProperties.length > 0 && !formPropertyId) {
@@ -179,7 +195,7 @@ const TaxFolderPage = () => {
     return map;
   }, [documents]);
 
-  const years = Array.from({ length: 5 }, (_, i) => String(currentYear - i));
+  const years = availableYears.length > 0 ? availableYears : [String(currentYear)];
 
   return (
     <div className="space-y-8">

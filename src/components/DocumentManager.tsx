@@ -219,8 +219,8 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
     return matchSearch && matchYear && matchCat;
   });
 
-  const years = [...new Set(docs.map((d) => getYear(d.created_at)))].sort((a, b) => b.localeCompare(a));
-  const allYears = [...new Set([...years, "2026", "2025", "2024"])].sort((a, b) => b.localeCompare(a));
+  const currentYearStr = new Date().getFullYear().toString();
+  const allYears = [...new Set([...docs.map((d) => getYear(d.created_at)), currentYearStr])].sort((a, b) => b.localeCompare(a));
 
   const groupedByYear: Record<string, Record<string, DocRow[]>> = {};
   filtered.forEach((d) => {
@@ -497,11 +497,11 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Dokument suchen…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9 text-sm" />
           </div>
-          <select value={filterYear} onChange={(e) => setFilterYear(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
+          <select name="year-filter" value={filterYear} onChange={(e) => setFilterYear(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
             <option value="all">Alle Jahre</option>
             {allYears.map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
-          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
+          <select name="category-filter" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
             <option value="all">Alle Kategorien</option>
             {visibleCategories.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>

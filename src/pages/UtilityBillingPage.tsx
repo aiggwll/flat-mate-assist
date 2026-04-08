@@ -343,7 +343,7 @@ const UtilityBillingPage = () => {
     doc.save(`Nebenkostenabrechnung_${selectedYear}.pdf`);
   }, [selectedYear, selectedProperty, costs, totalCosts, tenantResults]);
 
-  const years = Array.from({ length: 5 }, (_, i) => String(currentYear - i));
+  const years = [...new Set([...Array.from({ length: 3 }, (_, i) => String(currentYear - i)), String(currentYear)])].sort((a, b) => b.localeCompare(a));
 
   return (
     <div className={`space-y-8 ${!finalized && selectedPropertyId ? "pb-24" : ""}`}>
