@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { Plus, Info, Receipt, Calculator } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { Plus, Info, Receipt, Calculator, Download } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { sal } from "@/lib/salutation";
 import { Button } from "@/components/ui/button";
@@ -237,6 +237,112 @@ const UtilityBillingPage = () => {
     setCosts(CATEGORIES.map(c => ({ category: c.key, amount: "", perSqm: false })));
   };
 
+  const selectedProperty = userProperties.find(p => p.id === selectedPropertyId);
+
+  const handlePdfExport = useCallback(async () => {
+    const { default: jsPDF } = await import("jspdf");
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    let y = 20;
+
+    // Title
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("Nebenkostenabrechnung", pageW / 2, y, { align: "center" });
+    y += 10;
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Abrechnungszeitraum: 01.01.${selectedYear} – 31.12.${selectedYear}`, pageW / 2, y, { align: "center" });
+    y += 12;
+
+    // Property info
+    if (selectedProperty) {
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("Immobilie:", 20, y);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${selectedProperty.address}, ${selectedProperty.zipCode} ${selectedProperty.city}`, 55, y);
+      y += 7;
+    }
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Jahr:", 20, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(selectedYear, 55, y);
+    y += 12;
+
+    // Cost categories table
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text("Betriebskosten", 20, y);
+    y += 8;
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("Kategorie", 20, y);
+    doc.text("Betrag", pageW - 20, y, { align: "right" });
+    y += 2;
+    doc.setDrawColor(200);
+    doc.line(20, y, pageW - 20, y);
+    y += 5;
+
+    doc.setFont("helvetica", "normal");
+    const activeCosts = costs.filter(c => parseFloat(c.amount) > 0);
+    activeCosts.forEach(c => {
+      const cat = CATEGORIES.find(cat => cat.key === c.category);
+      const amount = parseFloat(c.amount);
+      doc.text(cat?.label || c.category, 20, y);
+      doc.text(new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(amount), pageW - 20, y, { align: "right" });
+      y += 6;
+    });
+
+    y += 2;
+    doc.line(20, y, pageW - 20, y);
+    y += 6;
+    doc.setFont("helvetica", "bold");
+    doc.text("Gesamtkosten", 20, y);
+    doc.text(new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(totalCosts), pageW - 20, y, { align: "right" });
+    y += 12;
+
+    // Tenant results
+    if (tenantResults.length > 0) {
+      doc.setFontSize(13);
+      doc.text("Mieterabrechnung", 20, y);
+      y += 8;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("Mieter", 20, y);
+      doc.text("Wohnung", 70, y);
+      doc.text("Vorauszahlung", 110, y);
+      doc.text("Anteil", 145, y);
+      doc.text("Saldo", pageW - 20, y, { align: "right" });
+      y += 2;
+      doc.line(20, y, pageW - 20, y);
+      y += 5;
+
+      doc.setFont("helvetica", "normal");
+      tenantResults.forEach(t => {
+        const fmt = (v: number) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(v);
+        doc.text(t.tenantName, 20, y);
+        doc.text(t.unitId || "–", 70, y);
+        doc.text(fmt(t.advancePaid), 110, y);
+        doc.text(fmt(t.allocated), 145, y);
+        doc.text(fmt(t.balance), pageW - 20, y, { align: "right" });
+        y += 6;
+      });
+    }
+
+    // Footer
+    y += 10;
+    doc.setFontSize(9);
+    doc.setTextColor(130);
+    doc.text(`Erstellt am ${new Date().toLocaleDateString("de-DE")} mit Dwello`, pageW / 2, y, { align: "center" });
+
+    doc.save(`Nebenkostenabrechnung_${selectedYear}.pdf`);
+  }, [selectedYear, selectedProperty, costs, totalCosts, tenantResults]);
+
   const years = Array.from({ length: 5 }, (_, i) => String(currentYear - i));
 
   return (
@@ -256,18 +362,16 @@ const UtilityBillingPage = () => {
               {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
             </SelectContent>
           </Select>
-          {userProperties.length > 1 && (
-            <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Immobilie wählen" />
-              </SelectTrigger>
-              <SelectContent>
-                {userProperties.map(p => (
-                  <SelectItem key={p.id} value={p.id}>{p.address}, {p.city}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
+            <SelectTrigger className="w-52">
+              <SelectValue placeholder="Immobilie auswählen *" />
+            </SelectTrigger>
+            <SelectContent>
+              {userProperties.map(p => (
+                <SelectItem key={p.id} value={p.id}>{p.address}, {p.city}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {finalized && (
             <Button onClick={handleNewBilling} className="rounded-xl h-11 font-semibold">
               <Plus className="h-4 w-4 mr-2" />
@@ -278,10 +382,14 @@ const UtilityBillingPage = () => {
       </div>
 
       {finalized && (
-        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center space-y-2">
+        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center space-y-3">
           <Receipt className="h-8 w-8 text-primary mx-auto" />
           <p className="text-lg font-heading font-bold text-foreground">Abrechnung {selectedYear} finalisiert</p>
           <p className="text-sm text-muted-foreground">Die Nebenkostenabrechnung wurde gespeichert.</p>
+          <Button onClick={handlePdfExport} variant="outline" className="mt-2">
+            <Download className="h-4 w-4 mr-2" />
+            Als PDF herunterladen
+          </Button>
         </div>
       )}
 
