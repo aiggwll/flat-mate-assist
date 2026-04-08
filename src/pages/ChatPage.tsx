@@ -38,7 +38,7 @@ interface TenantOption {
 
 const ChatPage = () => {
   const { userName, userId, salutation } = useUser();
-  const { messages, addMessage, markAsRead } = useMessages();
+  const { messages, addMessage, markAsRead, loadMessages } = useMessages();
   const ownerName = userName || "Eigentümer";
   const scrollRef = useRef<HTMLDivElement>(null);
 
