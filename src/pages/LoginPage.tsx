@@ -108,8 +108,18 @@ const LoginPage = () => {
         }
       } else {
         // Register
-        if (password.length < 6) {
-          setPasswordError("Passwort muss mindestens 6 Zeichen lang sein.");
+        if (password.length < 8) {
+          setPasswordError("Passwort muss mindestens 8 Zeichen lang sein.");
+          setLoading(false);
+          return;
+        }
+        if (!/[A-Z]/.test(password)) {
+          setPasswordError("Passwort muss mindestens einen Großbuchstaben enthalten.");
+          setLoading(false);
+          return;
+        }
+        if (!/[0-9]/.test(password)) {
+          setPasswordError("Passwort muss mindestens eine Zahl enthalten.");
           setLoading(false);
           return;
         }
