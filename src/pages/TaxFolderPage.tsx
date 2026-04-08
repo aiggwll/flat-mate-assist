@@ -388,6 +388,11 @@ const TaxFolderPage = () => {
           <p className={cn("text-xl font-bold", summary.income > 0 ? "text-green-600" : "text-muted-foreground")}>
             {formatCurrency(summary.income)}
           </p>
+          {summary.rentIncome > 0 && (
+            <p className="text-[10px] text-muted-foreground">
+              davon {formatCurrency(summary.rentIncome)} Mieteinnahmen (automatisch)
+            </p>
+          )}
         </div>
         <div className="bg-card rounded-2xl border p-5 space-y-1">
           <p className="text-xs text-muted-foreground font-medium">Gesamtausgaben / Werbungskosten</p>
