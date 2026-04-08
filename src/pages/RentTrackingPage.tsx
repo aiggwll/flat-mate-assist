@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
-import { format, isBefore, startOfMonth } from "date-fns";
+import { format, isBefore, startOfMonth, addMonths, setMonth, setYear, getMonth, getYear } from "date-fns";
 import { de } from "date-fns/locale";
 import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
@@ -45,9 +45,12 @@ const getStatusInfo = (paidAt: string | null, dueDate: string) => {
   return { label: "Ausstehend", color: "text-yellow-600 bg-yellow-50 border-yellow-200", icon: Clock };
 };
 
+const defaultDueDate = format(startOfMonth(addMonths(new Date(), 1)), "yyyy-MM-dd");
+
 const rentSchema = z.object({
   unit_id: z.string().min(1, "Bitte Immobilie & Wohnung auswählen"),
   tenant_name: z.string().trim().min(1, "Mietername ist erforderlich"),
+  due_date: z.string().min(1, "Fälligkeitsdatum ist erforderlich"),
   cold_rent: z.string().refine(v => !isNaN(parseFloat(v)) && parseFloat(v) > 0, "Kaltmiete muss eine positive Zahl sein"),
   nebenkosten: z.string().refine(v => !isNaN(parseFloat(v)) && parseFloat(v) >= 0, "Nebenkosten dürfen nicht negativ sein"),
 });
@@ -57,7 +60,7 @@ const RentTrackingPage = () => {
   const [payments, setPayments] = useState<RentPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ unit_id: "", tenant_name: "", cold_rent: "", nebenkosten: "" });
+  const [form, setForm] = useState({ unit_id: "", tenant_name: "", due_date: defaultDueDate, cold_rent: "", nebenkosten: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [attempted, setAttempted] = useState(false);
 
@@ -136,7 +139,7 @@ const RentTrackingPage = () => {
     if (!validateForm()) return;
     if (!user) return;
 
-    const dueDate = format(startOfMonth(new Date()), "yyyy-MM-dd");
+    const dueDate = form.due_date;
     const coldRent = parseFloat(form.cold_rent);
     const nebenkosten = parseFloat(form.nebenkosten);
     const warmmiete = coldRent + nebenkosten;
@@ -157,7 +160,7 @@ const RentTrackingPage = () => {
       toast.error("Fehler beim Anlegen: " + error.message);
     } else {
       toast.success("Mietzahlung angelegt!");
-      setForm({ unit_id: "", tenant_name: "", cold_rent: "", nebenkosten: "" });
+      setForm({ unit_id: "", tenant_name: "", due_date: defaultDueDate, cold_rent: "", nebenkosten: "" });
       setErrors({});
       setAttempted(false);
       setDialogOpen(false);
@@ -298,6 +301,49 @@ const RentTrackingPage = () => {
               <Label>Mietername *</Label>
               <Input className={errors.tenant_name ? "border-destructive" : ""} placeholder="Max Mustermann" value={form.tenant_name} onChange={e => setForm(f => ({ ...f, tenant_name: e.target.value }))} />
               {errors.tenant_name && <p className="text-xs text-destructive mt-1">{errors.tenant_name}</p>}
+            </div>
+            <div>
+              <Label>Fälligkeitsdatum *</Label>
+              <div className="flex gap-2">
+                <Select
+                  value={String(getMonth(new Date(form.due_date)))}
+                  onValueChange={(m) => {
+                    const d = new Date(form.due_date);
+                    const updated = startOfMonth(setMonth(d, parseInt(m)));
+                    setForm(f => ({ ...f, due_date: format(updated, "yyyy-MM-dd") }));
+                  }}
+                >
+                  <SelectTrigger className={`flex-1 ${errors.due_date ? "border-destructive" : ""}`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"].map((name, i) => (
+                      <SelectItem key={i} value={String(i)}>{name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={String(getYear(new Date(form.due_date)))}
+                  onValueChange={(y) => {
+                    const d = new Date(form.due_date);
+                    const updated = startOfMonth(setYear(d, parseInt(y)));
+                    setForm(f => ({ ...f, due_date: format(updated, "yyyy-MM-dd") }));
+                  }}
+                >
+                  <SelectTrigger className={`w-24 ${errors.due_date ? "border-destructive" : ""}`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 5 }, (_, i) => getYear(new Date()) + i - 1).map(y => (
+                      <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Fällig am: {format(new Date(form.due_date), "dd. MMMM yyyy", { locale: de })}
+              </p>
+              {errors.due_date && <p className="text-xs text-destructive mt-1">{errors.due_date}</p>}
             </div>
             <div>
               <Label>Kaltmiete (€) *</Label>
