@@ -48,8 +48,8 @@ const getStatusInfo = (paidAt: string | null, dueDate: string) => {
 const rentSchema = z.object({
   unit_id: z.string().min(1, "Bitte Immobilie & Wohnung auswählen"),
   tenant_name: z.string().trim().min(1, "Mietername ist erforderlich"),
-  cold_rent: z.string().refine(v => parseFloat(v) > 0, "Kaltmiete muss größer als 0 sein"),
-  nebenkosten: z.string().refine(v => v !== "" && !isNaN(parseFloat(v)), "Nebenkosten eingeben (oder 0)"),
+  cold_rent: z.string().refine(v => !isNaN(parseFloat(v)) && parseFloat(v) > 0, "Kaltmiete muss eine positive Zahl sein"),
+  nebenkosten: z.string().refine(v => !isNaN(parseFloat(v)) && parseFloat(v) >= 0, "Nebenkosten dürfen nicht negativ sein"),
 });
 
 const RentTrackingPage = () => {
@@ -107,8 +107,9 @@ const RentTrackingPage = () => {
   }, [loadPayments]);
 
   const computedWarmmiete = useMemo(() => {
-    const cold = parseFloat(form.cold_rent) || 0;
-    const nk = parseFloat(form.nebenkosten) || 0;
+    const cold = parseFloat(form.cold_rent);
+    const nk = parseFloat(form.nebenkosten);
+    if (isNaN(cold) || cold <= 0 || isNaN(nk) || nk < 0) return 0;
     return cold + nk;
   }, [form.cold_rent, form.nebenkosten]);
 
@@ -300,12 +301,12 @@ const RentTrackingPage = () => {
             </div>
             <div>
               <Label>Kaltmiete (€) *</Label>
-              <Input className={errors.cold_rent ? "border-destructive" : ""} type="number" placeholder="z.B. 850" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
+              <Input className={errors.cold_rent ? "border-destructive" : ""} type="number" min="0.01" step="0.01" placeholder="z.B. 850" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
               {errors.cold_rent && <p className="text-xs text-destructive mt-1">{errors.cold_rent}</p>}
             </div>
             <div>
               <Label>Nebenkosten / Vorauszahlung (€) *</Label>
-              <Input className={errors.nebenkosten ? "border-destructive" : ""} type="number" placeholder="z.B. 150" value={form.nebenkosten} onChange={e => setForm(f => ({ ...f, nebenkosten: e.target.value }))} />
+              <Input className={errors.nebenkosten ? "border-destructive" : ""} type="number" min="0" step="0.01" placeholder="z.B. 150" value={form.nebenkosten} onChange={e => setForm(f => ({ ...f, nebenkosten: e.target.value }))} />
               {errors.nebenkosten && <p className="text-xs text-destructive mt-1">{errors.nebenkosten}</p>}
               <p className="text-xs text-muted-foreground mt-1">Wenn keine Nebenkosten vereinbart: 0 eingeben</p>
             </div>
