@@ -239,14 +239,27 @@ const TaxFolderPage = () => {
           <h1 className="text-2xl font-heading font-bold text-foreground">Steuermappe</h1>
           <p className="text-sm text-muted-foreground mt-1">Belege sammeln und Einnahmen/Ausgaben für die Steuererklärung verwalten</p>
         </div>
-        <Select value={selectedYear} onValueChange={setSelectedYear}>
-          <SelectTrigger className="w-28">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-3">
+          <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
+            <SelectTrigger className="w-52">
+              <SelectValue placeholder="Immobilie auswählen" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Immobilien</SelectItem>
+              {userProperties.map(p => (
+                <SelectItem key={p.id} value={p.id}>{p.address}, {p.city}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="w-28">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Upload Area */}
