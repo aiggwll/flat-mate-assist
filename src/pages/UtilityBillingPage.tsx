@@ -403,7 +403,7 @@ const UtilityBillingPage = () => {
                       </div>
                       <div className="space-y-1">
                         <label className="text-[11px] text-muted-foreground font-medium">Anteil Kosten</label>
-                        <p className="text-sm font-medium text-foreground pt-2">{t.allocated.toFixed(2)} €</p>
+                        <p className="text-sm font-medium text-foreground pt-2">{formatCurrency(t.allocated)}</p>
                       </div>
                     </div>
                   </div>
