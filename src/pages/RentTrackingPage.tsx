@@ -301,7 +301,7 @@ const RentTrackingPage = () => {
             </div>
             <div>
               <Label>Kaltmiete (€) *</Label>
-              <Input className={errors.cold_rent ? "border-destructive" : ""} type="number" placeholder="z.B. 850" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
+              <Input className={errors.cold_rent ? "border-destructive" : ""} type="number" min="0.01" step="0.01" placeholder="z.B. 850" value={form.cold_rent} onChange={e => setForm(f => ({ ...f, cold_rent: e.target.value }))} />
               {errors.cold_rent && <p className="text-xs text-destructive mt-1">{errors.cold_rent}</p>}
             </div>
             <div>
