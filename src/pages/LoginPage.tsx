@@ -33,6 +33,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
   const [showPropertySetup, setShowPropertySetup] = useState(false);
   const [showTenantPropertyInfo, setShowTenantPropertyInfo] = useState(false);
   const [properties, setProperties] = useState<PropertyForm[]>([{ ...emptyProperty }]);
