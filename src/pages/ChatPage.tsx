@@ -168,6 +168,8 @@ const ChatPage = () => {
         timestamp: new Date().toISOString(),
         read: false,
       });
+      // Force reload messages so the contact list updates immediately
+      await loadMessages();
       toast.success("Nachricht gesendet");
       setShowNewDialog(false);
       setNewRecipient("");
