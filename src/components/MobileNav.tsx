@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Receipt,
   FolderOpen,
+  Store,
 } from "lucide-react";
 import DwelloLogo from "./DwelloLogo";
 import {
