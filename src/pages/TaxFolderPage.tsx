@@ -77,6 +77,21 @@ const TaxFolderPage = () => {
 
   useEffect(() => { loadDocuments(); }, [loadDocuments]);
 
+  // Load available years from all tax documents
+  useEffect(() => {
+    if (!userId) return;
+    const loadYears = async () => {
+      const { data } = await supabase
+        .from("tax_documents")
+        .select("year")
+        .eq("user_id", userId);
+      const yearSet = new Set((data || []).map(d => String(d.year)));
+      yearSet.add(String(currentYear));
+      setAvailableYears([...yearSet].sort((a, b) => b.localeCompare(a)));
+    };
+    loadYears();
+  }, [userId]);
+
   useEffect(() => {
     if (userProperties.length > 0 && !formPropertyId) {
       setFormPropertyId(userProperties[0].id);
