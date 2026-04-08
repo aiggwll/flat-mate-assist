@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   Receipt,
   FolderOpen,
+  Store,
   LogOut,
 } from "lucide-react";
 import DwelloLogo from "./DwelloLogo";
