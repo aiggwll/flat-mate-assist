@@ -13,6 +13,7 @@ import { useUser } from "@/contexts/UserContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { formatCurrency } from "@/lib/utils";
 import { de } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
