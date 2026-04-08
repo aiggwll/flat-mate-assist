@@ -413,8 +413,8 @@ const RentTrackingPage = () => {
               {errors.cold_rent && <p className="text-xs text-destructive mt-1">{errors.cold_rent}</p>}
             </div>
             <div>
-              <Label>Nebenkosten / Vorauszahlung (€) *</Label>
-              <Input className={errors.nebenkosten ? "border-destructive" : ""} type="number" min="0" step="0.01" placeholder="z.B. 150" value={form.nebenkosten} onChange={e => setForm(f => ({ ...f, nebenkosten: e.target.value }))} />
+              <Label htmlFor="nebenkosten">Nebenkosten / Vorauszahlung (€) *</Label>
+              <Input id="nebenkosten" name="nebenkosten" aria-required="true" className={errors.nebenkosten ? "border-destructive" : ""} type="number" min="0" step="0.01" placeholder="z.B. 150" value={form.nebenkosten} onChange={e => setForm(f => ({ ...f, nebenkosten: e.target.value }))} />
               {errors.nebenkosten && <p className="text-xs text-destructive mt-1">{errors.nebenkosten}</p>}
               <p className="text-xs text-muted-foreground mt-1">Wenn keine Nebenkosten vereinbart: 0 eingeben</p>
             </div>

@@ -494,8 +494,11 @@ const UtilityBillingPage = () => {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="space-y-1">
-                        <label className="text-[11px] text-muted-foreground font-medium">Wohnfläche (m²)</label>
+                        <label htmlFor={`sqm-${t.tenantId}`} className="text-[11px] text-muted-foreground font-medium">Wohnfläche (m²)</label>
                         <Input
+                          id={`sqm-${t.tenantId}`}
+                          name={`sqm-${t.tenantId}`}
+                          aria-label={`Wohnfläche ${t.tenantName}`}
                           type="number"
                           min="0"
                           placeholder="z.B. 65"
@@ -505,8 +508,11 @@ const UtilityBillingPage = () => {
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[11px] text-muted-foreground font-medium">Vorauszahlung/Monat (€)</label>
+                        <label htmlFor={`advance-${t.tenantId}`} className="text-[11px] text-muted-foreground font-medium">Vorauszahlung/Monat (€)</label>
                         <Input
+                          id={`advance-${t.tenantId}`}
+                          name={`advance-${t.tenantId}`}
+                          aria-label={`Vorauszahlung ${t.tenantName}`}
                           type="number"
                           min="0"
                           placeholder="z.B. 200"
