@@ -179,7 +179,8 @@ const TaxFolderPage = () => {
     return map;
   }, [documents]);
 
-  const years = Array.from({ length: 5 }, (_, i) => String(currentYear - i));
+  const docYears = documents.length > 0 ? [...new Set(documents.map(d => String(d.year)))] : [];
+  const years = [...new Set([...docYears, String(currentYear)])].sort((a, b) => b.localeCompare(a));
 
   return (
     <div className="space-y-8">

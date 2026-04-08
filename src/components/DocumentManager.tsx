@@ -497,11 +497,11 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Dokument suchen…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9 text-sm" />
           </div>
-          <select value={filterYear} onChange={(e) => setFilterYear(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
+          <select name="year-filter" value={filterYear} onChange={(e) => setFilterYear(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
             <option value="all">Alle Jahre</option>
             {allYears.map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
-          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
+          <select name="category-filter" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
             <option value="all">Alle Kategorien</option>
             {visibleCategories.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
