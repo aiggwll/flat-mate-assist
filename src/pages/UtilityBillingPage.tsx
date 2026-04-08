@@ -15,16 +15,16 @@ import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 
 const CATEGORIES = [
-  { key: "grundsteuer", label: "Grundsteuer", info: "Grundsteuer, die auf das Grundstück erhoben wird" },
-  { key: "wasser", label: "Wasserversorgung & Entwässerung", info: "Kosten für Frischwasser, Abwasser und Niederschlagswasser" },
-  { key: "heizung", label: "Heizkosten", info: "Kosten für Heizenergie (Gas, Öl, Fernwärme)" },
-  { key: "warmwasser", label: "Warmwasser", info: "Kosten für die Warmwasserbereitung" },
-  { key: "muell", label: "Müllbeseitigung", info: "Gebühren für Müllabfuhr und Entsorgung" },
-  { key: "versicherung", label: "Gebäudeversicherung", info: "Sach- und Haftpflichtversicherung des Gebäudes" },
-  { key: "hausmeister", label: "Hausmeister", info: "Vergütung für Hausmeisterdienste" },
-  { key: "garten", label: "Gartenpflege", info: "Pflege von Außenanlagen, Rasen, Hecken" },
-  { key: "beleuchtung", label: "Beleuchtung (Gemeinschaftsflächen)", info: "Strom für Treppenhaus, Keller, Außenbeleuchtung" },
-  { key: "sonstige", label: "Sonstige Betriebskosten", info: "Weitere umlagefähige Betriebskosten" },
+  { key: "grundsteuer", label: "Grundsteuer", info: "Grundsteuer wird nach dem Verhältnis der Wohnfläche auf die Mieter umgelegt." },
+  { key: "wasser", label: "Wasserversorgung & Entwässerung", info: "Kosten für Frischwasser, Abwasser und Niederschlagswasser — Verteilung nach Verbrauch oder Wohnfläche." },
+  { key: "heizung", label: "Heizkosten", info: "Heizkosten werden zu 50–70 % nach Verbrauch und 30–50 % nach Wohnfläche umgelegt (§ 7 HeizKV)." },
+  { key: "warmwasser", label: "Warmwasser", info: "Kosten für die Warmwasserbereitung — Verteilung analog zu Heizkosten nach HeizKV." },
+  { key: "muell", label: "Müllbeseitigung", info: "Gebühren für Müllabfuhr und Entsorgung — häufig pro Wohneinheit oder nach Personenzahl." },
+  { key: "versicherung", label: "Gebäudeversicherung", info: "Sach- und Haftpflichtversicherung des Gebäudes — Umlage nach Wohnfläche üblich." },
+  { key: "hausmeister", label: "Hausmeister", info: "Vergütung für Hausmeisterdienste — Umlage nach Wohneinheit oder Wohnfläche." },
+  { key: "garten", label: "Gartenpflege", info: "Pflege von Außenanlagen, Rasen, Hecken — gleichmäßig auf alle Mieter verteilt." },
+  { key: "beleuchtung", label: "Beleuchtung (Gemeinschaftsflächen)", info: "Strom für Treppenhaus, Keller, Außenbeleuchtung — pro Wohneinheit oder Wohnfläche." },
+  { key: "sonstige", label: "Sonstige Betriebskosten", info: "Weitere umlagefähige Betriebskosten nach § 2 BetrKV." },
 ];
 
 interface CostEntry {
