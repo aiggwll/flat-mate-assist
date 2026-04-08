@@ -139,7 +139,7 @@ const RentTrackingPage = () => {
     if (!validateForm()) return;
     if (!user) return;
 
-    const dueDate = format(startOfMonth(new Date()), "yyyy-MM-dd");
+    const dueDate = form.due_date;
     const coldRent = parseFloat(form.cold_rent);
     const nebenkosten = parseFloat(form.nebenkosten);
     const warmmiete = coldRent + nebenkosten;
