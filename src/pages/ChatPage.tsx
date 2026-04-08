@@ -127,8 +127,30 @@ const ChatPage = () => {
     setNewMessage("");
   };
 
+  const [msgErrors, setMsgErrors] = useState<Record<string, string>>({});
+  const [msgAttempted, setMsgAttempted] = useState(false);
+
+  const validateNewMessage = () => {
+    const result = messageSchema.safeParse({ recipient: newRecipient, text: newText });
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach(e => { fieldErrors[e.path[0] as string] = e.message; });
+      setMsgErrors(fieldErrors);
+      return false;
+    }
+    setMsgErrors({});
+    return true;
+  };
+
+  useEffect(() => {
+    if (msgAttempted) validateNewMessage();
+  }, [newRecipient, newText, msgAttempted]);
+
+  const isMsgValid = messageSchema.safeParse({ recipient: newRecipient, text: newText }).success;
+
   const handleNewMessage = async () => {
-    if (!newRecipient || !newText.trim()) return;
+    setMsgAttempted(true);
+    if (!validateNewMessage()) return;
     setSending(true);
     const tenant = tenants.find(t => t.userId === newRecipient);
     if (tenant) {
@@ -143,6 +165,8 @@ const ChatPage = () => {
       setShowNewDialog(false);
       setNewRecipient("");
       setNewText("");
+      setMsgErrors({});
+      setMsgAttempted(false);
       setSelectedContact(tenant.name);
     }
     setSending(false);
