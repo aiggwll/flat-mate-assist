@@ -322,16 +322,18 @@ const TaxFolderPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-card rounded-2xl border p-5 space-y-1">
           <p className="text-xs text-muted-foreground font-medium">Gesamteinnahmen</p>
-          <p className="text-xl font-bold text-primary">{formatCurrency(summary.income)}</p>
+          <p className={cn("text-xl font-bold", summary.income > 0 ? "text-green-600" : "text-muted-foreground")}>
+            {formatCurrency(summary.income)}
+          </p>
         </div>
         <div className="bg-card rounded-2xl border p-5 space-y-1">
           <p className="text-xs text-muted-foreground font-medium">Gesamtausgaben / Werbungskosten</p>
-          <p className="text-xl font-bold text-destructive">{formatCurrency(summary.expenses)}</p>
+          <p className="text-xl font-bold text-foreground">{formatCurrency(summary.expenses)}</p>
         </div>
         <div className="bg-card rounded-2xl border p-5 space-y-1">
           <p className="text-xs text-muted-foreground font-medium">Vorläufiges Ergebnis</p>
-          <p className={cn("text-xl font-bold", summary.result >= 0 ? "text-primary" : "text-destructive")}>
-            {summary.result >= 0 ? "+" : ""}{formatCurrency(Math.abs(summary.result))}
+          <p className={cn("text-xl font-bold", summary.result > 0 ? "text-green-600" : summary.result < 0 ? "text-destructive" : "text-muted-foreground")}>
+            {summary.result > 0 ? "+" : ""}{formatCurrency(Math.abs(summary.result))}
           </p>
         </div>
       </div>
