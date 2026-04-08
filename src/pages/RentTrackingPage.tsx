@@ -381,7 +381,7 @@ const RentTrackingPage = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Neue Mietzahlung anlegen</DialogTitle>
+            <DialogTitle>{editingId ? "Mietzahlung bearbeiten" : "Neue Mietzahlung anlegen"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
