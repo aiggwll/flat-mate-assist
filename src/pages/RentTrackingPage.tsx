@@ -45,9 +45,12 @@ const getStatusInfo = (paidAt: string | null, dueDate: string) => {
   return { label: "Ausstehend", color: "text-yellow-600 bg-yellow-50 border-yellow-200", icon: Clock };
 };
 
+const defaultDueDate = format(startOfMonth(addMonths(new Date(), 1)), "yyyy-MM-dd");
+
 const rentSchema = z.object({
   unit_id: z.string().min(1, "Bitte Immobilie & Wohnung auswählen"),
   tenant_name: z.string().trim().min(1, "Mietername ist erforderlich"),
+  due_date: z.string().min(1, "Fälligkeitsdatum ist erforderlich"),
   cold_rent: z.string().refine(v => !isNaN(parseFloat(v)) && parseFloat(v) > 0, "Kaltmiete muss eine positive Zahl sein"),
   nebenkosten: z.string().refine(v => !isNaN(parseFloat(v)) && parseFloat(v) >= 0, "Nebenkosten dürfen nicht negativ sein"),
 });
