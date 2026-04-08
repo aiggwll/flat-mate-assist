@@ -226,7 +226,8 @@ const DamagesPage = () => {
             {/* Title */}
             <div>
               <Label>Titel *</Label>
-              <Input placeholder="z.B. Heizung defekt" value={form.title} onChange={e => update("title", e.target.value)} />
+              <Input className={dmgErrors.title ? "border-destructive" : ""} placeholder="z.B. Heizung defekt" value={form.title} onChange={e => update("title", e.target.value)} />
+              {dmgErrors.title && <p className="text-xs text-destructive mt-1">{dmgErrors.title}</p>}
             </div>
 
             {/* Category */}
