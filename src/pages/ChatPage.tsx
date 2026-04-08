@@ -23,6 +23,12 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const messageSchema = z.object({
+  recipient: z.string().min(1, "Bitte Empfänger auswählen"),
+  text: z.string().trim().min(1, "Nachricht darf nicht leer sein"),
+});
 
 interface TenantOption {
   userId: string;
