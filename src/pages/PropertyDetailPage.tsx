@@ -184,9 +184,17 @@ const PropertyDetailPage = () => {
               <Select value={form.category} onValueChange={v => update("category", v)}>
                 <SelectTrigger><SelectValue placeholder="Kategorie wählen" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Heizung">🔥 Heizung</SelectItem>
-                  <SelectItem value="Wasser">💧 Wasser</SelectItem>
-                  <SelectItem value="Elektrik">⚡ Elektrik</SelectItem>
+                  <SelectItem value="Heizung & Warmwasser">🔥 Heizung & Warmwasser</SelectItem>
+                  <SelectItem value="Wasserrohrbruch / Leckage">💧 Wasserrohrbruch / Leckage</SelectItem>
+                  <SelectItem value="Elektrik / Stromausfall">⚡ Elektrik / Stromausfall</SelectItem>
+                  <SelectItem value="Fenster & Türen">🪟 Fenster & Türen</SelectItem>
+                  <SelectItem value="Dach & Fassade">🏠 Dach & Fassade</SelectItem>
+                  <SelectItem value="Schimmel & Feuchtigkeit">🍄 Schimmel & Feuchtigkeit</SelectItem>
+                  <SelectItem value="Sanitär / Bad & WC">🚿 Sanitär / Bad & WC</SelectItem>
+                  <SelectItem value="Aufzug">🛗 Aufzug</SelectItem>
+                  <SelectItem value="Einbruch / Sicherheit">🔒 Einbruch / Sicherheit</SelectItem>
+                  <SelectItem value="Strukturschäden / Risse">🏗️ Strukturschäden / Risse</SelectItem>
+                  <SelectItem value="Schädlingsbefall">🐭 Schädlingsbefall</SelectItem>
                   <SelectItem value="Sonstiges">🔧 Sonstiges</SelectItem>
                 </SelectContent>
               </Select>
