@@ -450,16 +450,30 @@ const UtilityBillingPage = () => {
                       />
                       <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">€</span>
                     </div>
-                    <div className="flex items-center gap-1.5 w-24">
-                      <Switch
-                        checked={costs[idx].perSqm}
-                        onCheckedChange={v => updateCost(idx, "perSqm", v)}
-                        className="scale-75"
-                      />
-                      <span className="text-[11px] text-muted-foreground whitespace-nowrap">
-                        {costs[idx].perSqm ? "pro m²" : "pro Wohnung"}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-1.5 w-24 cursor-help">
+                          <Switch
+                            checked={costs[idx].perSqm}
+                            onCheckedChange={v => updateCost(idx, "perSqm", v)}
+                            className="scale-75"
+                          />
+                          <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                            {costs[idx].perSqm ? "pro m²" : "pro Whg."}
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-xs text-xs">
+                        {costs[idx].perSqm
+                          ? "Betrag wird anteilig nach Wohnfläche (m²) auf die Mieter verteilt"
+                          : "Betrag wird gleichmäßig auf alle Wohneinheiten verteilt"}
+                      </TooltipContent>
+                    </Tooltip>
+                    {costs[idx].perSqm && totalSqm > 0 && parseFloat(costs[idx].amount) > 0 && (
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                        = {formatCurrency(parseFloat(costs[idx].amount) / totalSqm)}/m²
                       </span>
-                    </div>
+                    )}
                   </div>
                 </div>
                 );
