@@ -422,7 +422,7 @@ const UtilityBillingPage = () => {
               </div>
               <div className="space-y-0.5">
                 <p className="text-xs text-muted-foreground font-medium">Davon umlagefähig</p>
-                <p className="text-lg font-bold text-foreground">{totalCosts.toFixed(2)} €</p>
+                <p className="text-lg font-bold text-foreground">{formatCurrency(totalCosts)}</p>
               </div>
               <div className="space-y-0.5">
                 <p className="text-xs text-muted-foreground font-medium">Alle Vorauszahlungen</p>
