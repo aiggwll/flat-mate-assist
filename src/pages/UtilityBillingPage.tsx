@@ -370,7 +370,7 @@ const UtilityBillingPage = () => {
                       </div>
                       {t.balance !== 0 && (parseFloat(tenantRows[idx].sqm) > 0 || !costs.some(c => c.perSqm)) && (
                         <Badge variant={t.balance >= 0 ? "default" : "destructive"} className={`text-xs font-semibold ${t.balance >= 0 ? "bg-primary/10 text-primary hover:bg-primary/10" : ""}`}>
-                          {t.balance >= 0 ? `Rückerstattung ${t.balance.toFixed(2)} €` : `Nachzahlung ${Math.abs(t.balance).toFixed(2)} €`}
+                          {t.balance >= 0 ? `Rückerstattung ${formatCurrency(t.balance)}` : `Nachzahlung ${formatCurrency(Math.abs(t.balance))}`}
                         </Badge>
                       )}
                     </div>
