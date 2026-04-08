@@ -331,7 +331,7 @@ const TaxFolderPage = () => {
         <div className="bg-card rounded-2xl border p-5 space-y-1">
           <p className="text-xs text-muted-foreground font-medium">Vorläufiges Ergebnis</p>
           <p className={cn("text-xl font-bold", summary.result >= 0 ? "text-primary" : "text-destructive")}>
-            {summary.result >= 0 ? "+" : ""}{summary.result.toFixed(2)} €
+            {summary.result >= 0 ? "+" : ""}{formatCurrency(Math.abs(summary.result))}
           </p>
         </div>
       </div>
