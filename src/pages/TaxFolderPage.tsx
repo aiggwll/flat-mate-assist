@@ -98,6 +98,33 @@ const TaxFolderPage = () => {
     loadYears();
   }, [userId]);
 
+  // Auto-pull rent income for selected property/year
+  useEffect(() => {
+    if (!userId) { setRentIncome(0); return; }
+    const loadRentIncome = async () => {
+      let query = supabase
+        .from("rent_payments")
+        .select("cold_rent, nebenkosten")
+        .eq("user_id", userId)
+        .not("paid_at", "is", null);
+      // Filter by year via due_date
+      const yearStart = `${selectedYear}-01-01`;
+      const yearEnd = `${selectedYear}-12-31`;
+      query = query.gte("due_date", yearStart).lte("due_date", yearEnd);
+      if (selectedPropertyId !== "all") {
+        // Match unit_id prefix to property address
+        const prop = userProperties.find(p => p.id === selectedPropertyId);
+        if (prop) {
+          query = query.like("unit_id", `${prop.address}%`);
+        }
+      }
+      const { data } = await query;
+      const total = (data || []).reduce((sum, r) => sum + Number(r.cold_rent || 0) + Number(r.nebenkosten || 0), 0);
+      setRentIncome(total);
+    };
+    loadRentIncome();
+  }, [userId, selectedYear, selectedPropertyId, userProperties]);
+
   useEffect(() => {
     if (userProperties.length > 0 && !formPropertyId) {
       setFormPropertyId(userProperties[0].id);
