@@ -213,14 +213,15 @@ const TaxFolderPage = () => {
 
   // Summary calculations
   const summary = useMemo(() => {
-    const income = documents
+    const docIncome = documents
       .filter(d => CATEGORIES.find(c => c.key === d.category)?.type === "income")
       .reduce((s, d) => s + d.amount, 0);
+    const income = docIncome + rentIncome;
     const expenses = documents
       .filter(d => CATEGORIES.find(c => c.key === d.category)?.type === "expense")
       .reduce((s, d) => s + d.amount, 0);
-    return { income, expenses, result: income - expenses };
-  }, [documents]);
+    return { income, expenses, result: income - expenses, rentIncome, docIncome };
+  }, [documents, rentIncome]);
 
   const categoryTotals = useMemo(() => {
     const map: Record<string, number> = {};
