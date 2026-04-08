@@ -13,6 +13,7 @@ import { useUser } from "@/contexts/UserContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { formatCurrency } from "@/lib/utils";
 import { de } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
@@ -321,16 +322,16 @@ const TaxFolderPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-card rounded-2xl border p-5 space-y-1">
           <p className="text-xs text-muted-foreground font-medium">Gesamteinnahmen</p>
-          <p className="text-xl font-bold text-primary">{summary.income.toFixed(2)} €</p>
+          <p className="text-xl font-bold text-primary">{formatCurrency(summary.income)}</p>
         </div>
         <div className="bg-card rounded-2xl border p-5 space-y-1">
           <p className="text-xs text-muted-foreground font-medium">Gesamtausgaben / Werbungskosten</p>
-          <p className="text-xl font-bold text-destructive">{summary.expenses.toFixed(2)} €</p>
+          <p className="text-xl font-bold text-destructive">{formatCurrency(summary.expenses)}</p>
         </div>
         <div className="bg-card rounded-2xl border p-5 space-y-1">
           <p className="text-xs text-muted-foreground font-medium">Vorläufiges Ergebnis</p>
           <p className={cn("text-xl font-bold", summary.result >= 0 ? "text-primary" : "text-destructive")}>
-            {summary.result >= 0 ? "+" : ""}{summary.result.toFixed(2)} €
+            {summary.result >= 0 ? "+" : ""}{formatCurrency(Math.abs(summary.result))}
           </p>
         </div>
       </div>
@@ -346,7 +347,7 @@ const TaxFolderPage = () => {
               <div key={cat.key} className="flex items-center justify-between px-5 py-3">
                 <span className="text-sm font-medium text-foreground">{cat.label}</span>
                 <span className={cn("text-sm font-semibold", cat.type === "income" ? "text-primary" : "text-destructive")}>
-                  {cat.type === "income" ? "+" : "-"}{categoryTotals[cat.key].toFixed(2)} €
+                  {cat.type === "income" ? "+" : "-"}{formatCurrency(categoryTotals[cat.key])}
                 </span>
               </div>
             ))}
@@ -389,7 +390,7 @@ const TaxFolderPage = () => {
                     </div>
                   </div>
                   <span className={cn("text-sm font-semibold shrink-0", cat?.type === "income" ? "text-primary" : "text-destructive")}>
-                    {doc.amount.toFixed(2)} €
+                    {formatCurrency(doc.amount)}
                   </span>
                   <button onClick={() => handleDelete(doc)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0">
                     <Trash2 className="h-4 w-4" />

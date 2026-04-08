@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { useUser } from "@/contexts/UserContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { formatCurrency } from "@/lib/utils";
 
 const CATEGORIES = [
   { key: "grundsteuer", label: "Grundsteuer", info: "Grundsteuer, die auf das Grundstück erhoben wird" },
@@ -369,7 +370,7 @@ const UtilityBillingPage = () => {
                       </div>
                       {t.balance !== 0 && (parseFloat(tenantRows[idx].sqm) > 0 || !costs.some(c => c.perSqm)) && (
                         <Badge variant={t.balance >= 0 ? "default" : "destructive"} className={`text-xs font-semibold ${t.balance >= 0 ? "bg-primary/10 text-primary hover:bg-primary/10" : ""}`}>
-                          {t.balance >= 0 ? `Rückerstattung ${t.balance.toFixed(2)} €` : `Nachzahlung ${Math.abs(t.balance).toFixed(2)} €`}
+                          {t.balance >= 0 ? `Rückerstattung ${formatCurrency(t.balance)}` : `Nachzahlung ${formatCurrency(Math.abs(t.balance))}`}
                         </Badge>
                       )}
                     </div>
@@ -398,11 +399,11 @@ const UtilityBillingPage = () => {
                       </div>
                       <div className="space-y-1">
                         <label className="text-[11px] text-muted-foreground font-medium">Vorausz. gesamt</label>
-                        <p className="text-sm font-medium text-foreground pt-2">{t.advancePaid.toFixed(2)} €</p>
+                        <p className="text-sm font-medium text-foreground pt-2">{formatCurrency(t.advancePaid)}</p>
                       </div>
                       <div className="space-y-1">
                         <label className="text-[11px] text-muted-foreground font-medium">Anteil Kosten</label>
-                        <p className="text-sm font-medium text-foreground pt-2">{t.allocated.toFixed(2)} €</p>
+                        <p className="text-sm font-medium text-foreground pt-2">{formatCurrency(t.allocated)}</p>
                       </div>
                     </div>
                   </div>
@@ -417,15 +418,15 @@ const UtilityBillingPage = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="space-y-0.5">
                 <p className="text-xs text-muted-foreground font-medium">Gesamtkosten</p>
-                <p className="text-lg font-bold text-foreground">{totalCosts.toFixed(2)} €</p>
+                <p className="text-lg font-bold text-foreground">{formatCurrency(totalCosts)}</p>
               </div>
               <div className="space-y-0.5">
                 <p className="text-xs text-muted-foreground font-medium">Davon umlagefähig</p>
-                <p className="text-lg font-bold text-foreground">{totalCosts.toFixed(2)} €</p>
+                <p className="text-lg font-bold text-foreground">{formatCurrency(totalCosts)}</p>
               </div>
               <div className="space-y-0.5">
                 <p className="text-xs text-muted-foreground font-medium">Alle Vorauszahlungen</p>
-                <p className="text-lg font-bold text-foreground">{totalAdvance.toFixed(2)} €</p>
+                <p className="text-lg font-bold text-foreground">{formatCurrency(totalAdvance)}</p>
               </div>
               <div className="space-y-0.5">
                 <p className="text-xs text-muted-foreground font-medium">Status</p>
@@ -439,7 +440,7 @@ const UtilityBillingPage = () => {
           {/* Sticky bottom save bar */}
           <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-card border-t px-6 py-4 flex items-center justify-between z-40">
             <p className="text-sm font-medium text-foreground">
-              Gesamtkosten: <span className="font-bold">{totalCosts.toFixed(2)} €</span>
+              Gesamtkosten: <span className="font-bold">{formatCurrency(totalCosts)}</span>
             </p>
             <Button
               onClick={handleFinalize}
