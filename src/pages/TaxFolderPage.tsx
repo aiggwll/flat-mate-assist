@@ -48,8 +48,10 @@ const TaxFolderPage = () => {
   const { userProperties, userId, salutation } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
+  const [selectedPropertyId, setSelectedPropertyId] = useState("all");
   const [documents, setDocuments] = useState<TaxDoc[]>([]);
   const [availableYears, setAvailableYears] = useState<string[]>([]);
+  const [rentIncome, setRentIncome] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // Upload form state
@@ -65,15 +67,19 @@ const TaxFolderPage = () => {
   const loadDocuments = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
-    const { data } = await supabase
+    let query = supabase
       .from("tax_documents")
       .select("*")
       .eq("user_id", userId)
       .eq("year", parseInt(selectedYear))
       .order("created_at", { ascending: false });
+    if (selectedPropertyId !== "all") {
+      query = query.eq("property_id", selectedPropertyId);
+    }
+    const { data } = await query;
     setDocuments((data as TaxDoc[]) || []);
     setLoading(false);
-  }, [userId, selectedYear]);
+  }, [userId, selectedYear, selectedPropertyId]);
 
   useEffect(() => { loadDocuments(); }, [loadDocuments]);
 
@@ -91,6 +97,33 @@ const TaxFolderPage = () => {
     };
     loadYears();
   }, [userId]);
+
+  // Auto-pull rent income for selected property/year
+  useEffect(() => {
+    if (!userId) { setRentIncome(0); return; }
+    const loadRentIncome = async () => {
+      let query = supabase
+        .from("rent_payments")
+        .select("cold_rent, nebenkosten")
+        .eq("user_id", userId)
+        .not("paid_at", "is", null);
+      // Filter by year via due_date
+      const yearStart = `${selectedYear}-01-01`;
+      const yearEnd = `${selectedYear}-12-31`;
+      query = query.gte("due_date", yearStart).lte("due_date", yearEnd);
+      if (selectedPropertyId !== "all") {
+        // Match unit_id prefix to property address
+        const prop = userProperties.find(p => p.id === selectedPropertyId);
+        if (prop) {
+          query = query.like("unit_id", `${prop.address}%`);
+        }
+      }
+      const { data } = await query;
+      const total = (data || []).reduce((sum, r) => sum + Number(r.cold_rent || 0) + Number(r.nebenkosten || 0), 0);
+      setRentIncome(total);
+    };
+    loadRentIncome();
+  }, [userId, selectedYear, selectedPropertyId, userProperties]);
 
   useEffect(() => {
     if (userProperties.length > 0 && !formPropertyId) {
@@ -180,14 +213,15 @@ const TaxFolderPage = () => {
 
   // Summary calculations
   const summary = useMemo(() => {
-    const income = documents
+    const docIncome = documents
       .filter(d => CATEGORIES.find(c => c.key === d.category)?.type === "income")
       .reduce((s, d) => s + d.amount, 0);
+    const income = docIncome + rentIncome;
     const expenses = documents
       .filter(d => CATEGORIES.find(c => c.key === d.category)?.type === "expense")
       .reduce((s, d) => s + d.amount, 0);
-    return { income, expenses, result: income - expenses };
-  }, [documents]);
+    return { income, expenses, result: income - expenses, rentIncome, docIncome };
+  }, [documents, rentIncome]);
 
   const categoryTotals = useMemo(() => {
     const map: Record<string, number> = {};
@@ -205,14 +239,27 @@ const TaxFolderPage = () => {
           <h1 className="text-2xl font-heading font-bold text-foreground">Steuermappe</h1>
           <p className="text-sm text-muted-foreground mt-1">Belege sammeln und Einnahmen/Ausgaben für die Steuererklärung verwalten</p>
         </div>
-        <Select value={selectedYear} onValueChange={setSelectedYear}>
-          <SelectTrigger className="w-28">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-3">
+          <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
+            <SelectTrigger className="w-52">
+              <SelectValue placeholder="Immobilie auswählen" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Immobilien</SelectItem>
+              {userProperties.map(p => (
+                <SelectItem key={p.id} value={p.id}>{p.address}, {p.city}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="w-28">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Upload Area */}
@@ -341,6 +388,11 @@ const TaxFolderPage = () => {
           <p className={cn("text-xl font-bold", summary.income > 0 ? "text-green-600" : "text-muted-foreground")}>
             {formatCurrency(summary.income)}
           </p>
+          {summary.rentIncome > 0 && (
+            <p className="text-[10px] text-muted-foreground">
+              davon {formatCurrency(summary.rentIncome)} Mieteinnahmen (automatisch)
+            </p>
+          )}
         </div>
         <div className="bg-card rounded-2xl border p-5 space-y-1">
           <p className="text-xs text-muted-foreground font-medium">Gesamtausgaben / Werbungskosten</p>
