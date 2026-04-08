@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { useUser } from "@/contexts/UserContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { formatCurrency } from "@/lib/utils";
 
 const CATEGORIES = [
   { key: "grundsteuer", label: "Grundsteuer", info: "Grundsteuer, die auf das Grundstück erhoben wird" },
