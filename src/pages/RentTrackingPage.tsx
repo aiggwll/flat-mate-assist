@@ -45,12 +45,21 @@ const getStatusInfo = (paidAt: string | null, dueDate: string) => {
   return { label: "Ausstehend", color: "text-yellow-600 bg-yellow-50 border-yellow-200", icon: Clock };
 };
 
+const rentSchema = z.object({
+  unit_id: z.string().min(1, "Bitte Immobilie & Wohnung auswählen"),
+  tenant_name: z.string().trim().min(1, "Mietername ist erforderlich"),
+  cold_rent: z.string().refine(v => parseFloat(v) > 0, "Kaltmiete muss größer als 0 sein"),
+  nebenkosten: z.string().refine(v => v !== "" && !isNaN(parseFloat(v)), "Nebenkosten eingeben (oder 0)"),
+});
+
 const RentTrackingPage = () => {
   const { user, userProperties, salutation } = useUser();
   const [payments, setPayments] = useState<RentPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ unit_id: "", tenant_name: "", cold_rent: "", nebenkosten: "" });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [attempted, setAttempted] = useState(false);
 
   const unitOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
