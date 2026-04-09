@@ -1,6 +1,7 @@
 import { payments } from "@/lib/dummy-data";
 import { CheckCircle2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/utils";
 import { useState } from "react";
 
 const PaymentsPage = () => {
