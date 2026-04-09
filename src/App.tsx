@@ -7,6 +7,7 @@ import { UserProvider } from "./contexts/UserContext";
 import { MessagesProvider } from "./contexts/MessagesContext";
 import AppLayout from "./components/AppLayout";
 import LoginPage from "./pages/LoginPage";
+import AuthCallbackPage from "./pages/AuthCallbackPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import TenantDashboardPage from "./pages/TenantDashboardPage";
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/" element={<LoginPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route element={<AppLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
