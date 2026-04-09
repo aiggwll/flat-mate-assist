@@ -56,7 +56,7 @@ const TenantDashboardPage = () => {
   // Load real property info from profile
   const [propertyAddress, setPropertyAddress] = useState("Wird geladen...");
   const [unitLabel, setUnitLabel] = useState("");
-  const [ownerName, setOwnerName] = useState("Vermieter");
+  const [ownerName, setOwnerName] = useState("Ihr Vermieter");
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [hasProperty, setHasProperty] = useState(true);
 
