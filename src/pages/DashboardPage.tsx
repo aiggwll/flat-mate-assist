@@ -67,6 +67,9 @@ const DashboardPage = () => {
 
   useEffect(() => {
     if (!userId) return;
+    // Reset to false immediately when userId changes to avoid stale state
+    setHasPayments(false);
+    setHasDocuments(false);
     const checkPayments = async () => {
       const { count } = await supabase
         .from("rent_payments")
