@@ -124,3 +124,9 @@
     @apply pb-4 mb-6 border-b border-border;
   }
 }
+
+/* Prevent empty layout wrappers from consuming viewport height */
+main:empty,
+main > div:empty {
+  display: none;
+}
