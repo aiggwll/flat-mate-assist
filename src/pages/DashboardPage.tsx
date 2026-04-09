@@ -35,6 +35,8 @@ const DashboardPage = () => {
   const displayName = userName || "Eigentümer";
   const effectiveSalutation = salutation || "sie";
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
+  const [invitations, setInvitations] = useState<InvitationInfo[]>([]);
+  const [resending, setResending] = useState<string | null>(null);
   const [hasPayments, setHasPayments] = useState(false);
   const [hasDocuments, setHasDocuments] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(
