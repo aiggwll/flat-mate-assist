@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Building2, Users, MessageSquare, AlertTriangle, ArrowRight, MapPin, UserPlus } from "lucide-react";
+import { Building2, Users, MessageSquare, AlertTriangle, ArrowRight, MapPin, UserPlus, Clock, CheckCircle2, RotateCcw } from "lucide-react";
 import WelcomeSlider from "@/components/WelcomeSlider";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
 import LandlordOnboarding from "@/components/LandlordOnboarding";
@@ -10,6 +10,7 @@ import { useUser } from "@/contexts/UserContext";
 import { useMessages } from "@/contexts/MessagesContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface TenantInfo {
   name: string;
@@ -18,12 +19,24 @@ interface TenantInfo {
   unit_id: string;
 }
 
+interface InvitationInfo {
+  id: string;
+  email: string;
+  tenant_name: string;
+  property_id: string;
+  unit_id: string;
+  status: string;
+  invited_at: string;
+}
+
 const DashboardPage = () => {
   const { userName, userProperties, salutation, userId, setupWizardComplete, gender, lastName } = useUser();
   const { messages } = useMessages();
   const displayName = userName || "Eigentümer";
   const effectiveSalutation = salutation || "sie";
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
+  const [invitations, setInvitations] = useState<InvitationInfo[]>([]);
+  const [resending, setResending] = useState<string | null>(null);
   const [hasPayments, setHasPayments] = useState(false);
   const [hasDocuments, setHasDocuments] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(
@@ -62,8 +75,28 @@ const DashboardPage = () => {
         })));
       }
     };
+    const loadInvitations = async () => {
+      if (!userId) return;
+      const { data } = await supabase
+        .from("invitations" as any)
+        .select("id, email, tenant_name, property_id, unit_id, status, invited_at")
+        .eq("invited_by", userId)
+        .order("invited_at", { ascending: false });
+      if (data) {
+        setInvitations((data as any[]).map(inv => ({
+          id: inv.id,
+          email: inv.email,
+          tenant_name: inv.tenant_name,
+          property_id: inv.property_id,
+          unit_id: inv.unit_id,
+          status: inv.status,
+          invited_at: inv.invited_at,
+        })));
+      }
+    };
     loadTenants();
-  }, [userProperties]);
+    loadInvitations();
+  }, [userProperties, userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -88,6 +121,33 @@ const DashboardPage = () => {
     checkPayments();
     checkDocuments();
   }, [userId]);
+
+  const handleResendInvitation = async (inv: InvitationInfo) => {
+    setResending(inv.id);
+    try {
+      await supabase
+        .from("invitations" as any)
+        .update({ invited_at: new Date().toISOString() } as any)
+        .eq("id", inv.id);
+      // Refresh invitations
+      const { data } = await supabase
+        .from("invitations" as any)
+        .select("id, email, tenant_name, property_id, unit_id, status, invited_at")
+        .eq("invited_by", userId!)
+        .order("invited_at", { ascending: false });
+      if (data) {
+        setInvitations((data as any[]).map(i => ({
+          id: i.id, email: i.email, tenant_name: i.tenant_name,
+          property_id: i.property_id, unit_id: i.unit_id,
+          status: i.status, invited_at: i.invited_at,
+        })));
+      }
+      toast.success(`Einladung wurde erneut an ${inv.email} versendet.`);
+    } catch {
+      toast.error("Die Einladung konnte nicht erneut versendet werden.");
+    }
+    setResending(null);
+  };
 
   const propertyCount = userProperties.length;
   const totalUnits = userProperties.reduce((sum, p) => sum + p.units, 0);
@@ -216,6 +276,12 @@ const DashboardPage = () => {
               const propertyTenants = tenants.filter(t =>
                 t.property_id === `${p.address}, ${p.city}` || t.property_id.includes(p.address)
               );
+              const propertyInvitations = invitations.filter(inv =>
+                inv.property_id === p.id && inv.status === "pending"
+              );
+              // Filter out invitations where the tenant has already registered
+              const registeredEmails = new Set(propertyTenants.map(t => t.email));
+              const pendingInvitations = propertyInvitations.filter(inv => !registeredEmails.has(inv.email));
 
               return (
                 <div key={p.id} className="bg-card rounded-2xl border overflow-hidden hover:shadow-md transition-all">
@@ -249,23 +315,59 @@ const DashboardPage = () => {
                       )}
                     </div>
 
-                    <div className="pt-3 border-t">
-                      {propertyTenants.length === 0 ? (
-                        <InviteTenantDialog />
-                      ) : (
-                        <div className="space-y-1.5">
-                          {propertyTenants.map((t, i) => (
-                            <div key={i} className="flex items-center gap-2">
-                              <div className="h-6 w-6 rounded-full bg-primary/8 flex items-center justify-center">
-                                <span className="text-[9px] font-bold text-primary">
-                                  {t.name.split(" ").map(n => n[0]).join("")}
-                                </span>
-                              </div>
-                              <p className="text-sm text-foreground">{t.name}</p>
-                              <p className="text-xs text-muted-foreground">· {t.unit_id}</p>
-                            </div>
-                          ))}
+                    <div className="pt-3 border-t space-y-2">
+                      {/* Registered tenants */}
+                      {propertyTenants.map((t, i) => (
+                        <div key={`t-${i}`} className="flex items-center gap-2">
+                          <div className="h-6 w-6 rounded-full bg-primary/8 flex items-center justify-center">
+                            <span className="text-[9px] font-bold text-primary">
+                              {t.name.split(" ").map(n => n[0]).join("")}
+                            </span>
+                          </div>
+                          <p className="text-sm text-foreground">{t.name}</p>
+                          <Badge variant="outline" className="text-[10px] bg-primary/5 text-primary border-primary/20 gap-1">
+                            <CheckCircle2 className="h-3 w-3" /> Registriert
+                          </Badge>
                         </div>
+                      ))}
+
+                      {/* Pending invitations */}
+                      {pendingInvitations.map((inv) => (
+                        <div key={`inv-${inv.id}`} className="flex items-center gap-2 flex-wrap">
+                          <div className="h-6 w-6 rounded-full bg-amber-500/10 flex items-center justify-center">
+                            <Clock className="h-3 w-3 text-amber-600" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm text-foreground">{inv.tenant_name || inv.email}</p>
+                            <p className="text-[11px] text-muted-foreground">
+                              Einladung versendet am {new Date(inv.invited_at).toLocaleDateString("de-DE")}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground"
+                            disabled={resending === inv.id}
+                            onClick={() => handleResendInvitation(inv)}
+                          >
+                            <RotateCcw className={`h-3 w-3 ${resending === inv.id ? "animate-spin" : ""}`} />
+                            Erneut senden
+                          </Button>
+                        </div>
+                      ))}
+
+                      {/* Show invite button if no tenants or invitations */}
+                      {propertyTenants.length === 0 && pendingInvitations.length === 0 && (
+                        <InviteTenantDialog />
+                      )}
+
+                      {/* Also show invite if there are some but space for more */}
+                      {(propertyTenants.length > 0 || pendingInvitations.length > 0) && (
+                        <InviteTenantDialog trigger={
+                          <Button variant="ghost" size="sm" className="text-xs gap-1 text-primary h-7 mt-1">
+                            <UserPlus className="h-3 w-3" /> Weiteren Mieter einladen
+                          </Button>
+                        } />
                       )}
                     </div>
                   </div>

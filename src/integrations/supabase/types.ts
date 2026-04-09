@@ -164,6 +164,48 @@ export type Database = {
         }
         Relationships: []
       }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          id: string
+          invite_link: string
+          invited_at: string
+          invited_by: string
+          property_id: string
+          status: string
+          tenant_name: string
+          unit_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          invite_link?: string
+          invited_at?: string
+          invited_by: string
+          property_id: string
+          status?: string
+          tenant_name?: string
+          unit_id?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          invite_link?: string
+          invited_at?: string
+          invited_by?: string
+          property_id?: string
+          status?: string
+          tenant_name?: string
+          unit_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           created_at: string
