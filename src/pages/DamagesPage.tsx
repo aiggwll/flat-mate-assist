@@ -46,10 +46,18 @@ const statusColor: Record<string, string> = {
 };
 
 const categoryIcon: Record<string, string> = {
-  Heizung: "🔥",
-  Wasser: "💧",
-  Elektrik: "⚡",
-  Sonstiges: "🔧",
+  "Heizung & Warmwasser": "🔥",
+  "Wasserrohrbruch / Leckage": "💧",
+  "Elektrik / Stromausfall": "⚡",
+  "Fenster & Türen": "🪟",
+  "Dach & Fassade": "🏠",
+  "Schimmel & Feuchtigkeit": "🍄",
+  "Sanitär / Bad & WC": "🚿",
+  "Aufzug": "🛗",
+  "Einbruch / Sicherheit": "🔒",
+  "Strukturschäden / Risse": "🏗️",
+  "Schädlingsbefall": "🐭",
+  "Sonstiges": "🔧",
 };
 
 const DamagesPage = () => {
