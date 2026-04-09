@@ -130,7 +130,7 @@ const DamagesPage = () => {
       category: form.category as Damage["category"],
       status: "offen",
       reportedAt: new Date().toISOString().split("T")[0],
-      reportedBy: "Mieter",
+      reportedBy: userRole === "owner" ? "Vermieter" : "Mieter",
       propertyAddress: property?.address ?? "",
       unitNumber: form.unitId,
       photos: photos.map(p => p.preview),
