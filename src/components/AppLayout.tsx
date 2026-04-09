@@ -21,12 +21,12 @@ const AppLayout = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Desktop sidebar */}
-      <div className="hidden md:block">
+      <div className="hidden md:block" aria-hidden="true">
         <AppSidebar />
       </div>
       {/* Mobile nav */}
       <MobileNav />
-      <main className="md:ml-64 md:p-8 p-4 pt-18 pb-20 md:pt-8 md:pb-8">
+      <main className="md:ml-64 md:p-8 p-4 pt-18 pb-20 md:pt-8 md:pb-8 h-auto">
         <Outlet />
       </main>
     </div>
