@@ -71,7 +71,7 @@ const RegisterPage = () => {
         password,
         options: {
           data: { name: fullName, role, salutation: salutationField },
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
