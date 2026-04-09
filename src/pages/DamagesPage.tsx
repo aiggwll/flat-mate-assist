@@ -61,7 +61,7 @@ const categoryIcon: Record<string, string> = {
 };
 
 const DamagesPage = () => {
-  const { userProperties, salutation } = useUser();
+  const { userProperties, salutation, userRole } = useUser();
   const [damages, setDamages] = useState<DamageWithContext[]>(initialDamages);
   const [open, setOpen] = useState(false);
   const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([]);
