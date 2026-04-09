@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, MapPin, Plus, Calendar, Layers, UserPlus } from "lucide-react";
+import { Building2, MapPin, Plus, Calendar, Layers, Trash2 } from "lucide-react";
 import { sal } from "@/lib/salutation";
 import EmptyState from "@/components/EmptyState";
 import { Link } from "react-router-dom";
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/UserContext";
@@ -22,9 +23,47 @@ const PropertiesPage = () => {
     totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "",
   });
 
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; address: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const navigate = useNavigate();
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
   const { userProperties, setUserProperties, salutation } = useUser();
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      // Delete related data in correct order
+      // 1. utility_results & utility_costs via utility_periods
+      const { data: periods } = await supabase
+        .from("utility_periods")
+        .select("id")
+        .eq("property_id", deleteTarget.id);
+      if (periods && periods.length > 0) {
+        const periodIds = periods.map(p => p.id);
+        await supabase.from("utility_results").delete().in("period_id", periodIds);
+        await supabase.from("utility_costs").delete().in("period_id", periodIds);
+        await supabase.from("utility_periods").delete().in("id", periodIds);
+      }
+      // 2. tax_documents, documents
+      await supabase.from("tax_documents").delete().eq("property_id", deleteTarget.id);
+      await supabase.from("documents").delete().eq("property_id", deleteTarget.id);
+      // 3. Clear tenant profile references
+      await supabase.from("profiles").update({ property_id: null, unit_id: null }).eq("property_id", deleteTarget.id);
+      // 4. Delete the property itself
+      const { error } = await supabase.from("properties").delete().eq("id", deleteTarget.id);
+      if (error) throw error;
+
+      setUserProperties(userProperties.filter(p => p.id !== deleteTarget.id));
+      toast.success("Immobilie wurde erfolgreich gelöscht");
+    } catch (e: any) {
+      toast.error("Fehler beim Löschen: " + (e.message || "Unbekannter Fehler"));
+    } finally {
+      setIsDeleting(false);
+      setDeleteTarget(null);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!form.address || !form.city || !form.zipCode) {
@@ -110,6 +149,14 @@ const PropertiesPage = () => {
                 <div className="flex items-center gap-3 pt-3 border-t">
                   <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/properties/${p.id}`)}>Details</Button>
                   <InviteTenantDialog />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => setDeleteTarget({ id: p.id, address: p.address })}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -219,6 +266,27 @@ const PropertiesPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Immobilie löschen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Möchten Sie „{deleteTarget?.address}" wirklich löschen? Alle zugehörigen Daten (Mieter, Dokumente, Abrechnungen) werden ebenfalls entfernt. Diese Aktion kann nicht rückgängig gemacht werden.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Wird gelöscht…" : "Löschen"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
