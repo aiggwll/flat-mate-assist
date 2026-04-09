@@ -23,9 +23,47 @@ const PropertiesPage = () => {
     totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "",
   });
 
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; address: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const navigate = useNavigate();
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
   const { userProperties, setUserProperties, salutation } = useUser();
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      // Delete related data in correct order
+      // 1. utility_results & utility_costs via utility_periods
+      const { data: periods } = await supabase
+        .from("utility_periods")
+        .select("id")
+        .eq("property_id", deleteTarget.id);
+      if (periods && periods.length > 0) {
+        const periodIds = periods.map(p => p.id);
+        await supabase.from("utility_results").delete().in("period_id", periodIds);
+        await supabase.from("utility_costs").delete().in("period_id", periodIds);
+        await supabase.from("utility_periods").delete().in("id", periodIds);
+      }
+      // 2. tax_documents, documents
+      await supabase.from("tax_documents").delete().eq("property_id", deleteTarget.id);
+      await supabase.from("documents").delete().eq("property_id", deleteTarget.id);
+      // 3. Clear tenant profile references
+      await supabase.from("profiles").update({ property_id: null, unit_id: null }).eq("property_id", deleteTarget.id);
+      // 4. Delete the property itself
+      const { error } = await supabase.from("properties").delete().eq("id", deleteTarget.id);
+      if (error) throw error;
+
+      setUserProperties(userProperties.filter(p => p.id !== deleteTarget.id));
+      toast.success("Immobilie wurde erfolgreich gelöscht");
+    } catch (e: any) {
+      toast.error("Fehler beim Löschen: " + (e.message || "Unbekannter Fehler"));
+    } finally {
+      setIsDeleting(false);
+      setDeleteTarget(null);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!form.address || !form.city || !form.zipCode) {
