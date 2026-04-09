@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import InviteTenantDialog from "./InviteTenantDialog";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LandlordOnboardingProps {
   open: boolean;
@@ -15,11 +16,17 @@ interface LandlordOnboardingProps {
 const LandlordOnboarding = ({ open, onComplete }: LandlordOnboardingProps) => {
   const [step, setStep] = useState(0);
   const navigate = useNavigate();
-  const { salutation } = useUser();
+  const { salutation, user } = useUser();
   const isSie = salutation === "sie";
 
-  const finish = () => {
+  const finish = async () => {
     localStorage.setItem("onboarding_complete_owner", "true");
+    if (user) {
+      await supabase
+        .from("profiles")
+        .update({ setup_wizard_complete: true } as any)
+        .eq("user_id", user.id);
+    }
     onComplete();
     toast.success("Ihr Konto ist eingerichtet! 🎉");
   };

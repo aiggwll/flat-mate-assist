@@ -36,8 +36,12 @@ const getSlides = (salutation: "sie" | "du") => [
   },
 ];
 
-const WelcomeSlider = () => {
-  const { salutation } = useUser();
+interface WelcomeSliderProps {
+  onComplete?: () => void;
+}
+
+const WelcomeSlider = ({ onComplete }: WelcomeSliderProps = {}) => {
+  const { salutation, userRole } = useUser();
   const slides = getSlides(salutation);
   const [current, setCurrent] = useState(0);
   const [showWizard, setShowWizard] = useState(false);
@@ -48,7 +52,10 @@ const WelcomeSlider = () => {
     if (launchWizard && !localStorage.getItem("dwello_setup_complete")) {
       setShowWizard(true);
     } else {
-      navigate("/dashboard");
+      // Signal parent to hide slider, then navigate to correct dashboard
+      onComplete?.();
+      const target = userRole === "tenant" ? "/tenant-dashboard" : "/dashboard";
+      navigate(target, { replace: true });
     }
   };
 
