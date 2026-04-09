@@ -4,7 +4,7 @@ import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
 import { format, isBefore, parse } from "date-fns";
 import { de } from "date-fns/locale";
-import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro, MoreVertical, Undo2, Trash2, Pencil } from "lucide-react";
+import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro, MoreVertical, Undo2, Trash2, Pencil, CalendarIcon } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { sal } from "@/lib/salutation";
 import { Button } from "@/components/ui/button";
