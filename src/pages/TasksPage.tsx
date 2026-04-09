@@ -1,3 +1,4 @@
+import { formatCurrency } from "@/lib/utils";
 import { useState } from "react";
 import { TrendingUp, Calendar, CheckCircle2, Clock, AlertCircle, Building2, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -98,7 +99,7 @@ const TasksPage = () => {
           </div>
           <div>
             <p className="text-2xl font-bold text-foreground">
-              {activeRentTasks.reduce((sum, t) => sum + (t.maxIncrease ?? 0), 0).toLocaleString("de-DE")} €
+              {formatCurrency(activeRentTasks.reduce((sum, t) => sum + (t.maxIncrease ?? 0), 0))}
             </p>
             <p className="text-xs text-muted-foreground">Max. Erhöhungspotenzial</p>
           </div>
@@ -184,12 +185,12 @@ const TasksPage = () => {
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Mieter: {task.tenantName} · Aktuelle Miete: {task.currentRent?.toLocaleString("de-DE")} €/M
+                        Mieter: {task.tenantName} · Aktuelle Miete: {formatCurrency(task.currentRent ?? 0)}/M
                       </p>
                       <p className="text-sm text-foreground/80 mt-2">{task.note}</p>
                       {task.rentStatus === "möglich" && (
                         <p className="text-sm font-medium text-accent mt-1">
-                          Mögliche Erhöhung: bis zu {task.maxIncrease?.toLocaleString("de-DE")} €/M
+                          Mögliche Erhöhung: bis zu {formatCurrency(task.maxIncrease ?? 0)}/M
                         </p>
                       )}
                     </div>
