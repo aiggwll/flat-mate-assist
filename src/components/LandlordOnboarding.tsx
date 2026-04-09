@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import InviteTenantDialog from "./InviteTenantDialog";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LandlordOnboardingProps {
   open: boolean;
