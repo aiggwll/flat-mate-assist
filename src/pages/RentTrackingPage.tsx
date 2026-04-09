@@ -85,6 +85,7 @@ const RentTrackingPage = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [attempted, setAttempted] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [autoFillHint, setAutoFillHint] = useState<string | null>(null);
 
   const unitOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
