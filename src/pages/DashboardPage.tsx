@@ -276,6 +276,12 @@ const DashboardPage = () => {
               const propertyTenants = tenants.filter(t =>
                 t.property_id === `${p.address}, ${p.city}` || t.property_id.includes(p.address)
               );
+              const propertyInvitations = invitations.filter(inv =>
+                inv.property_id === p.id && inv.status === "pending"
+              );
+              // Filter out invitations where the tenant has already registered
+              const registeredEmails = new Set(propertyTenants.map(t => t.email));
+              const pendingInvitations = propertyInvitations.filter(inv => !registeredEmails.has(inv.email));
 
               return (
                 <div key={p.id} className="bg-card rounded-2xl border overflow-hidden hover:shadow-md transition-all">
