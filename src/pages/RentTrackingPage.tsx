@@ -65,6 +65,7 @@ const getStatusInfo = (paidAt: string | null, dueDate: string) => {
 };
 
 const defaultDueDate = format(new Date(), "yyyy-MM-dd");
+const firstOfMonth = format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), "yyyy-MM-dd");
 
 const rentSchema = z.object({
   unit_id: z.string().min(1, "Bitte Immobilie & Wohnung auswählen"),
