@@ -140,8 +140,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let mounted = true;
+    let initialSessionHandled = false;
 
-    const handleAuthUser = (currentUser: User | null) => {
+    const handleAuthUser = async (currentUser: User | null) => {
       if (!mounted) return;
       const ts = Date.now();
       latestAuthTimestamp.current = ts;
@@ -153,7 +154,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           dataLoadedForUser.current = null;
         }
         sessionStorage.setItem("activeSession", "true");
-        loadUserData(currentUser, ts);
+        await loadUserData(currentUser, ts);
       } else {
         dataLoadedForUser.current = null;
         setUserName("");
@@ -164,29 +165,35 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUserProperties([]);
         setSetupWizardComplete(false);
       }
-      setIsLoading(false);
+      if (mounted) setIsLoading(false);
     };
 
-    // 1. Set up auth state listener FIRST — this is the source of truth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      handleAuthUser(session?.user ?? null);
-    });
-
-    // 2. Check "remember me" preference
-    const rememberMe = localStorage.getItem("rememberMe");
-    if (rememberMe === "false" && !sessionStorage.getItem("activeSession")) {
-      supabase.auth.signOut().then(() => {
+    // 1. Restore session first — this is the authoritative bootstrap
+    const bootstrap = async () => {
+      const rememberMe = localStorage.getItem("rememberMe");
+      if (rememberMe === "false" && !sessionStorage.getItem("activeSession")) {
+        await supabase.auth.signOut();
         if (mounted) {
           localStorage.removeItem("rememberMe");
           setIsLoading(false);
         }
-      });
-    } else {
-      // 3. Bootstrap: restore session once (onAuthStateChange may not fire for existing sessions)
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        handleAuthUser(session?.user ?? null);
-      });
-    }
+        initialSessionHandled = true;
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      initialSessionHandled = true;
+      await handleAuthUser(session?.user ?? null);
+    };
+
+    // 2. Listen for subsequent auth changes (sign-in, sign-out, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Skip the INITIAL_SESSION event — we handle it via getSession() above
+      if (!initialSessionHandled) return;
+      handleAuthUser(session?.user ?? null);
+    });
+
+    bootstrap();
 
     return () => {
       mounted = false;
