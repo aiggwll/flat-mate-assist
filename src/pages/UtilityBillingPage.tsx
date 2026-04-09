@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Plus, Info, Receipt, Calculator, Download } from "lucide-react";
+import { Plus, Info, Receipt, Calculator, Download, Mail, FolderDown } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { sal } from "@/lib/salutation";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useUser } from "@/contexts/UserContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -39,12 +40,16 @@ interface TenantRow {
   unitId: string;
   sqm: string;
   monthlyAdvance: string;
+  email?: string;
 }
 
 const currentYear = new Date().getFullYear();
 
+const fmtDE = (v: number) =>
+  new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(v);
+
 const UtilityBillingPage = () => {
-  const { userProperties, userId, salutation } = useUser();
+  const { userProperties, userId, userName, salutation } = useUser();
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
   const [selectedPropertyId, setSelectedPropertyId] = useState("");
   const [costs, setCosts] = useState<CostEntry[]>(
@@ -54,6 +59,10 @@ const UtilityBillingPage = () => {
   const [saving, setSaving] = useState(false);
   const [finalized, setFinalized] = useState(false);
   const [existingPeriodId, setExistingPeriodId] = useState<string | null>(null);
+  const [sendModalOpen, setSendModalOpen] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [savingToDocuments, setSavingToDocuments] = useState(false);
+  const [savedToDocuments, setSavedToDocuments] = useState(false);
 
   // Auto-select first property
   useEffect(() => {
@@ -68,7 +77,7 @@ const UtilityBillingPage = () => {
     const loadTenants = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("user_id, name, unit_id")
+        .select("user_id, name, unit_id, email")
         .eq("property_id", selectedPropertyId)
         .eq("role", "tenant");
       if (data && data.length > 0) {
@@ -78,6 +87,7 @@ const UtilityBillingPage = () => {
           unitId: t.unit_id || "",
           sqm: "",
           monthlyAdvance: "",
+          email: t.email || "",
         })));
       } else {
         setTenantRows([]);
@@ -89,6 +99,7 @@ const UtilityBillingPage = () => {
   // Check for existing period
   useEffect(() => {
     if (!selectedPropertyId || !selectedYear) return;
+    setSavedToDocuments(false);
     const check = async () => {
       const { data } = await supabase
         .from("utility_periods")
@@ -99,7 +110,6 @@ const UtilityBillingPage = () => {
       if (data) {
         setExistingPeriodId(data.id);
         setFinalized(data.status === "finalized");
-        // Load existing costs
         const { data: costsData } = await supabase
           .from("utility_costs")
           .select("*")
@@ -114,18 +124,26 @@ const UtilityBillingPage = () => {
             };
           }));
         }
-        // Load existing results
         const { data: resultsData } = await supabase
           .from("utility_results")
           .select("*")
           .eq("period_id", data.id);
         if (resultsData && resultsData.length > 0) {
+          // Also load tenant emails
+          const tenantIds = resultsData.map(r => r.tenant_id);
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("user_id, email")
+            .in("user_id", tenantIds);
+          const emailMap = new Map((profiles || []).map(p => [p.user_id, p.email]));
+
           setTenantRows(resultsData.map(r => ({
             tenantId: r.tenant_id,
             tenantName: r.tenant_name,
             unitId: r.unit_id,
             sqm: String(r.sqm),
             monthlyAdvance: r.advance_paid ? String(Math.round(r.advance_paid / 12)) : "",
+            email: emailMap.get(r.tenant_id) || "",
           })));
         }
       } else {
@@ -222,6 +240,7 @@ const UtilityBillingPage = () => {
 
       setFinalized(true);
       setExistingPeriodId(periodId);
+      setSavedToDocuments(false);
       toast.success(`Abrechnung für ${selectedYear} wurde gespeichert.`);
     } catch (e: any) {
       console.error("Finalize error:", e);
@@ -234,18 +253,28 @@ const UtilityBillingPage = () => {
   const handleNewBilling = () => {
     setFinalized(false);
     setExistingPeriodId(null);
+    setSavedToDocuments(false);
     setCosts(CATEGORIES.map(c => ({ category: c.key, amount: "", perSqm: false })));
   };
 
   const selectedProperty = userProperties.find(p => p.id === selectedPropertyId);
 
-  const handlePdfExport = useCallback(async () => {
+  // --- PDF generation as Blob ---
+  const generatePdfBlob = useCallback(async (): Promise<Blob> => {
     const { default: jsPDF } = await import("jspdf");
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
     let y = 20;
 
-    // Title
+    const checkPage = (needed: number) => {
+      if (y + needed > pageH - 25) {
+        doc.addPage();
+        y = 20;
+      }
+    };
+
+    // Header
     doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
     doc.text("Nebenkostenabrechnung", pageW / 2, y, { align: "center" });
@@ -253,12 +282,19 @@ const UtilityBillingPage = () => {
 
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
-    doc.text(`Abrechnungszeitraum: 01.01.${selectedYear} – 31.12.${selectedYear}`, pageW / 2, y, { align: "center" });
-    y += 12;
+    doc.text(`Abrechnungszeitraum: 01.01.${selectedYear} \u2013 31.12.${selectedYear}`, pageW / 2, y, { align: "center" });
+    y += 14;
+
+    // Landlord info
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("Vermieter:", 20, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(userName || "—", 55, y);
+    y += 7;
 
     // Property info
     if (selectedProperty) {
-      doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
       doc.text("Immobilie:", 20, y);
       doc.setFont("helvetica", "normal");
@@ -270,30 +306,33 @@ const UtilityBillingPage = () => {
     doc.text("Jahr:", 20, y);
     doc.setFont("helvetica", "normal");
     doc.text(selectedYear, 55, y);
-    y += 12;
+    y += 14;
 
     // Cost categories table
     doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
-    doc.text("Betriebskosten", 20, y);
+    doc.text("Betriebskostenpositionen", 20, y);
     y += 8;
 
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
-    doc.text("Kategorie", 20, y);
-    doc.text("Betrag", pageW - 20, y, { align: "right" });
+    doc.text("Kostenart", 20, y);
+    doc.text("Verteilschlüssel", 110, y);
+    doc.text("Jahresgesamt", pageW - 20, y, { align: "right" });
     y += 2;
-    doc.setDrawColor(200);
+    doc.setDrawColor(180);
     doc.line(20, y, pageW - 20, y);
     y += 5;
 
     doc.setFont("helvetica", "normal");
     const activeCosts = costs.filter(c => parseFloat(c.amount) > 0);
     activeCosts.forEach(c => {
+      checkPage(7);
       const cat = CATEGORIES.find(cat => cat.key === c.category);
       const amount = parseFloat(c.amount);
       doc.text(cat?.label || c.category, 20, y);
-      doc.text(new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(amount), pageW - 20, y, { align: "right" });
+      doc.text(c.perSqm ? "nach m²" : "pro Whg.", 110, y);
+      doc.text(fmtDE(amount), pageW - 20, y, { align: "right" });
       y += 6;
     });
 
@@ -302,46 +341,187 @@ const UtilityBillingPage = () => {
     y += 6;
     doc.setFont("helvetica", "bold");
     doc.text("Gesamtkosten", 20, y);
-    doc.text(new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(totalCosts), pageW - 20, y, { align: "right" });
-    y += 12;
+    doc.text(fmtDE(totalCosts), pageW - 20, y, { align: "right" });
+    y += 14;
 
-    // Tenant results
+    // Per-tenant breakdown
     if (tenantResults.length > 0) {
-      doc.setFontSize(13);
-      doc.text("Mieterabrechnung", 20, y);
-      y += 8;
-
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "bold");
-      doc.text("Mieter", 20, y);
-      doc.text("Wohnung", 70, y);
-      doc.text("Vorauszahlung", 110, y);
-      doc.text("Anteil", 145, y);
-      doc.text("Saldo", pageW - 20, y, { align: "right" });
-      y += 2;
-      doc.line(20, y, pageW - 20, y);
-      y += 5;
-
-      doc.setFont("helvetica", "normal");
       tenantResults.forEach(t => {
-        const fmt = (v: number) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(v);
-        doc.text(t.tenantName, 20, y);
-        doc.text(t.unitId || "–", 70, y);
-        doc.text(fmt(t.advancePaid), 110, y);
-        doc.text(fmt(t.allocated), 145, y);
-        doc.text(fmt(t.balance), pageW - 20, y, { align: "right" });
+        checkPage(50);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text(`Abrechnung für: ${t.tenantName}`, 20, y);
         y += 6;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Wohnung: ${t.unitId || "—"}`, 20, y);
+        const sqm = parseFloat(t.sqm) || 0;
+        if (sqm > 0) {
+          doc.text(`Wohnfläche: ${sqm} m²`, 90, y);
+        }
+        y += 8;
+
+        // Tenant cost breakdown
+        doc.setFont("helvetica", "bold");
+        doc.text("Kostenart", 20, y);
+        doc.text("Anteil", pageW - 20, y, { align: "right" });
+        y += 2;
+        doc.line(20, y, pageW - 20, y);
+        y += 5;
+        doc.setFont("helvetica", "normal");
+
+        let tenantTotal = 0;
+        activeCosts.forEach(c => {
+          checkPage(7);
+          const cat = CATEGORIES.find(cat => cat.key === c.category);
+          const amount = parseFloat(c.amount) || 0;
+          let share = 0;
+          if (c.perSqm && totalSqm > 0) {
+            share = (sqm / totalSqm) * amount;
+          } else if (!c.perSqm && totalUnits > 0) {
+            share = amount / totalUnits;
+          }
+          tenantTotal += share;
+          const pct = c.perSqm && totalSqm > 0
+            ? ` (${((sqm / totalSqm) * 100).toFixed(1)}%)`
+            : totalUnits > 0 ? ` (1/${totalUnits})` : "";
+          doc.text(`${cat?.label || c.category}${pct}`, 20, y);
+          doc.text(fmtDE(share), pageW - 20, y, { align: "right" });
+          y += 6;
+        });
+
+        y += 2;
+        doc.line(20, y, pageW - 20, y);
+        y += 6;
+        doc.setFont("helvetica", "bold");
+        doc.text("Gesamtkosten Mieter", 20, y);
+        doc.text(fmtDE(tenantTotal), pageW - 20, y, { align: "right" });
+        y += 8;
+
+        // Advance payments
+        doc.setFont("helvetica", "normal");
+        doc.text("Geleistete Vorauszahlungen", 20, y);
+        doc.text(fmtDE(t.advancePaid), pageW - 20, y, { align: "right" });
+        y += 8;
+
+        // Balance
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        if (t.balance >= 0) {
+          doc.setTextColor(22, 163, 74); // green
+          doc.text(`Guthaben: ${fmtDE(t.balance)}`, 20, y);
+        } else {
+          doc.setTextColor(220, 38, 38); // red
+          doc.text(`Nachzahlung: ${fmtDE(Math.abs(t.balance))}`, 20, y);
+        }
+        doc.setTextColor(0);
+        y += 14;
       });
     }
 
-    // Footer
+    // Disclaimer
+    checkPage(20);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(120);
+    doc.text(
+      "Einspruchsfrist: Sie haben 12 Monate nach Zugang dieser Abrechnung Zeit, Einwände zu erheben (§ 556 Abs. 3 BGB).",
+      20, y, { maxWidth: pageW - 40 }
+    );
     y += 10;
-    doc.setFontSize(9);
-    doc.setTextColor(130);
-    doc.text(`Erstellt am ${new Date().toLocaleDateString("de-DE")} mit Dwello`, pageW / 2, y, { align: "center" });
 
-    doc.save(`Nebenkostenabrechnung_${selectedYear}.pdf`);
-  }, [selectedYear, selectedProperty, costs, totalCosts, tenantResults]);
+    // Footer
+    const docNr = `NK-${selectedYear}-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text(
+      `Erstellt mit dwello.pro · ${new Date().toLocaleDateString("de-DE")} · Dokument-Nr. ${docNr}`,
+      pageW / 2, pageH - 12, { align: "center" }
+    );
+
+    return doc.output("blob");
+  }, [selectedYear, selectedProperty, costs, totalCosts, tenantResults, totalSqm, totalUnits, userName]);
+
+  const handlePdfExport = useCallback(async () => {
+    const blob = await generatePdfBlob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Nebenkostenabrechnung_${selectedYear}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [generatePdfBlob, selectedYear]);
+
+  // Save PDF to documents
+  const handleSaveToDocuments = useCallback(async () => {
+    if (!userId) return;
+    setSavingToDocuments(true);
+    try {
+      const blob = await generatePdfBlob();
+      const filename = `Nebenkostenabrechnung_${selectedYear}.pdf`;
+      const filePath = `${userId}/${filename}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("documents")
+        .upload(filePath, blob, { contentType: "application/pdf", upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from("documents").getPublicUrl(filePath);
+
+      const { error: dbError } = await supabase.from("documents").insert({
+        user_id: userId,
+        filename,
+        file_url: urlData.publicUrl,
+        file_size: blob.size,
+        category: "Abrechnung",
+        property_id: selectedPropertyId || null,
+      });
+      if (dbError) throw dbError;
+
+      setSavedToDocuments(true);
+      toast.success("Abrechnung wurde in Dokumenten gespeichert.");
+    } catch (e: any) {
+      console.error("Save to documents error:", e);
+      toast.error("Fehler beim Speichern: " + (e.message || "Unbekannter Fehler"));
+    } finally {
+      setSavingToDocuments(false);
+    }
+  }, [generatePdfBlob, selectedYear, userId, selectedPropertyId]);
+
+  // Send to tenants
+  const tenantEmails = tenantResults.filter(t => t.email).map(t => ({ name: t.tenantName, email: t.email! }));
+
+  const handleSendToTenants = async () => {
+    setSendingEmail(true);
+    try {
+      // For each tenant with email, invoke the transactional email function
+      for (const tenant of tenantEmails) {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "utility-billing-notification",
+            recipientEmail: tenant.email,
+            idempotencyKey: `utility-billing-${existingPeriodId}-${tenant.email}`,
+            templateData: {
+              tenantName: tenant.name,
+              year: selectedYear,
+              propertyAddress: selectedProperty
+                ? `${selectedProperty.address}, ${selectedProperty.zipCode} ${selectedProperty.city}`
+                : "",
+              landlordName: userName,
+            },
+          },
+        });
+      }
+      toast.success(`Abrechnung wurde an ${tenantEmails.length} Mieter gesendet.`);
+      setSendModalOpen(false);
+    } catch (e: any) {
+      console.error("Send email error:", e);
+      toast.error("Fehler beim Senden: " + (e.message || "Unbekannter Fehler"));
+    } finally {
+      setSendingEmail(false);
+    }
+  };
 
   const years = [...new Set([...Array.from({ length: 3 }, (_, i) => String(currentYear - i)), String(currentYear)])].sort((a, b) => b.localeCompare(a));
 
@@ -353,7 +533,7 @@ const UtilityBillingPage = () => {
           <h1 className="text-2xl font-heading font-bold text-foreground">Nebenkostenabrechnung</h1>
           <p className="text-sm text-muted-foreground mt-1">Erstellen und verwalten Sie Ihre Betriebskostenabrechnungen</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <Select value={selectedYear} onValueChange={setSelectedYear}>
             <SelectTrigger className="w-28">
               <SelectValue />
@@ -382,16 +562,76 @@ const UtilityBillingPage = () => {
       </div>
 
       {finalized && (
-        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center space-y-3">
+        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center space-y-4">
           <Receipt className="h-8 w-8 text-primary mx-auto" />
           <p className="text-lg font-heading font-bold text-foreground">Abrechnung {selectedYear} finalisiert</p>
           <p className="text-sm text-muted-foreground">Die Nebenkostenabrechnung wurde gespeichert.</p>
-          <Button onClick={handlePdfExport} variant="outline" className="mt-2">
-            <Download className="h-4 w-4 mr-2" />
-            Als PDF herunterladen
-          </Button>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Button onClick={handlePdfExport} variant="outline" className="rounded-xl h-11">
+              <Download className="h-4 w-4 mr-2" />
+              Als PDF herunterladen
+            </Button>
+            {tenantEmails.length > 0 && (
+              <Button
+                onClick={() => setSendModalOpen(true)}
+                className="rounded-xl h-11 bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                An Mieter senden
+              </Button>
+            )}
+            {!savedToDocuments ? (
+              <Button
+                onClick={handleSaveToDocuments}
+                variant="outline"
+                disabled={savingToDocuments}
+                className="rounded-xl h-11"
+              >
+                <FolderDown className="h-4 w-4 mr-2" />
+                {savingToDocuments ? "Wird gespeichert…" : "Auch in Dokumenten speichern"}
+              </Button>
+            ) : (
+              <span className="text-sm text-green-600 font-medium">✓ In Dokumenten gespeichert</span>
+            )}
+          </div>
         </div>
       )}
+
+      {/* Send to tenants modal */}
+      <Dialog open={sendModalOpen} onOpenChange={setSendModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Abrechnung an Mieter senden</DialogTitle>
+            <DialogDescription>
+              Die Nebenkostenabrechnung {selectedYear} wird per E-Mail an folgende Mieter gesendet:
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            {tenantEmails.map(t => (
+              <div key={t.email} className="flex items-center gap-2 text-sm">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">{t.name}</span>
+                <span className="text-muted-foreground">— {t.email}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Die Mieter erhalten eine E-Mail-Benachrichtigung über die fertiggestellte Abrechnung.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSendModalOpen(false)} disabled={sendingEmail}>
+              Abbrechen
+            </Button>
+            <Button
+              onClick={handleSendToTenants}
+              disabled={sendingEmail}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              {sendingEmail ? "Wird gesendet…" : "Jetzt senden"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {!selectedPropertyId && (
         <EmptyState
