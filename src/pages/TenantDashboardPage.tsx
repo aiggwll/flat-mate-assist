@@ -253,15 +253,24 @@ const TenantDashboardPage = () => {
             <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
               <Building2 className="h-6 w-6" />
             </div>
-            <div>
-              <h2 className="text-lg font-heading font-bold text-foreground">{propertyAddress}</h2>
-              <p className="text-sm text-muted-foreground">
-                Wohnung {unitLabel}
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Vermieter: <span className="font-semibold text-foreground">{ownerName}</span>
-              </p>
-            </div>
+            {hasProperty ? (
+              <div>
+                <h2 className="text-lg font-heading font-bold text-foreground">{propertyAddress}</h2>
+                <p className="text-sm text-muted-foreground">
+                  Wohnung {unitLabel}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Vermieter: <span className="font-semibold text-foreground">{ownerName}</span>
+                </p>
+              </div>
+            ) : (
+              <div>
+                <h2 className="text-lg font-heading font-bold text-foreground">Wohnung wird zugewiesen</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Ihre Wohnung wird gerade zugewiesen — bitte kontaktieren Sie Ihren Vermieter.
+                </p>
+              </div>
+            )}
           </div>
         </Card>
 
