@@ -86,28 +86,19 @@ const TenantDashboardPage = () => {
           setUnitLabel(unit);
           setHasProperty(true);
 
-          // If owner_name is missing or placeholder, look up from properties table
-          if (!owner || owner === "Vermieter") {
+          // If owner_name is missing or placeholder, look up from landlord profiles
+          if (!owner || owner === "Vermieter" || owner === "Ihr Vermieter") {
             try {
-              // property_id stores "address, city" — match against properties
-              const { data: props } = await supabase
-                .from("properties")
-                .select("user_id, address, city");
-              if (props) {
-                const match = props.find((p: any) =>
-                  addr === `${p.address}, ${p.city}` || addr.includes(p.address)
-                );
-                if (match) {
-                  const { data: landlordProfile } = await supabase
-                    .from("profiles")
-                    .select("name")
-                    .eq("user_id", match.user_id)
-                    .single();
-                  if (landlordProfile?.name) {
-                    owner = landlordProfile.name;
-                    // Persist so we don't need to look up again
-                    await supabase.from("profiles").update({ owner_name: owner }).eq("user_id", userId);
-                  }
+              // Find landlord profiles (role=landlord) whose name we can read
+              const { data: landlordProfiles } = await supabase
+                .from("profiles")
+                .select("name, user_id")
+                .eq("role", "landlord");
+              if (landlordProfiles && landlordProfiles.length > 0) {
+                // If only one landlord exists, use that name
+                if (landlordProfiles.length === 1 && landlordProfiles[0].name) {
+                  owner = landlordProfiles[0].name;
+                  await supabase.from("profiles").update({ owner_name: owner }).eq("user_id", userId);
                 }
               }
             } catch {
