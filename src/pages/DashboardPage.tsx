@@ -122,6 +122,33 @@ const DashboardPage = () => {
     checkDocuments();
   }, [userId]);
 
+  const handleResendInvitation = async (inv: InvitationInfo) => {
+    setResending(inv.id);
+    try {
+      await supabase
+        .from("invitations" as any)
+        .update({ invited_at: new Date().toISOString() } as any)
+        .eq("id", inv.id);
+      // Refresh invitations
+      const { data } = await supabase
+        .from("invitations" as any)
+        .select("id, email, tenant_name, property_id, unit_id, status, invited_at")
+        .eq("invited_by", userId!)
+        .order("invited_at", { ascending: false });
+      if (data) {
+        setInvitations((data as any[]).map(i => ({
+          id: i.id, email: i.email, tenant_name: i.tenant_name,
+          property_id: i.property_id, unit_id: i.unit_id,
+          status: i.status, invited_at: i.invited_at,
+        })));
+      }
+      toast.success(`Einladung wurde erneut an ${inv.email} versendet.`);
+    } catch {
+      toast.error("Die Einladung konnte nicht erneut versendet werden.");
+    }
+    setResending(null);
+  };
+
   const propertyCount = userProperties.length;
   const totalUnits = userProperties.reduce((sum, p) => sum + p.units, 0);
   const unreadMessages = messages.filter(m => m.to === displayName && !m.read);
