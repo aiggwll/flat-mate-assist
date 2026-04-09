@@ -50,6 +50,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     () => localStorage.getItem("dwello_setup_complete") === "true"
   );
   const dataLoadedForUser = useRef<string | null>(null);
+  const latestAuthTimestamp = useRef<number>(0);
 
   const setSalutation = (s: "du" | "sie") => {
     setSalutationState(s);
