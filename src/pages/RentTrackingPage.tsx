@@ -415,45 +415,34 @@ const RentTrackingPage = () => {
             </div>
             <div>
               <Label>Fälligkeitsdatum *</Label>
-              <div className="flex gap-2">
-                <Select
-                  value={String(getMonth(new Date(form.due_date)))}
-                  onValueChange={(m) => {
-                    const d = new Date(form.due_date);
-                    const updated = startOfMonth(setMonth(d, parseInt(m)));
-                    setForm(f => ({ ...f, due_date: format(updated, "yyyy-MM-dd") }));
-                  }}
-                >
-                  <SelectTrigger className={`flex-1 ${errors.due_date ? "border-destructive" : ""}`}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"].map((name, i) => (
-                      <SelectItem key={i} value={String(i)}>{name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={String(getYear(new Date(form.due_date)))}
-                  onValueChange={(y) => {
-                    const d = new Date(form.due_date);
-                    const updated = startOfMonth(setYear(d, parseInt(y)));
-                    setForm(f => ({ ...f, due_date: format(updated, "yyyy-MM-dd") }));
-                  }}
-                >
-                  <SelectTrigger className={`w-24 ${errors.due_date ? "border-destructive" : ""}`}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 5 }, (_, i) => getYear(new Date()) + i - 1).map(y => (
-                      <SelectItem key={y} value={String(y)}>{y}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Fällig am: {format(new Date(form.due_date), "dd. MMMM yyyy", { locale: de })}
-              </p>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !form.due_date && "text-muted-foreground",
+                      errors.due_date && "border-destructive"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {form.due_date
+                      ? format(new Date(form.due_date), "dd. MMMM yyyy", { locale: de })
+                      : "Datum wählen"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={form.due_date ? new Date(form.due_date) : undefined}
+                    onSelect={(date) => {
+                      if (date) setForm(f => ({ ...f, due_date: format(date, "yyyy-MM-dd") }));
+                    }}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
               {errors.due_date && <p className="text-xs text-destructive mt-1">{errors.due_date}</p>}
             </div>
             <div>
