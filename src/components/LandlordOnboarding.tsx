@@ -18,8 +18,14 @@ const LandlordOnboarding = ({ open, onComplete }: LandlordOnboardingProps) => {
   const { salutation } = useUser();
   const isSie = salutation === "sie";
 
-  const finish = () => {
+  const finish = async () => {
     localStorage.setItem("onboarding_complete_owner", "true");
+    if (user) {
+      await supabase
+        .from("profiles")
+        .update({ setup_wizard_complete: true } as any)
+        .eq("user_id", user.id);
+    }
     onComplete();
     toast.success("Ihr Konto ist eingerichtet! 🎉");
   };
