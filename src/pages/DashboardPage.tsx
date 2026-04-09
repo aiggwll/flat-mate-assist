@@ -315,23 +315,59 @@ const DashboardPage = () => {
                       )}
                     </div>
 
-                    <div className="pt-3 border-t">
-                      {propertyTenants.length === 0 ? (
-                        <InviteTenantDialog />
-                      ) : (
-                        <div className="space-y-1.5">
-                          {propertyTenants.map((t, i) => (
-                            <div key={i} className="flex items-center gap-2">
-                              <div className="h-6 w-6 rounded-full bg-primary/8 flex items-center justify-center">
-                                <span className="text-[9px] font-bold text-primary">
-                                  {t.name.split(" ").map(n => n[0]).join("")}
-                                </span>
-                              </div>
-                              <p className="text-sm text-foreground">{t.name}</p>
-                              <p className="text-xs text-muted-foreground">· {t.unit_id}</p>
-                            </div>
-                          ))}
+                    <div className="pt-3 border-t space-y-2">
+                      {/* Registered tenants */}
+                      {propertyTenants.map((t, i) => (
+                        <div key={`t-${i}`} className="flex items-center gap-2">
+                          <div className="h-6 w-6 rounded-full bg-primary/8 flex items-center justify-center">
+                            <span className="text-[9px] font-bold text-primary">
+                              {t.name.split(" ").map(n => n[0]).join("")}
+                            </span>
+                          </div>
+                          <p className="text-sm text-foreground">{t.name}</p>
+                          <Badge variant="outline" className="text-[10px] bg-primary/5 text-primary border-primary/20 gap-1">
+                            <CheckCircle2 className="h-3 w-3" /> Registriert
+                          </Badge>
                         </div>
+                      ))}
+
+                      {/* Pending invitations */}
+                      {pendingInvitations.map((inv) => (
+                        <div key={`inv-${inv.id}`} className="flex items-center gap-2 flex-wrap">
+                          <div className="h-6 w-6 rounded-full bg-amber-500/10 flex items-center justify-center">
+                            <Clock className="h-3 w-3 text-amber-600" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm text-foreground">{inv.tenant_name || inv.email}</p>
+                            <p className="text-[11px] text-muted-foreground">
+                              Einladung versendet am {new Date(inv.invited_at).toLocaleDateString("de-DE")}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground"
+                            disabled={resending === inv.id}
+                            onClick={() => handleResendInvitation(inv)}
+                          >
+                            <RotateCcw className={`h-3 w-3 ${resending === inv.id ? "animate-spin" : ""}`} />
+                            Erneut senden
+                          </Button>
+                        </div>
+                      ))}
+
+                      {/* Show invite button if no tenants or invitations */}
+                      {propertyTenants.length === 0 && pendingInvitations.length === 0 && (
+                        <InviteTenantDialog />
+                      )}
+
+                      {/* Also show invite if there are some but space for more */}
+                      {(propertyTenants.length > 0 || pendingInvitations.length > 0) && (
+                        <InviteTenantDialog trigger={
+                          <Button variant="ghost" size="sm" className="text-xs gap-1 text-primary h-7 mt-1">
+                            <UserPlus className="h-3 w-3" /> Weiteren Mieter einladen
+                          </Button>
+                        } />
                       )}
                     </div>
                   </div>
