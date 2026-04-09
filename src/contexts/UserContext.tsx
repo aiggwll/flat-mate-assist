@@ -50,14 +50,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     () => localStorage.getItem("dwello_setup_complete") === "true"
   );
   const dataLoadedForUser = useRef<string | null>(null);
+  const latestAuthTimestamp = useRef<number>(0);
 
   const setSalutation = (s: "du" | "sie") => {
     setSalutationState(s);
     localStorage.setItem("dwello_salutation", s);
   };
 
-  const loadUserData = async (currentUser: User) => {
-    // Avoid reloading if we already loaded for this user
+  const loadUserData = async (currentUser: User, timestamp: number) => {
+    // Skip if a newer auth event has already fired
+    if (timestamp < latestAuthTimestamp.current) return;
+    // Skip if already loaded for this exact user
     if (dataLoadedForUser.current === currentUser.id) return;
     dataLoadedForUser.current = currentUser.id;
 
@@ -138,15 +141,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    // 1. Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const handleAuthUser = (currentUser: User | null) => {
       if (!mounted) return;
-      const currentUser = session?.user ?? null;
+      const ts = Date.now();
+      latestAuthTimestamp.current = ts;
       setUser(currentUser);
 
       if (currentUser) {
+        // Reset ref if user changed so data reloads
+        if (dataLoadedForUser.current !== currentUser.id) {
+          dataLoadedForUser.current = null;
+        }
         sessionStorage.setItem("activeSession", "true");
-        loadUserData(currentUser);
+        loadUserData(currentUser, ts);
       } else {
         dataLoadedForUser.current = null;
         setUserName("");
@@ -158,12 +165,16 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setSetupWizardComplete(false);
       }
       setIsLoading(false);
+    };
+
+    // 1. Set up auth state listener FIRST — this is the source of truth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleAuthUser(session?.user ?? null);
     });
 
     // 2. Check "remember me" preference
     const rememberMe = localStorage.getItem("rememberMe");
     if (rememberMe === "false" && !sessionStorage.getItem("activeSession")) {
-      // User chose not to stay logged in and browser was closed
       supabase.auth.signOut().then(() => {
         if (mounted) {
           localStorage.removeItem("rememberMe");
@@ -171,17 +182,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         }
       });
     } else {
-      // 3. Restore existing session
+      // 3. Bootstrap: restore session once (onAuthStateChange may not fire for existing sessions)
       supabase.auth.getSession().then(({ data: { session } }) => {
-        if (!mounted) return;
-        if (session?.user) {
-          setUser(session.user);
-          sessionStorage.setItem("activeSession", "true");
-          loadUserData(session.user);
-          setIsLoading(false);
-        } else {
-          setIsLoading(false);
-        }
+        handleAuthUser(session?.user ?? null);
       });
     }
 
