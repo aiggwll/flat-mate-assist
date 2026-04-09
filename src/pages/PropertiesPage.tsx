@@ -149,6 +149,14 @@ const PropertiesPage = () => {
                 <div className="flex items-center gap-3 pt-3 border-t">
                   <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/properties/${p.id}`)}>Details</Button>
                   <InviteTenantDialog />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => setDeleteTarget({ id: p.id, address: p.address })}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
