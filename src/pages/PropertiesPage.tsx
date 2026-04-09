@@ -103,7 +103,7 @@ const PropertiesPage = () => {
                   )}
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Layers className="h-3.5 w-3.5 shrink-0 text-primary/60" />
-                    <span>{p.units ?? 1} Wohnungen</span>
+                    <span>{(p.units ?? 1) === 1 ? "1 Wohnung" : `${p.units ?? 1} Wohnungen`}</span>
                   </div>
                 </div>
 
