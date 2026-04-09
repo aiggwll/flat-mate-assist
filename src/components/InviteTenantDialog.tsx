@@ -3,14 +3,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Copy, Check, Mail } from "lucide-react";
-
-import { toast } from "@/components/ui/sonner";
+import { UserPlus, Copy, Check, Mail, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useUser } from "@/contexts/UserContext";
+import { supabase } from "@/integrations/supabase/client";
 
-const InviteTenantDialog = ({ onSuccess, trigger }: { onSuccess?: () => void; trigger?: React.ReactNode } = {}) => {
-  const { userProperties, userName } = useUser();
-  const ownerDisplayName = userName || "Max Kaufmann";
+interface InviteTenantDialogProps {
+  onSuccess?: () => void;
+  trigger?: React.ReactNode;
+}
+
+const InviteTenantDialog = ({ onSuccess, trigger }: InviteTenantDialogProps) => {
+  const { userProperties, userName, userId } = useUser();
+  const ownerDisplayName = userName || "Vermieter";
   const [open, setOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
@@ -18,45 +23,80 @@ const InviteTenantDialog = ({ onSuccess, trigger }: { onSuccess?: () => void; tr
   const [tenantEmail, setTenantEmail] = useState("");
   const [copied, setCopied] = useState(false);
   const [linkGenerated, setLinkGenerated] = useState(false);
+  const [sending, setSending] = useState(false);
 
-  const propertyList = userProperties.map(p => ({ id: p.id, label: `${p.address}, ${p.city}`, units: Array.from({ length: p.units }, (_, i) => ({ id: `${p.id}-u${i + 1}`, number: `Whg. ${i + 1}`, size: 0, rent: 0, hasTenant: false })) }));
+  const propertyList = userProperties.map(p => ({
+    id: p.id,
+    label: `${p.address}, ${p.city}`,
+    units: Array.from({ length: p.units }, (_, i) => ({
+      id: `${p.id}-u${i + 1}`,
+      number: `Whg. ${i + 1}`,
+      size: 0,
+      rent: 0,
+      hasTenant: false,
+    })),
+  }));
 
   const selectedProp = propertyList.find(p => p.id === selectedProperty);
   const availableUnits = selectedProp?.units ?? [];
-
   const selectedUnitObj = selectedProp?.units.find(u => u.id === selectedUnit);
 
   const inviteLink = linkGenerated
-    ? `${window.location.origin}/?role=tenant&property=${encodeURIComponent(selectedProp?.label || "")}&unit=${encodeURIComponent(selectedUnitObj?.number || "")}&owner=${encodeURIComponent(ownerDisplayName)}`
+    ? `${window.location.origin}/register?role=tenant&property=${encodeURIComponent(selectedProp?.label || "")}&unit=${encodeURIComponent(selectedUnitObj?.number || "")}&owner=${encodeURIComponent(ownerDisplayName)}&property_id=${encodeURIComponent(selectedProperty)}`
     : "";
 
-  const handleGenerateLink = () => {
+  const saveInvitation = async (link: string) => {
+    if (!userId) return;
+    try {
+      await supabase.from("invitations" as any).insert({
+        email: tenantEmail.trim(),
+        tenant_name: tenantName.trim(),
+        property_id: selectedProperty,
+        unit_id: selectedUnit,
+        invited_by: userId,
+        invite_link: link,
+        status: "pending",
+      } as any);
+    } catch (e) {
+      console.error("Error saving invitation:", e);
+    }
+  };
+
+  const handleGenerateLink = async () => {
     if (!selectedProperty || !selectedUnit) {
-      toast("Bitte wählen Sie eine Immobilie und Wohnung aus.");
+      toast.error("Bitte wählen Sie eine Immobilie und Wohnung aus.");
       return;
     }
     if (!tenantName.trim()) {
-      toast("Bitte geben Sie den Namen des Mieters ein.");
+      toast.error("Bitte geben Sie den Namen des Mieters ein.");
       return;
     }
     if (!tenantEmail.trim()) {
-      toast("Bitte geben Sie die E-Mail-Adresse des Mieters ein.");
+      toast.error("Bitte geben Sie die E-Mail-Adresse des Mieters ein.");
       return;
     }
+    setSending(true);
     setLinkGenerated(true);
+
+    // Build the link synchronously since it depends on state that's already set
+    const link = `${window.location.origin}/register?role=tenant&property=${encodeURIComponent(selectedProp?.label || "")}&unit=${encodeURIComponent(selectedUnitObj?.number || "")}&owner=${encodeURIComponent(ownerDisplayName)}&property_id=${encodeURIComponent(selectedProperty)}`;
+
+    await saveInvitation(link);
+    setSending(false);
+    toast.success(`Einladung wurde erfolgreich an ${tenantEmail.trim()} versendet.`);
     onSuccess?.();
   };
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(inviteLink);
     setCopied(true);
-    toast("Einladungslink kopiert!");
+    toast.success("Einladungslink kopiert!");
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleSendEmail = () => {
     if (!tenantEmail) {
-      toast("Bitte geben Sie eine E-Mail-Adresse ein.");
+      toast.error("Bitte geben Sie eine E-Mail-Adresse ein.");
       return;
     }
     const subject = encodeURIComponent("Einladung zu Dwello");
@@ -64,7 +104,7 @@ const InviteTenantDialog = ({ onSuccess, trigger }: { onSuccess?: () => void; tr
       `Hallo ${tenantName},\n\nSie wurden eingeladen, Dwello als Mieter zu nutzen.\n\nBitte registrieren Sie sich über folgenden Link:\n${inviteLink}\n\nMit freundlichen Grüßen`
     );
     window.open(`mailto:${tenantEmail}?subject=${subject}&body=${body}`);
-    toast("E-Mail-Client wird geöffnet...");
+    toast.success(`E-Mail-Einladung an ${tenantEmail} wird vorbereitet...`);
   };
 
   const handleReset = () => {
@@ -74,6 +114,7 @@ const InviteTenantDialog = ({ onSuccess, trigger }: { onSuccess?: () => void; tr
     setTenantEmail("");
     setLinkGenerated(false);
     setCopied(false);
+    setSending(false);
   };
 
   return (
@@ -116,7 +157,9 @@ const InviteTenantDialog = ({ onSuccess, trigger }: { onSuccess?: () => void; tr
             >
               <option value="">Wohnung wählen...</option>
               {availableUnits.map(u => (
-                <option key={u.id} value={u.id}>{u.number}{u.size ? ` – ${u.size} m²` : ""}{u.rent ? ` – ${u.rent} €` : ""}</option>
+                <option key={u.id} value={u.id}>
+                  {u.number}{u.size ? ` – ${u.size} m²` : ""}{u.rent ? ` – ${u.rent} €` : ""}
+                </option>
               ))}
             </select>
             {selectedProperty && availableUnits.length === 0 && (
@@ -144,8 +187,19 @@ const InviteTenantDialog = ({ onSuccess, trigger }: { onSuccess?: () => void; tr
           </div>
 
           {!linkGenerated ? (
-            <Button onClick={handleGenerateLink} className="w-full gap-2" disabled={!selectedProperty || !selectedUnit || !tenantName.trim() || !tenantEmail.trim()}>
-              Einladungslink erstellen
+            <Button
+              onClick={handleGenerateLink}
+              className="w-full gap-2"
+              disabled={!selectedProperty || !selectedUnit || !tenantName.trim() || !tenantEmail.trim() || sending}
+            >
+              {sending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Wird erstellt…
+                </>
+              ) : (
+                "Einladungslink erstellen"
+              )}
             </Button>
           ) : (
             <div className="space-y-4">
@@ -154,7 +208,7 @@ const InviteTenantDialog = ({ onSuccess, trigger }: { onSuccess?: () => void; tr
                 <div className="flex gap-2">
                   <Input value={inviteLink} readOnly className="text-xs" />
                   <Button variant="outline" size="icon" onClick={handleCopy}>
-                    {copied ? <Check className="h-4 w-4 text-accent" /> : <Copy className="h-4 w-4" />}
+                    {copied ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
