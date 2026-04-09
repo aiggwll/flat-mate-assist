@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
-import { format, isBefore, startOfMonth, addMonths, setMonth, setYear, getMonth, getYear } from "date-fns";
+import { format, isBefore, parse } from "date-fns";
 import { de } from "date-fns/locale";
 import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro, MoreVertical, Undo2, Trash2, Pencil } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
