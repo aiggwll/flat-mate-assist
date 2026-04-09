@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Building2, Users, MessageSquare, AlertTriangle, ArrowRight, MapPin, UserPlus } from "lucide-react";
+import { Building2, Users, MessageSquare, AlertTriangle, ArrowRight, MapPin, UserPlus, Clock, CheckCircle2, RotateCcw } from "lucide-react";
 import WelcomeSlider from "@/components/WelcomeSlider";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
 import LandlordOnboarding from "@/components/LandlordOnboarding";
@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/contexts/UserContext";
 import { useMessages } from "@/contexts/MessagesContext";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 interface TenantInfo {
