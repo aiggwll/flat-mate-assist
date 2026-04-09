@@ -7,7 +7,7 @@ import { de } from "date-fns/locale";
 import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro, MoreVertical, Undo2, Trash2, Pencil, CalendarIcon } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { sal } from "@/lib/salutation";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -292,15 +292,15 @@ const RentTrackingPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-card rounded-xl border p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">Erwartet (Warmmiete)</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{totalExpected.toLocaleString("de-DE")} €</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(totalExpected)}</p>
         </div>
         <div className="bg-card rounded-xl border p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">Erhalten</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">{totalPaid.toLocaleString("de-DE")} €</p>
+          <p className="text-2xl font-bold text-green-600 mt-1">{formatCurrency(totalPaid)}</p>
         </div>
         <div className="bg-card rounded-xl border p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">Offen</p>
-          <p className="text-2xl font-bold text-red-600 mt-1">{totalOpen.toLocaleString("de-DE")} €</p>
+          <p className="text-2xl font-bold text-red-600 mt-1">{formatCurrency(totalOpen)}</p>
         </div>
       </div>
 
@@ -338,7 +338,7 @@ const RentTrackingPage = () => {
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    {p.unit_id} · Kalt: {p.cold_rent.toLocaleString("de-DE")} € + NK: {p.nebenkosten.toLocaleString("de-DE")} € = {warmmiete.toLocaleString("de-DE")} € gesamt
+                    {p.unit_id} · Kalt: {formatCurrency(p.cold_rent)} + NK: {formatCurrency(p.nebenkosten)} = {formatCurrency(warmmiete)} gesamt
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Fällig: {format(new Date(p.due_date), "dd. MMM yyyy", { locale: de })}
@@ -347,7 +347,7 @@ const RentTrackingPage = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-bold text-foreground whitespace-nowrap">
-                    {warmmiete.toLocaleString("de-DE")} €
+                    {formatCurrency(warmmiete)}
                   </span>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -462,7 +462,7 @@ const RentTrackingPage = () => {
             <div>
               <Label>Warmmiete (Gesamt)</Label>
               <div className="h-9 px-3 flex items-center rounded-md border bg-muted/50 text-sm font-medium text-foreground">
-                {computedWarmmiete > 0 ? `${computedWarmmiete.toLocaleString("de-DE")} €` : "—"}
+                {computedWarmmiete > 0 ? `${formatCurrency(computedWarmmiete)}` : "—"}
               </div>
               <p className="text-xs text-muted-foreground mt-1">Kaltmiete + Nebenkosten (automatisch berechnet)</p>
             </div>
