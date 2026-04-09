@@ -338,7 +338,7 @@ const RentTrackingPage = () => {
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    {p.unit_id} · Kalt: {p.cold_rent.toLocaleString("de-DE")} € + NK: {p.nebenkosten.toLocaleString("de-DE")} € = {warmmiete.toLocaleString("de-DE")} € gesamt
+                    {p.unit_id} · Kalt: {formatCurrency(p.cold_rent)} + NK: {formatCurrency(p.nebenkosten)} = {formatCurrency(warmmiete)} gesamt
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Fällig: {format(new Date(p.due_date), "dd. MMM yyyy", { locale: de })}

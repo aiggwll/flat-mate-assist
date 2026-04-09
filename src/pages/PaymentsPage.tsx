@@ -25,11 +25,11 @@ const PaymentsPage = () => {
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-card rounded-xl border p-3 md:p-4">
           <p className="text-[11px] text-muted-foreground">Erwartet</p>
-          <p className="text-base md:text-lg font-bold text-foreground mt-0.5">{totalExpected.toLocaleString("de-DE")} €</p>
+          <p className="text-base md:text-lg font-bold text-foreground mt-0.5">{formatCurrency(totalExpected)}</p>
         </div>
         <div className="bg-card rounded-xl border p-3 md:p-4">
           <p className="text-[11px] text-muted-foreground">Erhalten</p>
-          <p className="text-base md:text-lg font-bold text-accent mt-0.5">{totalReceived.toLocaleString("de-DE")} €</p>
+          <p className="text-base md:text-lg font-bold text-accent mt-0.5">{formatCurrency(totalReceived)}</p>
         </div>
         <div className="bg-card rounded-xl border p-3 md:p-4">
           <p className="text-[11px] text-muted-foreground">Offen</p>
@@ -54,7 +54,7 @@ const PaymentsPage = () => {
               <tr key={p.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
                 <td className="px-5 py-3.5 text-sm font-medium text-foreground">{p.tenantName}</td>
                 <td className="px-5 py-3.5 text-sm text-muted-foreground">{p.propertyAddress} · {p.unitNumber}</td>
-                <td className="px-5 py-3.5 text-sm font-medium text-foreground text-right">{p.amount.toLocaleString("de-DE")} €</td>
+                <td className="px-5 py-3.5 text-sm font-medium text-foreground text-right">{formatCurrency(p.amount)}</td>
                 <td className="px-5 py-3.5 text-center">
                   {p.paid ? (
                     <span className="inline-flex items-center gap-1 text-xs font-medium text-accent">
@@ -91,7 +91,7 @@ const PaymentsPage = () => {
                 <p className="text-xs text-muted-foreground mt-0.5 truncate">{p.propertyAddress} · {p.unitNumber}</p>
               </div>
               <div className="text-right ml-3">
-                <p className="text-sm font-bold text-foreground">{p.amount.toLocaleString("de-DE")} €</p>
+                <p className="text-sm font-bold text-foreground">{formatCurrency(p.amount)}</p>
                 {p.paid ? (
                   <span className="inline-flex items-center gap-1 text-[11px] font-medium text-accent mt-0.5">
                     <CheckCircle2 className="h-3 w-3" />
