@@ -2,12 +2,15 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
-import { format, isBefore, startOfMonth, addMonths, setMonth, setYear, getMonth, getYear } from "date-fns";
+import { format, isBefore, parse } from "date-fns";
 import { de } from "date-fns/locale";
-import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro, MoreVertical, Undo2, Trash2, Pencil } from "lucide-react";
+import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro, MoreVertical, Undo2, Trash2, Pencil, CalendarIcon } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { sal } from "@/lib/salutation";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -61,7 +64,7 @@ const getStatusInfo = (paidAt: string | null, dueDate: string) => {
   return { label: "Ausstehend", color: "text-yellow-600 bg-yellow-50 border-yellow-200", icon: Clock };
 };
 
-const defaultDueDate = format(startOfMonth(addMonths(new Date(), 1)), "yyyy-MM-dd");
+const defaultDueDate = format(new Date(), "yyyy-MM-dd");
 
 const rentSchema = z.object({
   unit_id: z.string().min(1, "Bitte Immobilie & Wohnung auswählen"),
@@ -415,45 +418,34 @@ const RentTrackingPage = () => {
             </div>
             <div>
               <Label>Fälligkeitsdatum *</Label>
-              <div className="flex gap-2">
-                <Select
-                  value={String(getMonth(new Date(form.due_date)))}
-                  onValueChange={(m) => {
-                    const d = new Date(form.due_date);
-                    const updated = startOfMonth(setMonth(d, parseInt(m)));
-                    setForm(f => ({ ...f, due_date: format(updated, "yyyy-MM-dd") }));
-                  }}
-                >
-                  <SelectTrigger className={`flex-1 ${errors.due_date ? "border-destructive" : ""}`}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"].map((name, i) => (
-                      <SelectItem key={i} value={String(i)}>{name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={String(getYear(new Date(form.due_date)))}
-                  onValueChange={(y) => {
-                    const d = new Date(form.due_date);
-                    const updated = startOfMonth(setYear(d, parseInt(y)));
-                    setForm(f => ({ ...f, due_date: format(updated, "yyyy-MM-dd") }));
-                  }}
-                >
-                  <SelectTrigger className={`w-24 ${errors.due_date ? "border-destructive" : ""}`}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 5 }, (_, i) => getYear(new Date()) + i - 1).map(y => (
-                      <SelectItem key={y} value={String(y)}>{y}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Fällig am: {format(new Date(form.due_date), "dd. MMMM yyyy", { locale: de })}
-              </p>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !form.due_date && "text-muted-foreground",
+                      errors.due_date && "border-destructive"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {form.due_date
+                      ? format(new Date(form.due_date), "dd. MMMM yyyy", { locale: de })
+                      : "Datum wählen"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={form.due_date ? new Date(form.due_date) : undefined}
+                    onSelect={(date) => {
+                      if (date) setForm(f => ({ ...f, due_date: format(date, "yyyy-MM-dd") }));
+                    }}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
               {errors.due_date && <p className="text-xs text-destructive mt-1">{errors.due_date}</p>}
             </div>
             <div>
