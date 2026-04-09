@@ -7,6 +7,7 @@ import { UserProvider } from "./contexts/UserContext";
 import { MessagesProvider } from "./contexts/MessagesContext";
 import AppLayout from "./components/AppLayout";
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import TenantDashboardPage from "./pages/TenantDashboardPage";
 import PropertiesPage from "./pages/PropertiesPage";
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/" element={<LoginPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route element={<AppLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/properties" element={<PropertiesPage />} />
