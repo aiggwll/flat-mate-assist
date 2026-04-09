@@ -3,6 +3,7 @@ import { Home, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useUser } from "@/contexts/UserContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TenantOnboardingProps {
   open: boolean;
@@ -11,11 +12,17 @@ interface TenantOnboardingProps {
 
 const TenantOnboarding = ({ open, onComplete }: TenantOnboardingProps) => {
   const [step, setStep] = useState(0);
-  const { salutation } = useUser();
+  const { salutation, user } = useUser();
   const isSie = salutation === "sie";
 
-  const finish = () => {
+  const finish = async () => {
     localStorage.setItem("onboarding_complete_tenant", "true");
+    if (user) {
+      await supabase
+        .from("profiles")
+        .update({ setup_wizard_complete: true } as any)
+        .eq("user_id", user.id);
+    }
     onComplete();
   };
 
