@@ -19,6 +19,16 @@ interface TenantInfo {
   unit_id: string;
 }
 
+interface InvitationInfo {
+  id: string;
+  email: string;
+  tenant_name: string;
+  property_id: string;
+  unit_id: string;
+  status: string;
+  invited_at: string;
+}
+
 const DashboardPage = () => {
   const { userName, userProperties, salutation, userId, setupWizardComplete, gender, lastName } = useUser();
   const { messages } = useMessages();
