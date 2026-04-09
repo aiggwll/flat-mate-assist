@@ -61,7 +61,7 @@ const categoryIcon: Record<string, string> = {
 };
 
 const DamagesPage = () => {
-  const { userProperties, salutation } = useUser();
+  const { userProperties, salutation, userRole } = useUser();
   const [damages, setDamages] = useState<DamageWithContext[]>(initialDamages);
   const [open, setOpen] = useState(false);
   const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([]);
@@ -130,7 +130,7 @@ const DamagesPage = () => {
       category: form.category as Damage["category"],
       status: "offen",
       reportedAt: new Date().toISOString().split("T")[0],
-      reportedBy: "Mieter",
+      reportedBy: userRole === "owner" ? "Vermieter" : "Mieter",
       propertyAddress: property?.address ?? "",
       unitNumber: form.unitId,
       photos: photos.map(p => p.preview),
