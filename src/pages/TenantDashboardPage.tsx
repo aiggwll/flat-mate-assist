@@ -58,19 +58,41 @@ const TenantDashboardPage = () => {
   const [unitLabel, setUnitLabel] = useState("");
   const [ownerName, setOwnerName] = useState("Vermieter");
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [hasProperty, setHasProperty] = useState(true);
 
   useEffect(() => {
     const loadProfile = async () => {
       if (!userId) return;
-      const { data } = await supabase
-        .from("profiles")
-        .select("property_id, unit_id, owner_name")
-        .eq("user_id", userId)
-        .single();
-      if (data) {
-        setPropertyAddress(data.property_id || searchParams.get("property") || "Keine Immobilie");
-        setUnitLabel(data.unit_id || searchParams.get("unit") || "");
-        setOwnerName((data as any).owner_name || searchParams.get("owner") || "Vermieter");
+      // Retry up to 3 times to handle race condition after registration
+      let attempts = 0;
+      let profileData: any = null;
+      while (attempts < 3) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("property_id, unit_id, owner_name")
+          .eq("user_id", userId)
+          .single();
+        profileData = data;
+        if (data?.property_id) break;
+        attempts++;
+        if (attempts < 3) await new Promise(r => setTimeout(r, 1000));
+      }
+      if (profileData) {
+        const addr = profileData.property_id || "";
+        const unit = profileData.unit_id || "";
+        const owner = (profileData as any).owner_name || "Vermieter";
+        if (addr) {
+          setPropertyAddress(addr);
+          setUnitLabel(unit);
+          setOwnerName(owner);
+          setHasProperty(true);
+        } else {
+          setPropertyAddress("");
+          setHasProperty(false);
+        }
+      } else {
+        setPropertyAddress("");
+        setHasProperty(false);
       }
       setProfileLoaded(true);
     };
@@ -212,7 +234,7 @@ const TenantDashboardPage = () => {
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-medium text-foreground">{tenantName}</p>
-              <p className="text-xs text-muted-foreground">{propertyAddress}, {unitLabel}</p>
+              {hasProperty && <p className="text-xs text-muted-foreground">{propertyAddress}{unitLabel ? `, ${unitLabel}` : ""}</p>}
             </div>
             <button
               onClick={async () => { await signOut(); navigate("/"); }}
@@ -231,15 +253,24 @@ const TenantDashboardPage = () => {
             <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
               <Building2 className="h-6 w-6" />
             </div>
-            <div>
-              <h2 className="text-lg font-heading font-bold text-foreground">{propertyAddress}</h2>
-              <p className="text-sm text-muted-foreground">
-                Wohnung {unitLabel}
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Vermieter: <span className="font-semibold text-foreground">{ownerName}</span>
-              </p>
-            </div>
+            {hasProperty ? (
+              <div>
+                <h2 className="text-lg font-heading font-bold text-foreground">{propertyAddress}</h2>
+                <p className="text-sm text-muted-foreground">
+                  Wohnung {unitLabel}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Vermieter: <span className="font-semibold text-foreground">{ownerName}</span>
+                </p>
+              </div>
+            ) : (
+              <div>
+                <h2 className="text-lg font-heading font-bold text-foreground">Wohnung wird zugewiesen</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Ihre Wohnung wird gerade zugewiesen — bitte kontaktieren Sie Ihren Vermieter.
+                </p>
+              </div>
+            )}
           </div>
         </Card>
 
