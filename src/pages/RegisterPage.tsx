@@ -1,0 +1,641 @@
+import { useState, useEffect } from "react";
+import DwelloLogo from "@/components/DwelloLogo";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Building2, Home, Plus, X, CheckCircle2, AlertCircle, Check, Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
+import { useUser } from "@/contexts/UserContext";
+import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
+
+type Role = "owner" | "tenant";
+
+interface PropertyForm {
+  address: string;
+  city: string;
+  zipCode: string;
+  yearBuilt: string;
+  units: string;
+}
+
+const emptyProperty: PropertyForm = { address: "", city: "", zipCode: "", yearBuilt: "", units: "1" };
+
+const RegisterPage = () => {
+  const [searchParams] = useSearchParams();
+  const inviteRole = searchParams.get("role") as Role | null;
+  const inviteProperty = searchParams.get("property");
+
+  const [step, setStep] = useState<"role" | "form" | "property-setup" | "tenant-info">(inviteRole ? "form" : "role");
+  const [selectedRole, setSelectedRole] = useState<Role | null>(inviteRole);
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [salutationField, setSalutationField] = useState<"du" | "sie">("sie");
+
+  // Property setup state
+  const [properties, setProperties] = useState<PropertyForm[]>([{ ...emptyProperty }]);
+
+  const navigate = useNavigate();
+  const { user: contextUser, setUserName, setUserProperties, setIsNewUser, setUserRole, setSalutation } = useUser();
+
+  const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const hasLen = password.length >= 8;
+  const hasUpper = /[A-Z]/.test(password);
+  const hasNum = /[0-9]/.test(password);
+  const passwordStrong = hasLen && hasUpper && hasNum;
+  const passwordsMatch = password === passwordConfirm;
+  const formValid = firstName.trim() && lastName.trim() && emailValid && passwordStrong && passwordsMatch;
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formValid || !selectedRole) return;
+    setLoading(true);
+    setPasswordError("");
+
+    try {
+      const role = selectedRole;
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name: fullName, role, salutation: salutationField },
+          emailRedirectTo: window.location.origin,
+        },
+      });
+
+      if (error) {
+        if (error.message.includes("already registered")) {
+          setPasswordError("Diese E-Mail-Adresse ist bereits registriert.");
+        } else {
+          setPasswordError(error.message);
+        }
+        setLoading(false);
+        return;
+      }
+
+      setUserName(fullName || (role === "owner" ? "Eigentümer" : "Mieter"));
+      setUserRole(role);
+      setSalutation(salutationField);
+      setIsNewUser(true);
+
+      // For tenants: save invite property info
+      if (role === "tenant" && inviteProperty) {
+        const { data: { user: newUser } } = await supabase.auth.getUser();
+        if (newUser) {
+          const updateProfile = async () => {
+            for (let i = 0; i < 5; i++) {
+              const { error: updateErr } = await supabase.from("profiles").update({
+                property_id: inviteProperty,
+                unit_id: searchParams.get("unit") || "",
+                owner_name: searchParams.get("owner") || "",
+              }).eq("user_id", newUser.id);
+              if (!updateErr) return;
+              await new Promise(r => setTimeout(r, 500 * (i + 1)));
+            }
+          };
+          updateProfile();
+        }
+      }
+
+      if (role === "owner") {
+        // Send emails asynchronously
+        const sendEmails = async () => {
+          try {
+            const { count } = await supabase
+              .from("profiles")
+              .select("id", { count: "exact", head: true })
+              .eq("role", "owner");
+
+            const registrationId = crypto.randomUUID();
+
+            await supabase.functions.invoke("send-transactional-email", {
+              body: {
+                templateName: "new-landlord-notification",
+                recipientEmail: "gina2406@hotmail.de",
+                idempotencyKey: `new-landlord-notify-${registrationId}`,
+                templateData: {
+                  name: fullName,
+                  email,
+                  createdAt: new Date().toLocaleDateString("de-DE"),
+                  totalOwners: count ?? 1,
+                },
+              },
+            });
+
+            await supabase.functions.invoke("send-transactional-email", {
+              body: {
+                templateName: "welcome-landlord",
+                recipientEmail: email,
+                idempotencyKey: `welcome-landlord-${registrationId}`,
+                templateData: { name: fullName },
+              },
+            });
+          } catch (err) {
+            console.error("Email sending failed (non-blocking):", err);
+          }
+        };
+        sendEmails();
+
+        setStep("property-setup");
+      } else {
+        setStep("tenant-info");
+      }
+    } catch {
+      setPasswordError("Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Property helpers
+  const updateProperty = (index: number, field: keyof PropertyForm, value: string) => {
+    setProperties(prev => prev.map((p, i) => i === index ? { ...p, [field]: value } : p));
+  };
+  const addProperty = () => {
+    if (properties.length >= 10) return;
+    setProperties(prev => [...prev, { ...emptyProperty }]);
+  };
+  const removeProperty = (index: number) => {
+    if (properties.length <= 1) return;
+    setProperties(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handlePropertySubmit = async () => {
+    const incomplete = properties.some(p => !p.address.trim() || !p.city.trim() || !p.zipCode.trim());
+    if (incomplete) {
+      toast.error("Bitte füllen Sie mindestens Adresse, Stadt und PLZ aus.");
+      return;
+    }
+
+    let currentUser = contextUser;
+    if (!currentUser) {
+      const { data: { session } } = await supabase.auth.getSession();
+      currentUser = session?.user ?? null;
+    }
+    if (!currentUser) {
+      const { data: { user: fetchedUser } } = await supabase.auth.getUser();
+      currentUser = fetchedUser;
+    }
+
+    const rows = properties.map(p => ({
+      address: p.address.trim(),
+      city: p.city.trim(),
+      zip_code: p.zipCode.trim(),
+      year_built: parseInt(p.yearBuilt) || 0,
+      units: parseInt(p.units) || 1,
+    }));
+
+    if (!currentUser) {
+      localStorage.setItem("pendingProperties", JSON.stringify(rows));
+      toast.info("Immobilien werden nach dem nächsten Login synchronisiert.");
+      setUserProperties(rows.map((r, i) => ({
+        id: `pending-${i}`,
+        address: r.address,
+        city: r.city,
+        zipCode: r.zip_code,
+        yearBuilt: r.year_built,
+        units: r.units,
+      })));
+      navigate("/dashboard");
+      return;
+    }
+
+    const insertRows = rows.map(r => ({ ...r, user_id: currentUser!.id }));
+    const { data: inserted, error } = await supabase.from("properties").insert(insertRows).select();
+    if (error) {
+      toast.error("Fehler beim Speichern: " + error.message);
+      return;
+    }
+    if (inserted) {
+      setUserProperties(inserted.map(p => ({
+        id: p.id,
+        address: p.address,
+        city: p.city,
+        zipCode: p.zip_code,
+        yearBuilt: p.year_built ?? 0,
+        units: p.units ?? 1,
+      })));
+    }
+    toast.success(`${properties.length} ${properties.length === 1 ? "Immobilie" : "Immobilien"} angelegt!`);
+    navigate("/dashboard");
+  };
+
+  // Left branding panel (reused across steps)
+  const BrandingPanel = ({ subtitle }: { subtitle: string }) => (
+    <div className="flex-1 hidden lg:flex items-center justify-center p-12">
+      <div className="max-w-md">
+        <div className="mb-4"><DwelloLogo variant="dark" size="xl" showIcon={false} /></div>
+        <p className="text-primary-foreground/70 text-lg leading-relaxed">{subtitle}</p>
+      </div>
+    </div>
+  );
+
+  // ── Step: Role selection ──
+  if (step === "role") {
+    return (
+      <div className="min-h-screen bg-primary flex">
+        <BrandingPanel subtitle="Erstellen Sie Ihr kostenloses Konto und starten Sie in wenigen Minuten." />
+        <div className="flex-1 flex items-center justify-center p-8 bg-background rounded-l-3xl lg:max-w-lg">
+          <div className="w-full max-w-sm">
+            <div className="lg:hidden mb-8"><DwelloLogo variant="light" size="lg" showIcon={false} /></div>
+
+            <h2 className="text-2xl font-heading font-bold text-foreground">Konto erstellen</h2>
+            <p className="text-muted-foreground text-sm mt-1 mb-8">Wie möchten Sie Dwello nutzen?</p>
+
+            <div className="space-y-4">
+              <button
+                onClick={() => { setSelectedRole("owner"); setStep("form"); }}
+                className="w-full flex items-center gap-4 p-5 rounded-xl border-2 border-border bg-card hover:border-accent hover:bg-accent/5 transition-all text-left group"
+              >
+                <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
+                  <Building2 className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="font-heading font-semibold text-foreground">Ich bin Eigentümer / Vermieter</p>
+                  <p className="text-sm text-muted-foreground">Immobilien verwalten & Mieter managen</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => { setSelectedRole("tenant"); setStep("form"); }}
+                className="w-full flex items-center gap-4 p-5 rounded-xl border-2 border-border bg-card hover:border-accent hover:bg-accent/5 transition-all text-left group"
+              >
+                <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
+                  <Home className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="font-heading font-semibold text-foreground">Ich bin Mieter</p>
+                  <p className="text-sm text-muted-foreground">Schäden melden & mit Vermieter kommunizieren</p>
+                </div>
+              </button>
+            </div>
+
+            <p className="text-center text-sm text-muted-foreground mt-6">
+              Bereits registriert?{" "}
+              <button onClick={() => navigate("/login")} className="text-accent font-medium hover:underline">
+                ← Zurück zur Anmeldung
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Step: Tenant property info (after registration) ──
+  if (step === "tenant-info") {
+    const propertyAddress = inviteProperty || "Berliner Str. 42, Berlin";
+    const unitLabel = searchParams.get("unit") || "Whg. 1";
+    const ownerName = searchParams.get("owner") || "Ihr Vermieter";
+
+    return (
+      <div className="min-h-screen bg-primary flex">
+        <div className="flex-1 hidden lg:flex items-center justify-center p-12">
+          <div className="max-w-md">
+            <div className="mb-4"><DwelloLogo variant="dark" size="xl" showIcon={false} /></div>
+            <p className="text-primary-foreground/70 text-lg leading-relaxed">
+              Willkommen in Ihrem Mieterportal. Hier finden Sie alle Informationen zu Ihrer Wohnung.
+            </p>
+            <div className="mt-8 flex items-center gap-3 text-primary-foreground/50">
+              <CheckCircle2 className="h-5 w-5 text-accent" />
+              <span className="text-sm">Konto erfolgreich erstellt</span>
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center p-8 bg-background rounded-l-3xl lg:max-w-lg">
+          <div className="w-full max-w-sm">
+            <div className="lg:hidden mb-6"><DwelloLogo variant="light" size="lg" showIcon={false} /></div>
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle2 className="h-5 w-5 text-accent" />
+              <span className="text-sm font-medium text-accent">Registrierung erfolgreich</span>
+            </div>
+            <h2 className="text-2xl font-heading font-bold text-foreground">
+              Hallo, {fullName || "Mieter"}!
+            </h2>
+            <p className="text-muted-foreground text-sm mt-1 mb-6">
+              Hier sind die Informationen zu Ihrer Wohnung.
+            </p>
+            <div className="p-5 rounded-xl border bg-card space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                  <Building2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-heading font-semibold text-foreground text-sm">Ihre Wohnung</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Zugewiesen durch Ihren Vermieter</p>
+                </div>
+              </div>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Adresse</span>
+                  <span className="font-medium text-foreground">{propertyAddress}</span>
+                </div>
+                <div className="border-t" />
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Wohnung</span>
+                  <span className="font-medium text-foreground">{unitLabel}</span>
+                </div>
+                <div className="border-t" />
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Vermieter</span>
+                  <span className="font-medium text-foreground">{ownerName}</span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 space-y-3">
+              <Button className="w-full" onClick={() => navigate("/tenant-dashboard")}>
+                Zum Mieterportal →
+              </Button>
+              <p className="text-xs text-center text-muted-foreground">
+                Sie können Nachrichten senden, Schäden melden und Dokumente einsehen.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Step: Property setup (owner, after registration) ──
+  if (step === "property-setup") {
+    return (
+      <div className="min-h-screen bg-primary flex">
+        <div className="flex-1 hidden lg:flex items-center justify-center p-12">
+          <div className="max-w-md">
+            <div className="mb-4"><DwelloLogo variant="dark" size="xl" showIcon={false} /></div>
+            <p className="text-primary-foreground/70 text-lg leading-relaxed">
+              Legen Sie Ihre Immobilien an, um direkt loslegen zu können. Sie können später jederzeit weitere hinzufügen.
+            </p>
+            <div className="mt-8 flex items-center gap-3 text-primary-foreground/50">
+              <CheckCircle2 className="h-5 w-5 text-accent" />
+              <span className="text-sm">Konto erfolgreich erstellt</span>
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center p-8 bg-background rounded-l-3xl lg:max-w-lg">
+          <div className="w-full max-w-sm">
+            <div className="lg:hidden mb-6"><DwelloLogo variant="light" size="lg" showIcon={false} /></div>
+            <h2 className="text-2xl font-heading font-bold text-foreground">Immobilie anlegen</h2>
+            <p className="text-muted-foreground text-sm mt-1 mb-6">Fügen Sie Ihre erste Immobilie hinzu.</p>
+            <div className="space-y-5 max-h-[55vh] overflow-y-auto pr-1">
+              {properties.map((prop, index) => (
+                <div key={index} className="space-y-3 p-4 rounded-xl border bg-card relative">
+                  {properties.length > 1 && (
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-medium text-muted-foreground">Immobilie {index + 1}</p>
+                      <button onClick={() => removeProperty(index)} className="p-1 text-muted-foreground hover:text-destructive transition-colors">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Adresse *</Label>
+                    <Input placeholder="z.B. Berliner Str. 42" value={prop.address} onChange={e => updateProperty(index, "address", e.target.value)} className="h-9 text-sm" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">PLZ *</Label>
+                      <Input placeholder="10115" value={prop.zipCode} onChange={e => updateProperty(index, "zipCode", e.target.value)} className="h-9 text-sm" maxLength={5} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Stadt *</Label>
+                      <Input placeholder="Berlin" value={prop.city} onChange={e => updateProperty(index, "city", e.target.value)} className="h-9 text-sm" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Baujahr</Label>
+                      <Input placeholder="2000" value={prop.yearBuilt} onChange={e => updateProperty(index, "yearBuilt", e.target.value)} className="h-9 text-sm" maxLength={4} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Wohneinheiten</Label>
+                      <Input type="number" min="1" max="50" value={prop.units} onChange={e => updateProperty(index, "units", e.target.value)} className="h-9 text-sm" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 space-y-3">
+              {properties.length < 10 && (
+                <Button variant="outline" size="sm" className="w-full gap-2" onClick={addProperty}>
+                  <Plus className="h-4 w-4" /> Weitere Immobilie
+                </Button>
+              )}
+              <Button className="w-full" onClick={handlePropertySubmit}>
+                {properties.length === 1 ? "Immobilie anlegen & starten" : `${properties.length} Immobilien anlegen & starten`}
+              </Button>
+              <button onClick={() => navigate("/dashboard")} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Später einrichten →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Step: Registration form ──
+  const passwordScore = [hasLen, hasUpper, hasNum].filter(Boolean).length;
+  const strengthLabel = passwordScore <= 1 ? "Schwach" : passwordScore === 2 ? "Mittel" : "Stark";
+  const strengthColor = passwordScore <= 1 ? "bg-destructive" : passwordScore === 2 ? "bg-yellow-500" : "bg-green-500";
+
+  return (
+    <div className="min-h-screen bg-primary flex">
+      <BrandingPanel subtitle="Dwello vereinfacht die Verwaltung Ihrer Immobilien — strukturiert, sicher und jederzeit verfügbar." />
+
+      <div className="flex-1 flex items-center justify-center p-8 bg-background rounded-l-3xl lg:max-w-lg">
+        <div className="w-full max-w-sm">
+          <div className="lg:hidden mb-8"><DwelloLogo variant="light" size="lg" showIcon={false} /></div>
+
+          {inviteProperty && (
+            <div className="mb-4 p-3 rounded-lg bg-accent/10 border border-accent/20">
+              <p className="text-sm text-accent font-medium">Sie wurden als Mieter eingeladen</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Erstellen Sie ein Konto, um fortzufahren.</p>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 mb-6">
+            <button
+              onClick={() => { if (inviteRole) { navigate("/login"); } else { setStep("role"); } }}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ← Zurück
+            </button>
+            <span className="text-muted-foreground">·</span>
+            <span className="text-sm font-medium text-accent flex items-center gap-1.5">
+              {selectedRole === "owner" ? <Building2 className="h-3.5 w-3.5" /> : <Home className="h-3.5 w-3.5" />}
+              {selectedRole === "owner" ? "Vermieter" : "Mieter"}
+            </span>
+          </div>
+
+          <h2 className="text-2xl font-heading font-bold text-foreground">Konto erstellen</h2>
+          <p className="text-muted-foreground text-sm mt-1 mb-6">Erstellen Sie Ihr Dwello Konto.</p>
+
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="reg-firstname">Vorname</Label>
+                <Input id="reg-firstname" name="given-name" autoComplete="given-name" placeholder="Max" required value={firstName} onChange={e => setFirstName(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reg-lastname">Nachname</Label>
+                <Input id="reg-lastname" name="family-name" autoComplete="family-name" placeholder="Mustermann" required value={lastName} onChange={e => setLastName(e.target.value)} />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Wie möchten Sie angesprochen werden?</Label>
+              <div className="flex gap-3">
+                {(["du", "sie"] as const).map(s => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSalutationField(s)}
+                    className={cn(
+                      "flex-1 py-2.5 px-4 rounded-xl border text-sm font-medium transition-all",
+                      salutationField === s
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/40"
+                    )}
+                  >
+                    {s === "du" ? "Du" : "Sie"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="reg-email">E-Mail</Label>
+              <div className="relative">
+                <Input
+                  id="reg-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="name@beispiel.de"
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  onBlur={() => setEmailTouched(true)}
+                  className={cn(emailTouched && email && (emailValid ? "border-green-500" : "border-destructive"))}
+                />
+                {emailTouched && email && (
+                  emailValid
+                    ? <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+                    : <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-destructive" />
+                )}
+              </div>
+              {emailTouched && email && !emailValid && (
+                <p className="text-xs text-destructive">Ungültige E-Mail-Adresse</p>
+              )}
+              {emailTouched && email && /\.(con|cmo|gmial|gmal)$/i.test(email) && (
+                <p className="text-xs text-yellow-600">
+                  Meinten Sie {email.replace(/\.(con|cmo)$/i, ".com").replace(/gmial|gmal/i, "gmail")}?
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="reg-password">Passwort</Label>
+              <div className="relative">
+                <Input
+                  id="reg-password"
+                  name="new-password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  required
+                  minLength={8}
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); setPasswordError(""); }}
+                  className="pr-10"
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {password.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                      <div className={cn("h-full rounded-full transition-all", strengthColor)} style={{ width: `${(passwordScore / 3) * 100}%` }} />
+                    </div>
+                    <span className={cn("text-xs font-medium", passwordScore <= 1 ? "text-destructive" : passwordScore === 2 ? "text-yellow-600" : "text-green-600")}>{strengthLabel}</span>
+                  </div>
+                  <ul className="space-y-0.5">
+                    {[
+                      { ok: hasLen, text: "Mindestens 8 Zeichen" },
+                      { ok: hasUpper, text: "Großbuchstabe" },
+                      { ok: hasNum, text: "Zahl" },
+                    ].map(r => (
+                      <li key={r.text} className={cn("text-xs flex items-center gap-1.5", r.ok ? "text-green-600" : "text-muted-foreground")}>
+                        {r.ok ? <Check className="h-3 w-3" /> : <span className="h-3 w-3 inline-block text-center">○</span>}
+                        {r.text}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="reg-password-confirm">Passwort bestätigen</Label>
+              <div className="relative">
+                <Input
+                  id="reg-password-confirm"
+                  name="new-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  required
+                  minLength={8}
+                  value={passwordConfirm}
+                  onChange={e => { setPasswordConfirm(e.target.value); setPasswordError(""); }}
+                  className={cn("pr-10", passwordConfirm && (passwordsMatch ? "border-green-500" : "border-destructive"))}
+                />
+                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {passwordConfirm && (
+                <p className={cn("text-xs flex items-center gap-1", passwordsMatch ? "text-green-600" : "text-destructive")}>
+                  {passwordsMatch
+                    ? <><Check className="h-3 w-3" /> Passwörter stimmen überein</>
+                    : <><AlertCircle className="h-3 w-3" /> Passwörter stimmen nicht überein</>
+                  }
+                </p>
+              )}
+            </div>
+
+            {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
+
+            <Button type="submit" className="w-full" disabled={loading || !formValid}>
+              {loading ? "Bitte warten..." : "Konto erstellen"}
+            </Button>
+          </form>
+
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            Bereits registriert?{" "}
+            <button onClick={() => navigate("/login")} className="text-accent font-medium hover:underline">
+              ← Zurück zur Anmeldung
+            </button>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RegisterPage;

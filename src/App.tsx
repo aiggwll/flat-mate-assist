@@ -7,6 +7,7 @@ import { UserProvider } from "./contexts/UserContext";
 import { MessagesProvider } from "./contexts/MessagesContext";
 import AppLayout from "./components/AppLayout";
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import TenantDashboardPage from "./pages/TenantDashboardPage";
 import PropertiesPage from "./pages/PropertiesPage";
