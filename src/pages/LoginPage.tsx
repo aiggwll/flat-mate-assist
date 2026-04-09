@@ -150,15 +150,22 @@ const LoginPage = () => {
         setSalutation(salutationField);
         setIsNewUser(true);
 
-        // For tenants: save invite property info to profile
+        // For tenants: save invite property info to profile (with retry for trigger race condition)
         if (role === "tenant" && inviteProperty) {
           const { data: { user: newUser } } = await supabase.auth.getUser();
           if (newUser) {
-            await supabase.from("profiles").update({
-              property_id: inviteProperty,
-              unit_id: searchParams.get("unit") || "",
-              owner_name: searchParams.get("owner") || "",
-            }).eq("user_id", newUser.id);
+            const updateProfile = async () => {
+              for (let i = 0; i < 5; i++) {
+                const { error: updateErr } = await supabase.from("profiles").update({
+                  property_id: inviteProperty,
+                  unit_id: searchParams.get("unit") || "",
+                  owner_name: searchParams.get("owner") || "",
+                }).eq("user_id", newUser.id);
+                if (!updateErr) return;
+                await new Promise(r => setTimeout(r, 500 * (i + 1)));
+              }
+            };
+            updateProfile(); // fire and forget — don't block UI
           }
         }
 
