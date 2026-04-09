@@ -80,12 +80,41 @@ const TenantDashboardPage = () => {
       if (profileData) {
         const addr = profileData.property_id || "";
         const unit = profileData.unit_id || "";
-        const owner = (profileData as any).owner_name || "Vermieter";
+        let owner = (profileData as any).owner_name || "";
         if (addr) {
           setPropertyAddress(addr);
           setUnitLabel(unit);
-          setOwnerName(owner);
           setHasProperty(true);
+
+          // If owner_name is missing or placeholder, look up from properties table
+          if (!owner || owner === "Vermieter") {
+            try {
+              // property_id stores "address, city" — match against properties
+              const { data: props } = await supabase
+                .from("properties")
+                .select("user_id, address, city");
+              if (props) {
+                const match = props.find((p: any) =>
+                  addr === `${p.address}, ${p.city}` || addr.includes(p.address)
+                );
+                if (match) {
+                  const { data: landlordProfile } = await supabase
+                    .from("profiles")
+                    .select("name")
+                    .eq("user_id", match.user_id)
+                    .single();
+                  if (landlordProfile?.name) {
+                    owner = landlordProfile.name;
+                    // Persist so we don't need to look up again
+                    await supabase.from("profiles").update({ owner_name: owner }).eq("user_id", userId);
+                  }
+                }
+              }
+            } catch {
+              // Fallback silently
+            }
+          }
+          setOwnerName(owner || "Ihr Vermieter");
         } else {
           setPropertyAddress("");
           setHasProperty(false);
