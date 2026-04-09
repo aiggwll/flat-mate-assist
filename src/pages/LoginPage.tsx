@@ -43,11 +43,13 @@ const LoginPage = () => {
 
       const { data: signInData, error: signInError } = signInResult;
       if (signInError) {
-        setError(
-          signInError.message === "Invalid login credentials"
-            ? "Ungültige E-Mail oder Passwort."
-            : signInError.message
-        );
+        if (signInError.message === "Invalid login credentials") {
+          setError("Ungültige E-Mail oder Passwort.");
+        } else if (signInError.message === "Email not confirmed") {
+          setError("EMAIL_NOT_CONFIRMED");
+        } else {
+          setError(signInError.message);
+        }
         return;
       }
 
@@ -159,8 +161,31 @@ const LoginPage = () => {
               </div>
             </div>
 
-            {error && (
+            {error && error !== "EMAIL_NOT_CONFIRMED" && (
               <p className="text-sm text-destructive">{error}</p>
+            )}
+
+            {error === "EMAIL_NOT_CONFIRMED" && (
+              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 space-y-2">
+                <p className="text-sm text-destructive">
+                  Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Den Link finden Sie in Ihrer Posteingangsmappe — prüfen Sie auch den Spam-Ordner.
+                </p>
+                <button
+                  type="button"
+                  className="text-sm text-accent font-medium hover:underline"
+                  onClick={async () => {
+                    if (!email) return;
+                    const { error: resendErr } = await supabase.auth.resend({ type: "signup", email });
+                    if (resendErr) {
+                      toast.error(`Fehler: ${resendErr.message}`);
+                    } else {
+                      toast.success("Bestätigungs-E-Mail wurde erneut gesendet.");
+                    }
+                  }}
+                >
+                  Bestätigungsmail erneut senden
+                </button>
+              </div>
             )}
 
             <div className="flex items-center justify-between">
