@@ -61,7 +61,7 @@ const getStatusInfo = (paidAt: string | null, dueDate: string) => {
   return { label: "Ausstehend", color: "text-yellow-600 bg-yellow-50 border-yellow-200", icon: Clock };
 };
 
-const defaultDueDate = format(startOfMonth(addMonths(new Date(), 1)), "yyyy-MM-dd");
+const defaultDueDate = format(new Date(), "yyyy-MM-dd");
 
 const rentSchema = z.object({
   unit_id: z.string().min(1, "Bitte Immobilie & Wohnung auswählen"),
