@@ -56,7 +56,7 @@ const TenantDashboardPage = () => {
   // Load real property info from profile
   const [propertyAddress, setPropertyAddress] = useState("Wird geladen...");
   const [unitLabel, setUnitLabel] = useState("");
-  const [ownerName, setOwnerName] = useState("Vermieter");
+  const [ownerName, setOwnerName] = useState("Ihr Vermieter");
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [hasProperty, setHasProperty] = useState(true);
 
@@ -80,12 +80,32 @@ const TenantDashboardPage = () => {
       if (profileData) {
         const addr = profileData.property_id || "";
         const unit = profileData.unit_id || "";
-        const owner = (profileData as any).owner_name || "Vermieter";
+        let owner = (profileData as any).owner_name || "";
         if (addr) {
           setPropertyAddress(addr);
           setUnitLabel(unit);
-          setOwnerName(owner);
           setHasProperty(true);
+
+          // If owner_name is missing or placeholder, look up from landlord profiles
+          if (!owner || owner === "Vermieter" || owner === "Ihr Vermieter") {
+            try {
+              // Find landlord profiles (role=landlord) whose name we can read
+              const { data: landlordProfiles } = await supabase
+                .from("profiles")
+                .select("name, user_id")
+                .eq("role", "landlord");
+              if (landlordProfiles && landlordProfiles.length > 0) {
+                // If only one landlord exists, use that name
+                if (landlordProfiles.length === 1 && landlordProfiles[0].name) {
+                  owner = landlordProfiles[0].name;
+                  await supabase.from("profiles").update({ owner_name: owner }).eq("user_id", userId);
+                }
+              }
+            } catch {
+              // Fallback silently
+            }
+          }
+          setOwnerName(owner || "Ihr Vermieter");
         } else {
           setPropertyAddress("");
           setHasProperty(false);
