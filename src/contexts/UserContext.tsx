@@ -57,8 +57,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("dwello_salutation", s);
   };
 
-  const loadUserData = async (currentUser: User) => {
-    // Avoid reloading if we already loaded for this user
+  const loadUserData = async (currentUser: User, timestamp: number) => {
+    // Skip if a newer auth event has already fired
+    if (timestamp < latestAuthTimestamp.current) return;
+    // Skip if already loaded for this exact user
     if (dataLoadedForUser.current === currentUser.id) return;
     dataLoadedForUser.current = currentUser.id;
 
