@@ -4,7 +4,7 @@ import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
 import { format, isBefore, parse } from "date-fns";
 import { de } from "date-fns/locale";
-import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro, MoreVertical, Undo2, Trash2, Pencil, CalendarIcon } from "lucide-react";
+import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro, MoreVertical, Undo2, Trash2, Pencil, CalendarIcon, Info } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { sal } from "@/lib/salutation";
 import { cn, formatCurrency } from "@/lib/utils";
@@ -65,6 +65,7 @@ const getStatusInfo = (paidAt: string | null, dueDate: string) => {
 };
 
 const defaultDueDate = format(new Date(), "yyyy-MM-dd");
+const firstOfMonth = format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), "yyyy-MM-dd");
 
 const rentSchema = z.object({
   unit_id: z.string().min(1, "Bitte Immobilie & Wohnung auswählen"),
@@ -84,6 +85,7 @@ const RentTrackingPage = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [attempted, setAttempted] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [autoFillHint, setAutoFillHint] = useState<string | null>(null);
 
   const unitOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
@@ -98,6 +100,34 @@ const RentTrackingPage = () => {
     });
     return options;
   }, [userProperties]);
+
+  const handleUnitSelected = useCallback(async (unitId: string) => {
+    setForm(f => ({ ...f, unit_id: unitId }));
+    setAutoFillHint(null);
+    if (!unitId) return;
+
+    const [{ data: tenantProfiles }, { data: lastPayment }] = await Promise.all([
+      supabase.from("profiles").select("name").eq("role", "tenant").eq("unit_id", unitId).limit(1),
+      supabase.from("rent_payments").select("cold_rent, nebenkosten, tenant_name").eq("unit_id", unitId).order("due_date", { ascending: false }).limit(1),
+    ]);
+
+    const tenant = tenantProfiles?.[0];
+    const prev = lastPayment?.[0];
+
+    if (!tenant && !prev) {
+      setAutoFillHint("Für diese Immobilie sind noch keine Mietdaten hinterlegt.");
+      setForm(f => ({ ...f, due_date: firstOfMonth }));
+      return;
+    }
+
+    setForm(f => ({
+      ...f,
+      tenant_name: f.tenant_name || (prev?.tenant_name || tenant?.name || ""),
+      cold_rent: f.cold_rent || (prev ? String(prev.cold_rent) : ""),
+      nebenkosten: f.nebenkosten || (prev ? String(prev.nebenkosten) : ""),
+      due_date: f.due_date === defaultDueDate ? firstOfMonth : f.due_date,
+    }));
+  }, []);
 
   const loadPayments = useCallback(async () => {
     if (!user) return;
@@ -166,6 +196,7 @@ const RentTrackingPage = () => {
     });
     setErrors({});
     setAttempted(false);
+    setAutoFillHint(null);
     setDialogOpen(true);
   };
 
@@ -174,6 +205,7 @@ const RentTrackingPage = () => {
     setForm({ unit_id: "", tenant_name: "", due_date: defaultDueDate, cold_rent: "", nebenkosten: "" });
     setErrors({});
     setAttempted(false);
+    setAutoFillHint(null);
     setDialogOpen(true);
   };
 
@@ -395,7 +427,7 @@ const RentTrackingPage = () => {
           <div className="space-y-4">
             <div>
               <Label>Immobilie & Wohnung *</Label>
-              <Select value={form.unit_id} onValueChange={(val) => setForm(f => ({ ...f, unit_id: val }))}>
+              <Select value={form.unit_id} onValueChange={(val) => editingId ? setForm(f => ({ ...f, unit_id: val })) : handleUnitSelected(val)}>
                 <SelectTrigger className={errors.unit_id ? "border-destructive" : ""}>
                   <SelectValue placeholder="Wohnung auswählen" />
                 </SelectTrigger>
@@ -410,6 +442,12 @@ const RentTrackingPage = () => {
                 </SelectContent>
               </Select>
               {errors.unit_id && <p className="text-xs text-destructive mt-1">{errors.unit_id}</p>}
+              {autoFillHint && (
+                <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
+                  <Info className="h-3 w-3 shrink-0" />
+                  {autoFillHint}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="mietername">Mietername *</Label>
