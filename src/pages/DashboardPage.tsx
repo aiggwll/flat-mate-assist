@@ -75,8 +75,28 @@ const DashboardPage = () => {
         })));
       }
     };
+    const loadInvitations = async () => {
+      if (!userId) return;
+      const { data } = await supabase
+        .from("invitations" as any)
+        .select("id, email, tenant_name, property_id, unit_id, status, invited_at")
+        .eq("invited_by", userId)
+        .order("invited_at", { ascending: false });
+      if (data) {
+        setInvitations((data as any[]).map(inv => ({
+          id: inv.id,
+          email: inv.email,
+          tenant_name: inv.tenant_name,
+          property_id: inv.property_id,
+          unit_id: inv.unit_id,
+          status: inv.status,
+          invited_at: inv.invited_at,
+        })));
+      }
+    };
     loadTenants();
-  }, [userProperties]);
+    loadInvitations();
+  }, [userProperties, userId]);
 
   useEffect(() => {
     if (!userId) return;
