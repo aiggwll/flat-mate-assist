@@ -58,19 +58,41 @@ const TenantDashboardPage = () => {
   const [unitLabel, setUnitLabel] = useState("");
   const [ownerName, setOwnerName] = useState("Vermieter");
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [hasProperty, setHasProperty] = useState(true);
 
   useEffect(() => {
     const loadProfile = async () => {
       if (!userId) return;
-      const { data } = await supabase
-        .from("profiles")
-        .select("property_id, unit_id, owner_name")
-        .eq("user_id", userId)
-        .single();
-      if (data) {
-        setPropertyAddress(data.property_id || searchParams.get("property") || "Keine Immobilie");
-        setUnitLabel(data.unit_id || searchParams.get("unit") || "");
-        setOwnerName((data as any).owner_name || searchParams.get("owner") || "Vermieter");
+      // Retry up to 3 times to handle race condition after registration
+      let attempts = 0;
+      let profileData: any = null;
+      while (attempts < 3) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("property_id, unit_id, owner_name")
+          .eq("user_id", userId)
+          .single();
+        profileData = data;
+        if (data?.property_id) break;
+        attempts++;
+        if (attempts < 3) await new Promise(r => setTimeout(r, 1000));
+      }
+      if (profileData) {
+        const addr = profileData.property_id || "";
+        const unit = profileData.unit_id || "";
+        const owner = (profileData as any).owner_name || "Vermieter";
+        if (addr) {
+          setPropertyAddress(addr);
+          setUnitLabel(unit);
+          setOwnerName(owner);
+          setHasProperty(true);
+        } else {
+          setPropertyAddress("");
+          setHasProperty(false);
+        }
+      } else {
+        setPropertyAddress("");
+        setHasProperty(false);
       }
       setProfileLoaded(true);
     };
