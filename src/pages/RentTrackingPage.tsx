@@ -50,6 +50,7 @@ interface RentPayment {
   paid_at: string | null;
   status: string;
   created_at: string;
+  reminder_sent_at: string | null;
 }
 
 const getStatusInfo = (paidAt: string | null, dueDate: string) => {
