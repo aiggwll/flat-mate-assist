@@ -14,9 +14,10 @@ interface ZahlungErinnerungProps {
   betrag?: string
   faelligkeitsDatum?: string
   iban?: string
+  paymentId?: string
 }
 
-const ZahlungErinnerungEmail = ({ objektAdresse, betrag, faelligkeitsDatum, iban }: ZahlungErinnerungProps) => (
+const ZahlungErinnerungEmail = ({ objektAdresse, betrag, faelligkeitsDatum, iban, paymentId }: ZahlungErinnerungProps) => (
   <Html lang="de" dir="ltr">
     <Head />
     <Preview>Erinnerung: Miete fällig am {faelligkeitsDatum || ''}</Preview>
