@@ -329,7 +329,32 @@ const RentTrackingPage = () => {
     }
   };
 
-  const deletePayment = async (id: string) => {
+  const sendManualReminder = async (paymentId: string, tenantName: string) => {
+    setSendingReminder(paymentId);
+    try {
+      const { data, error } = await supabase.functions.invoke("check-payment-reminders", {
+        body: { mode: "manual", paymentId },
+      });
+      if (error) throw error;
+      if (data?.error === "cooldown") {
+        toast.error(`Erinnerung wurde heute bereits gesendet. Bitte in ${data.hoursRemaining}h erneut versuchen.`);
+      } else if (data?.sent > 0) {
+        toast.success(`Erinnerung wurde an ${tenantName} gesendet.`);
+        loadPayments();
+      } else if (data?.results?.[0]?.status === "skipped") {
+        toast.error("E-Mail-Adresse des Mieters nicht gefunden.");
+      } else {
+        toast.error("Erinnerung konnte nicht gesendet werden.");
+      }
+    } catch (err) {
+      console.error("Manual reminder failed:", err);
+      toast.error("E-Mail konnte nicht gesendet werden. Bitte versuche es erneut.");
+    } finally {
+      setSendingReminder(null);
+    }
+  };
+
+
     const { error } = await supabase
       .from("rent_payments")
       .delete()
