@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import EmailHistory from "@/components/EmailHistory";
 import {
   FileText,
   Upload,
@@ -14,6 +15,7 @@ import {
   Calculator,
   Lock,
   Unlock,
+  Mail,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -587,6 +589,17 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
             </AccordionItem>
           ))}
         </Accordion>
+      )}
+
+      {/* Email History */}
+      {role === "owner" && (
+        <div className="mt-8">
+          <h3 className="text-base font-semibold mb-3 flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            E-Mail-Verlauf
+          </h3>
+          <EmailHistory />
+        </div>
       )}
     </div>
   );

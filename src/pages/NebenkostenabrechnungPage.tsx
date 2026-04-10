@@ -2,6 +2,8 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import jsPDF from "jspdf";
 import { useUser } from "@/contexts/UserContext";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Mail, Loader2 } from "lucide-react";
 
 /* ─── Types ─── */
 interface Vermieter {
@@ -81,6 +83,7 @@ const NebenkostenabrechnungPage = () => {
     DEFAULT_POSITIONS.map((p) => ({ ...p, id: makeId() }))
   );
   const [vorauszahlung, setVorauszahlung] = useState({ monatlich: "", monate: "12" });
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   const currentYear = new Date().getFullYear();
 
@@ -406,7 +409,57 @@ const NebenkostenabrechnungPage = () => {
     doc.save(`Nebenkostenabrechnung_${safeName}_${year}.pdf`);
   };
 
-  /* ─── Styles ─── */
+  /* ─── Send via Email ─── */
+  const sendAbrechnungEmail = async () => {
+    if (!selectedTenantId) {
+      toast.error("Bitte wählen Sie zuerst einen Mieter aus.");
+      return;
+    }
+    const tenant = tenants.find(t => t.userId === selectedTenantId);
+    if (!tenant) return;
+
+    // Find tenant's email
+    const { data: tenantProfile } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("user_id", selectedTenantId)
+      .maybeSingle();
+
+    if (!tenantProfile?.email) {
+      toast.error("E-Mail-Adresse des Mieters nicht gefunden.");
+      return;
+    }
+
+    setSendingEmail(true);
+    try {
+      const jahr = mieter.bis ? mieter.bis.split("-")[0] : String(currentYear);
+      const emailId = crypto.randomUUID();
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "nebenkostenabrechnung",
+          recipientEmail: tenantProfile.email,
+          idempotencyKey: `nebenkostenabrechnung-${emailId}`,
+          templateData: {
+            objektAdresse: `${mieter.objektStrasse}, ${mieter.objektPlzOrt}`,
+            abrechnungsZeitraum: `${fmtDate(mieter.von)} – ${fmtDate(mieter.bis)}`,
+            jahr,
+            gesamtKosten: eur(gesamtBK),
+            anteil: eur(anteilEur),
+            vorauszahlungen: eur(gezahlt),
+            ergebnis: eur(Math.abs(saldo)),
+            istNachzahlung: isNachzahlung,
+          },
+        },
+      });
+      toast.success(`Abrechnung per E-Mail an ${tenantProfile.email} gesendet.`);
+    } catch (err) {
+      console.error("Failed to send Nebenkostenabrechnung email:", err);
+      toast.error("E-Mail konnte nicht gesendet werden. Bitte versuche es erneut.");
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   const inputCls =
     "w-full rounded-[10px] border border-[#E0DBD3] bg-white px-3 py-2.5 text-sm text-[#1a1a1a] placeholder:text-[#b5b0aa] focus:outline-none focus:ring-2 focus:ring-[#2D5A3D]/30 focus:border-[#2D5A3D] transition";
   const labelCls = "block text-xs font-medium text-[#7A7570] mb-1";
@@ -655,13 +708,24 @@ const NebenkostenabrechnungPage = () => {
         </div>
 
         {/* CTA */}
-        <button
-          onClick={generatePDF}
-          className="w-full py-3.5 rounded-[10px] text-white font-semibold text-base transition hover:opacity-90"
-          style={{ background: "#2D5A3D", fontFamily: "'DM Serif Display', serif" }}
-        >
-          PDF herunterladen
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={generatePDF}
+            className="flex-1 py-3.5 rounded-[10px] text-white font-semibold text-base transition hover:opacity-90"
+            style={{ background: "#2D5A3D", fontFamily: "'DM Serif Display', serif" }}
+          >
+            PDF herunterladen
+          </button>
+          <button
+            onClick={sendAbrechnungEmail}
+            disabled={sendingEmail || !selectedTenantId}
+            className="flex-1 py-3.5 rounded-[10px] border-2 font-semibold text-base transition hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-50"
+            style={{ borderColor: "#2D5A3D", color: "#2D5A3D", fontFamily: "'DM Serif Display', serif" }}
+          >
+            {sendingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+            Per E-Mail senden
+          </button>
+        </div>
 
         {/* Legal note */}
         <div className="mt-4 rounded-[10px] border border-[#E0DBD3] bg-[#F5F3EF] p-4 text-xs text-[#7A7570] leading-relaxed">

@@ -82,6 +82,28 @@ const InviteTenantDialog = ({ onSuccess, trigger }: InviteTenantDialogProps) => 
     const link = `${window.location.origin}/register?role=tenant&property=${encodeURIComponent(selectedProp?.label || "")}&unit=${encodeURIComponent(selectedUnitObj?.number || "")}&owner=${encodeURIComponent(ownerDisplayName)}&property_id=${encodeURIComponent(selectedProperty)}`;
 
     await saveInvitation(link);
+
+    // Send invitation email
+    try {
+      const inviteId = crypto.randomUUID();
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "mieter-einladung",
+          recipientEmail: tenantEmail.trim(),
+          idempotencyKey: `mieter-einladung-${inviteId}`,
+          templateData: {
+            mieterName: tenantName.trim(),
+            vermieterName: ownerDisplayName,
+            objektAdresse: `${selectedProp?.label || ""}, ${selectedUnitObj?.number || ""}`,
+            einladungsLink: link,
+          },
+        },
+      });
+    } catch (err) {
+      console.error("Failed to send invitation email:", err);
+      toast.error("E-Mail konnte nicht gesendet werden. Bitte versuche es erneut.");
+    }
+
     setSending(false);
     toast.success(`Einladung wurde erfolgreich an ${tenantEmail.trim()} versendet.`);
     onSuccess?.();
