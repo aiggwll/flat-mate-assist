@@ -418,21 +418,43 @@ const RentTrackingPage = () => {
       ) : (
         <div className="space-y-3">
           {payments.map((p) => {
-            const statusInfo = getStatusInfo(p.paid_at, p.due_date);
+            const statusInfo = getStatusInfo(p.paid_at, p.due_date, p.status);
             const StatusIcon = statusInfo.icon;
             const warmmiete = p.cold_rent + p.nebenkosten;
+            const isOverdue = !p.paid_at && isBefore(new Date(p.due_date), new Date());
+            const canSendReminder = !p.paid_at && p.status !== "überwiesen";
+            const reminderSentToday = p.reminder_sent_at && (Date.now() - new Date(p.reminder_sent_at).getTime()) < 24 * 60 * 60 * 1000;
+
             return (
               <div
                 key={p.id}
                 className="bg-card rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center gap-3"
               >
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-semibold text-foreground truncate">{p.tenant_name}</h3>
                     <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${statusInfo.color}`}>
                       <StatusIcon className="h-3 w-3" />
                       {statusInfo.label}
                     </span>
+                    {/* Reminder indicator */}
+                    {!p.paid_at && (
+                      p.reminder_sent_at ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-green-600" title={`Erinnerung gesendet am ${format(new Date(p.reminder_sent_at), "dd. MMM yyyy, HH:mm", { locale: de })}`}>
+                          <Check className="h-3 w-3" />
+                          Erinnert
+                        </span>
+                      ) : isOverdue ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-red-500" title="Überfällig – keine Zahlung eingegangen">
+                          <AlertTriangle className="h-3 w-3" />
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground" title="Erinnerung wird automatisch 3 Tage vor Fälligkeit gesendet">
+                          <Clock className="h-3 w-3" />
+                          Auto-Erinnerung
+                        </span>
+                      )
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
                     {p.unit_id} · Kalt: {formatCurrency(p.cold_rent)} + NK: {formatCurrency(p.nebenkosten)} = {formatCurrency(warmmiete)} gesamt
@@ -440,9 +462,28 @@ const RentTrackingPage = () => {
                   <p className="text-xs text-muted-foreground">
                     Fällig: {format(new Date(p.due_date), "dd. MMM yyyy", { locale: de })}
                     {p.paid_at && ` · Bezahlt am: ${format(new Date(p.paid_at), "dd. MMM yyyy", { locale: de })}`}
+                    {p.reminder_sent_at && !p.paid_at && ` · Erinnerung: ${format(new Date(p.reminder_sent_at), "dd. MMM yyyy", { locale: de })}`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
+                  {/* Manual reminder button */}
+                  {canSendReminder && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1 text-xs"
+                      disabled={!!reminderSentToday || sendingReminder === p.id}
+                      title={reminderSentToday ? "Heute bereits gesendet" : "Erinnerung manuell senden"}
+                      onClick={() => sendManualReminder(p.id, p.tenant_name)}
+                    >
+                      {sendingReminder === p.id ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Bell className="h-3 w-3" />
+                      )}
+                      {p.reminder_sent_at ? "Erneut" : "Erinnern"}
+                    </Button>
+                  )}
                   <span className="text-lg font-bold text-foreground whitespace-nowrap">
                     {formatCurrency(warmmiete)}
                   </span>
