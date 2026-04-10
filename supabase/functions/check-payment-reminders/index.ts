@@ -157,6 +157,7 @@ Deno.serve(async (req) => {
             objektAdresse: payment.unit_id,
             betrag,
             faelligkeitsDatum: formattedDate,
+            paymentId: payment.id,
           },
         },
       })
