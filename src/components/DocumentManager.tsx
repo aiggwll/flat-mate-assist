@@ -589,6 +589,17 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
           ))}
         </Accordion>
       )}
+
+      {/* Email History */}
+      {role === "owner" && (
+        <div className="mt-8">
+          <h3 className="text-base font-semibold mb-3 flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            E-Mail-Verlauf
+          </h3>
+          <EmailHistory />
+        </div>
+      )}
     </div>
   );
 };
