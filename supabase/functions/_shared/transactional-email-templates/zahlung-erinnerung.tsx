@@ -7,14 +7,17 @@ import type { TemplateEntry } from './registry.ts'
 const SITE_NAME = "dwello"
 const APP_URL = "https://dwello-app.lovable.app"
 
+// Note: paymentId is injected by the edge function caller
+
 interface ZahlungErinnerungProps {
   objektAdresse?: string
   betrag?: string
   faelligkeitsDatum?: string
   iban?: string
+  paymentId?: string
 }
 
-const ZahlungErinnerungEmail = ({ objektAdresse, betrag, faelligkeitsDatum, iban }: ZahlungErinnerungProps) => (
+const ZahlungErinnerungEmail = ({ objektAdresse, betrag, faelligkeitsDatum, iban, paymentId }: ZahlungErinnerungProps) => (
   <Html lang="de" dir="ltr">
     <Head />
     <Preview>Erinnerung: Miete fällig am {faelligkeitsDatum || ''}</Preview>
@@ -32,9 +35,10 @@ const ZahlungErinnerungEmail = ({ objektAdresse, betrag, faelligkeitsDatum, iban
           <div style={row}><span style={label}>Betrag</span><span style={value}>{betrag ? `${betrag} €` : '–'}</span></div>
           {iban && <div style={row}><span style={label}>IBAN</span><span style={value}>{iban}</span></div>}
         </Section>
-        <Button style={button} href={APP_URL}>
+        <Button style={button} href={paymentId ? `${APP_URL}/confirm-payment?id=${paymentId}` : APP_URL}>
           Zahlung bestätigen
         </Button>
+        <Text style={small}>Du erhältst diese Erinnerung automatisch 3 Tage vor Fälligkeit deiner Miete.</Text>
         <Hr style={hr} />
         <Text style={footer}>{SITE_NAME} Immobilienverwaltung · dwello.de</Text>
       </Container>

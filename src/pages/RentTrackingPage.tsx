@@ -4,7 +4,7 @@ import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
 import { format, isBefore, parse } from "date-fns";
 import { de } from "date-fns/locale";
-import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro, MoreVertical, Undo2, Trash2, Pencil, CalendarIcon, Info } from "lucide-react";
+import { Plus, Check, Clock, AlertTriangle, CreditCard, Euro, MoreVertical, Undo2, Trash2, Pencil, CalendarIcon, Info, Mail, Bell, Loader2 } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { sal } from "@/lib/salutation";
 import { cn, formatCurrency } from "@/lib/utils";
@@ -50,11 +50,15 @@ interface RentPayment {
   paid_at: string | null;
   status: string;
   created_at: string;
+  reminder_sent_at: string | null;
 }
 
-const getStatusInfo = (paidAt: string | null, dueDate: string) => {
+const getStatusInfo = (paidAt: string | null, dueDate: string, status?: string) => {
   if (paidAt) {
     return { label: "Bezahlt", color: "text-green-600 bg-green-50 border-green-200", icon: Check };
+  }
+  if (status === "überwiesen") {
+    return { label: "Überwiesen", color: "text-blue-600 bg-blue-50 border-blue-200", icon: CreditCard };
   }
   const due = new Date(dueDate);
   const now = new Date();
@@ -86,6 +90,7 @@ const RentTrackingPage = () => {
   const [attempted, setAttempted] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [autoFillHint, setAutoFillHint] = useState<string | null>(null);
+  const [sendingReminder, setSendingReminder] = useState<string | null>(null);
 
   const unitOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
@@ -150,6 +155,7 @@ const RentTrackingPage = () => {
           paid_at: d.paid_at,
           status: d.status,
           created_at: d.created_at,
+          reminder_sent_at: d.reminder_sent_at || null,
         }))
       );
     }
@@ -323,7 +329,32 @@ const RentTrackingPage = () => {
     }
   };
 
-  const deletePayment = async (id: string) => {
+  const sendManualReminder = async (paymentId: string, tenantName: string) => {
+    setSendingReminder(paymentId);
+    try {
+      const { data, error } = await supabase.functions.invoke("check-payment-reminders", {
+        body: { mode: "manual", paymentId },
+      });
+      if (error) throw error;
+      if (data?.error === "cooldown") {
+        toast.error(`Erinnerung wurde heute bereits gesendet. Bitte in ${data.hoursRemaining}h erneut versuchen.`);
+      } else if (data?.sent > 0) {
+        toast.success(`Erinnerung wurde an ${tenantName} gesendet.`);
+        loadPayments();
+      } else if (data?.results?.[0]?.status === "skipped") {
+        toast.error("E-Mail-Adresse des Mieters nicht gefunden.");
+      } else {
+        toast.error("Erinnerung konnte nicht gesendet werden.");
+      }
+    } catch (err) {
+      console.error("Manual reminder failed:", err);
+      toast.error("E-Mail konnte nicht gesendet werden. Bitte versuche es erneut.");
+    } finally {
+      setSendingReminder(null);
+    }
+  };
+
+
     const { error } = await supabase
       .from("rent_payments")
       .delete()
@@ -387,21 +418,43 @@ const RentTrackingPage = () => {
       ) : (
         <div className="space-y-3">
           {payments.map((p) => {
-            const statusInfo = getStatusInfo(p.paid_at, p.due_date);
+            const statusInfo = getStatusInfo(p.paid_at, p.due_date, p.status);
             const StatusIcon = statusInfo.icon;
             const warmmiete = p.cold_rent + p.nebenkosten;
+            const isOverdue = !p.paid_at && isBefore(new Date(p.due_date), new Date());
+            const canSendReminder = !p.paid_at && p.status !== "überwiesen";
+            const reminderSentToday = p.reminder_sent_at && (Date.now() - new Date(p.reminder_sent_at).getTime()) < 24 * 60 * 60 * 1000;
+
             return (
               <div
                 key={p.id}
                 className="bg-card rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center gap-3"
               >
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-semibold text-foreground truncate">{p.tenant_name}</h3>
                     <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${statusInfo.color}`}>
                       <StatusIcon className="h-3 w-3" />
                       {statusInfo.label}
                     </span>
+                    {/* Reminder indicator */}
+                    {!p.paid_at && (
+                      p.reminder_sent_at ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-green-600" title={`Erinnerung gesendet am ${format(new Date(p.reminder_sent_at), "dd. MMM yyyy, HH:mm", { locale: de })}`}>
+                          <Check className="h-3 w-3" />
+                          Erinnert
+                        </span>
+                      ) : isOverdue ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-red-500" title="Überfällig – keine Zahlung eingegangen">
+                          <AlertTriangle className="h-3 w-3" />
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground" title="Erinnerung wird automatisch 3 Tage vor Fälligkeit gesendet">
+                          <Clock className="h-3 w-3" />
+                          Auto-Erinnerung
+                        </span>
+                      )
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
                     {p.unit_id} · Kalt: {formatCurrency(p.cold_rent)} + NK: {formatCurrency(p.nebenkosten)} = {formatCurrency(warmmiete)} gesamt
@@ -409,9 +462,28 @@ const RentTrackingPage = () => {
                   <p className="text-xs text-muted-foreground">
                     Fällig: {format(new Date(p.due_date), "dd. MMM yyyy", { locale: de })}
                     {p.paid_at && ` · Bezahlt am: ${format(new Date(p.paid_at), "dd. MMM yyyy", { locale: de })}`}
+                    {p.reminder_sent_at && !p.paid_at && ` · Erinnerung: ${format(new Date(p.reminder_sent_at), "dd. MMM yyyy", { locale: de })}`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
+                  {/* Manual reminder button */}
+                  {canSendReminder && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1 text-xs"
+                      disabled={!!reminderSentToday || sendingReminder === p.id}
+                      title={reminderSentToday ? "Heute bereits gesendet" : "Erinnerung manuell senden"}
+                      onClick={() => sendManualReminder(p.id, p.tenant_name)}
+                    >
+                      {sendingReminder === p.id ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Bell className="h-3 w-3" />
+                      )}
+                      {p.reminder_sent_at ? "Erneut" : "Erinnern"}
+                    </Button>
+                  )}
                   <span className="text-lg font-bold text-foreground whitespace-nowrap">
                     {formatCurrency(warmmiete)}
                   </span>
