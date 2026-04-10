@@ -409,7 +409,57 @@ const NebenkostenabrechnungPage = () => {
     doc.save(`Nebenkostenabrechnung_${safeName}_${year}.pdf`);
   };
 
-  /* ─── Styles ─── */
+  /* ─── Send via Email ─── */
+  const sendAbrechnungEmail = async () => {
+    if (!selectedTenantId) {
+      toast.error("Bitte wählen Sie zuerst einen Mieter aus.");
+      return;
+    }
+    const tenant = tenants.find(t => t.userId === selectedTenantId);
+    if (!tenant) return;
+
+    // Find tenant's email
+    const { data: tenantProfile } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("user_id", selectedTenantId)
+      .maybeSingle();
+
+    if (!tenantProfile?.email) {
+      toast.error("E-Mail-Adresse des Mieters nicht gefunden.");
+      return;
+    }
+
+    setSendingEmail(true);
+    try {
+      const jahr = mieter.bis ? mieter.bis.split("-")[0] : String(currentYear);
+      const emailId = crypto.randomUUID();
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "nebenkostenabrechnung",
+          recipientEmail: tenantProfile.email,
+          idempotencyKey: `nebenkostenabrechnung-${emailId}`,
+          templateData: {
+            objektAdresse: `${mieter.objektStrasse}, ${mieter.objektPlzOrt}`,
+            abrechnungsZeitraum: `${fmtDate(mieter.von)} – ${fmtDate(mieter.bis)}`,
+            jahr,
+            gesamtKosten: eur(gesamtBK),
+            anteil: eur(anteilEur),
+            vorauszahlungen: eur(gezahlt),
+            ergebnis: eur(Math.abs(saldo)),
+            istNachzahlung: isNachzahlung,
+          },
+        },
+      });
+      toast.success(`Abrechnung per E-Mail an ${tenantProfile.email} gesendet.`);
+    } catch (err) {
+      console.error("Failed to send Nebenkostenabrechnung email:", err);
+      toast.error("E-Mail konnte nicht gesendet werden. Bitte versuche es erneut.");
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   const inputCls =
     "w-full rounded-[10px] border border-[#E0DBD3] bg-white px-3 py-2.5 text-sm text-[#1a1a1a] placeholder:text-[#b5b0aa] focus:outline-none focus:ring-2 focus:ring-[#2D5A3D]/30 focus:border-[#2D5A3D] transition";
   const labelCls = "block text-xs font-medium text-[#7A7570] mb-1";
