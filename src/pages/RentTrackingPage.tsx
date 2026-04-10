@@ -53,9 +53,12 @@ interface RentPayment {
   reminder_sent_at: string | null;
 }
 
-const getStatusInfo = (paidAt: string | null, dueDate: string) => {
+const getStatusInfo = (paidAt: string | null, dueDate: string, status?: string) => {
   if (paidAt) {
     return { label: "Bezahlt", color: "text-green-600 bg-green-50 border-green-200", icon: Check };
+  }
+  if (status === "überwiesen") {
+    return { label: "Überwiesen", color: "text-blue-600 bg-blue-50 border-blue-200", icon: CreditCard };
   }
   const due = new Date(dueDate);
   const now = new Date();
