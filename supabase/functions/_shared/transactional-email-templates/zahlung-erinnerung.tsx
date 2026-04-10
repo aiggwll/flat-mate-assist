@@ -7,6 +7,8 @@ import type { TemplateEntry } from './registry.ts'
 const SITE_NAME = "dwello"
 const APP_URL = "https://dwello-app.lovable.app"
 
+// Note: paymentId is injected by the edge function caller
+
 interface ZahlungErinnerungProps {
   objektAdresse?: string
   betrag?: string
