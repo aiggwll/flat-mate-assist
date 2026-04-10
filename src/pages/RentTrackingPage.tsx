@@ -353,8 +353,7 @@ const RentTrackingPage = () => {
       setSendingReminder(null);
     }
   };
-
-
+  const handleDelete = async (id: string) => {
     const { error } = await supabase
       .from("rent_payments")
       .delete()
@@ -629,7 +628,7 @@ const RentTrackingPage = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteTarget && deletePayment(deleteTarget)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction onClick={() => deleteTarget && handleDelete(deleteTarget)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Löschen
             </AlertDialogAction>
           </AlertDialogFooter>
