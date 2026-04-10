@@ -233,6 +233,53 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_reminders_log: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string
+          email_sent_to: string
+          error_message: string | null
+          id: string
+          payment_id: string | null
+          property_id: string | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          due_date: string
+          email_sent_to: string
+          error_message?: string | null
+          id?: string
+          payment_id?: string | null
+          property_id?: string | null
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string
+          email_sent_to?: string
+          error_message?: string | null
+          id?: string
+          payment_id?: string | null
+          property_id?: string | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_reminders_log_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "rent_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -326,6 +373,7 @@ export type Database = {
           id: string
           nebenkosten: number
           paid_at: string | null
+          reminder_sent_at: string | null
           status: string
           tenant_name: string
           unit_id: string
@@ -340,6 +388,7 @@ export type Database = {
           id?: string
           nebenkosten?: number
           paid_at?: string | null
+          reminder_sent_at?: string | null
           status?: string
           tenant_name: string
           unit_id: string
@@ -354,6 +403,7 @@ export type Database = {
           id?: string
           nebenkosten?: number
           paid_at?: string | null
+          reminder_sent_at?: string | null
           status?: string
           tenant_name?: string
           unit_id?: string
