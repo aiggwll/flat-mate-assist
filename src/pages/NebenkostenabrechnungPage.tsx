@@ -83,6 +83,7 @@ const NebenkostenabrechnungPage = () => {
     DEFAULT_POSITIONS.map((p) => ({ ...p, id: makeId() }))
   );
   const [vorauszahlung, setVorauszahlung] = useState({ monatlich: "", monate: "12" });
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   const currentYear = new Date().getFullYear();
 
