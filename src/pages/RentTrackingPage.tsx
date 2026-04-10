@@ -353,8 +353,7 @@ const RentTrackingPage = () => {
       setSendingReminder(null);
     }
   };
-
-
+  const handleDelete = async (id: string) => {
     const { error } = await supabase
       .from("rent_payments")
       .delete()
