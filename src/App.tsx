@@ -22,6 +22,7 @@ import UtilityBillingPage from "./pages/UtilityBillingPage";
 import TaxFolderPage from "./pages/TaxFolderPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
 import NebenkostenabrechnungPage from "./pages/NebenkostenabrechnungPage";
+import ConfirmPaymentPage from "./pages/ConfirmPaymentPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ const App = () => (
             <Route path="/tenant-dashboard" element={<TenantDashboardPage />} />
             <Route path="/unsubscribe" element={<UnsubscribePage />} />
             <Route path="/nebenkostenabrechnung" element={<NebenkostenabrechnungPage />} />
+            <Route path="/confirm-payment" element={<ConfirmPaymentPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
