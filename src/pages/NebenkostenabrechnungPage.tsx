@@ -708,13 +708,24 @@ const NebenkostenabrechnungPage = () => {
         </div>
 
         {/* CTA */}
-        <button
-          onClick={generatePDF}
-          className="w-full py-3.5 rounded-[10px] text-white font-semibold text-base transition hover:opacity-90"
-          style={{ background: "#2D5A3D", fontFamily: "'DM Serif Display', serif" }}
-        >
-          PDF herunterladen
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={generatePDF}
+            className="flex-1 py-3.5 rounded-[10px] text-white font-semibold text-base transition hover:opacity-90"
+            style={{ background: "#2D5A3D", fontFamily: "'DM Serif Display', serif" }}
+          >
+            PDF herunterladen
+          </button>
+          <button
+            onClick={sendAbrechnungEmail}
+            disabled={sendingEmail || !selectedTenantId}
+            className="flex-1 py-3.5 rounded-[10px] border-2 font-semibold text-base transition hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-50"
+            style={{ borderColor: "#2D5A3D", color: "#2D5A3D", fontFamily: "'DM Serif Display', serif" }}
+          >
+            {sendingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+            Per E-Mail senden
+          </button>
+        </div>
 
         {/* Legal note */}
         <div className="mt-4 rounded-[10px] border border-[#E0DBD3] bg-[#F5F3EF] p-4 text-xs text-[#7A7570] leading-relaxed">
