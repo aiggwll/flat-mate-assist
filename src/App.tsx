@@ -55,6 +55,7 @@ const App = () => (
             </Route>
             <Route path="/tenant-dashboard" element={<TenantDashboardPage />} />
             <Route path="/unsubscribe" element={<UnsubscribePage />} />
+            <Route path="/nebenkostenabrechnung" element={<NebenkostenabrechnungPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
