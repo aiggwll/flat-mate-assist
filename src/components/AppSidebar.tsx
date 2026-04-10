@@ -19,7 +19,7 @@ const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/properties", label: "Immobilien", icon: Building2 },
   { to: "/payments", label: "Miete", icon: CreditCard },
-  { to: "/utility-billing", label: "Abrechnung", icon: Receipt },
+  { to: "/nebenkostenabrechnung", label: "Nebenkostenabrechnung", icon: Receipt },
   { to: "/tax-folder", label: "Steuermappe", icon: FolderOpen },
   { to: "/documents", label: "Dokumente", icon: FileText },
   { to: "/chat", label: "Nachrichten", icon: MessageSquare },
