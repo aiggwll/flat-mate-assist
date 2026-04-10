@@ -22,10 +22,10 @@ import {
 } from "@/components/ui/sheet";
 
 const primaryNav = [
-  { to: "/dashboard", label: "Home", icon: LayoutDashboard },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/properties", label: "Immobilien", icon: Building2 },
   { to: "/payments", label: "Miete", icon: CreditCard },
-  { to: "/chat", label: "Chat", icon: MessageSquare },
+  { to: "/nebenkostenabrechnung", label: "Abrechnung", icon: Receipt },
 ];
 
 const allNav = [
@@ -49,7 +49,7 @@ const MobileNav = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 h-14 bg-card border-b flex items-center justify-between px-4 z-50 md:hidden">
+      <header className="fixed top-0 left-0 right-0 bg-card border-b flex items-center justify-between px-4 z-50 md:hidden safe-top" style={{ height: "calc(56px + env(safe-area-inset-top, 0px))", paddingTop: "env(safe-area-inset-top, 0px)" }}>
         <DwelloLogo variant="light" size="sm" showIcon={false} />
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
@@ -101,7 +101,7 @@ const MobileNav = () => {
         </Sheet>
       </header>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t flex items-center justify-around h-16 z-50 md:hidden safe-bottom">
+      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border flex items-center justify-around z-50 md:hidden" style={{ height: "calc(64px + env(safe-area-inset-bottom, 0px))", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
         {primaryNav.map(({ to, label, icon: Icon }) => {
           const isActive = location.pathname.startsWith(to);
           return (

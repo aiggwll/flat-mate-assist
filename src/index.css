@@ -114,6 +114,9 @@
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
   .pt-18 {
     padding-top: 4.5rem;
   }
@@ -129,4 +132,49 @@
 main:empty,
 main > div:empty {
   display: none;
+}
+
+/* Touch-friendly global styles */
+@layer base {
+  button, a, [role="button"], [tabindex="0"] {
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Allow smaller icon-only buttons via explicit opt-out */
+  .tap-sm {
+    min-height: unset;
+    min-width: unset;
+  }
+
+  @media (max-width: 767px) {
+    input, select, textarea {
+      min-height: 48px;
+      font-size: 16px; /* prevents iOS zoom on focus */
+    }
+  }
+}
+
+/* Bottom-sheet dialog on mobile */
+@media (max-width: 767px) {
+  [data-radix-dialog-content] {
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    translate: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    border-radius: 1rem 1rem 0 0 !important;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slide-up 200ms ease-out;
+  }
+
+  @keyframes slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
 }
