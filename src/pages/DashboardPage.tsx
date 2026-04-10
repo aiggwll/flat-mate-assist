@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Building2, Users, MessageSquare, AlertTriangle, ArrowRight, MapPin, UserPlus, Clock, CheckCircle2, RotateCcw } from "lucide-react";
+import InstallPrompt from "@/components/InstallPrompt";
 import WelcomeSlider from "@/components/WelcomeSlider";
 import InviteTenantDialog from "@/components/InviteTenantDialog";
 import LandlordOnboarding from "@/components/LandlordOnboarding";
@@ -155,7 +156,7 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-10">
-      {showWelcome && <WelcomeSlider onComplete={() => setShowWelcome(false)} />}
+      <InstallPrompt />
       <LandlordOnboarding open={showOnboarding && !showWelcome} onComplete={() => setShowOnboarding(false)} />
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-primary/8 to-primary/3 border p-10">

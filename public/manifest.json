@@ -1,12 +1,12 @@
 {
-  "name": "Dwello",
-  "short_name": "Dwello",
-  "description": "Immobilienverwaltung für Kleininvestoren",
+  "name": "dwello",
+  "short_name": "dwello",
+  "description": "Deine Immobilienverwaltung",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f5f7fa",
-  "theme_color": "#1a2744",
   "orientation": "portrait",
+  "background_color": "#F5F3EF",
+  "theme_color": "#2D5A3D",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -17,6 +17,12 @@
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

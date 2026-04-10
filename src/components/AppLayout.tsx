@@ -26,7 +26,7 @@ const AppLayout = () => {
       </div>
       {/* Mobile nav */}
       <MobileNav />
-      <main className="md:ml-64 md:p-8 p-4 pt-18 pb-20 md:pt-8 md:pb-8 h-auto">
+      <main className="md:ml-64 md:p-8 px-4 pt-18 pb-24 md:pt-8 md:pb-8 h-auto">
         <Outlet />
       </main>
     </div>
