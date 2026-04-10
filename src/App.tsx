@@ -21,6 +21,7 @@ import MarketplacePage from "./pages/MarketplacePage";
 import UtilityBillingPage from "./pages/UtilityBillingPage";
 import TaxFolderPage from "./pages/TaxFolderPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
+import NebenkostenabrechnungPage from "./pages/NebenkostenabrechnungPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +55,7 @@ const App = () => (
             </Route>
             <Route path="/tenant-dashboard" element={<TenantDashboardPage />} />
             <Route path="/unsubscribe" element={<UnsubscribePage />} />
+            <Route path="/nebenkostenabrechnung" element={<NebenkostenabrechnungPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
