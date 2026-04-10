@@ -438,6 +438,55 @@ const NebenkostenabrechnungPage = () => {
           </p>
         </div>
 
+        {/* 0 — Property & Tenant Selection */}
+        {userProperties.length > 0 && (
+          <section className={`${cardCls} mb-4`}>
+            <h2 className={sectionTitle}>Immobilie & Mieter auswählen</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className={labelCls}>Immobilie</label>
+                <select
+                  className={inputCls}
+                  value={selectedPropertyId}
+                  onChange={(e) => setSelectedPropertyId(e.target.value)}
+                >
+                  <option value="">— Immobilie wählen —</option>
+                  {userProperties.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.address}, {p.zipCode} {p.city}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={labelCls}>Mieter</label>
+                {tenantsLoading ? (
+                  <div className={`${inputCls} bg-[#F5F3EF] text-[#7A7570]`}>Lade Mieter…</div>
+                ) : tenants.length === 0 ? (
+                  <div className={`${inputCls} bg-[#F5F3EF] text-[#7A7570]`}>
+                    {selectedPropertyId ? "Keine Mieter gefunden" : "Bitte Immobilie wählen"}
+                  </div>
+                ) : tenants.length === 1 ? (
+                  <input readOnly className={`${inputCls} bg-[#F5F3EF] cursor-default`} value={tenants[0].name} />
+                ) : (
+                  <select
+                    className={inputCls}
+                    value={selectedTenantId}
+                    onChange={(e) => setSelectedTenantId(e.target.value)}
+                  >
+                    <option value="">— Mieter wählen —</option>
+                    {tenants.map((t) => (
+                      <option key={t.userId} value={t.userId}>
+                        {t.name}{t.unitId ? ` (${t.unitId})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* 1 — Vermieter */}
         <section className={`${cardCls} mb-4`}>
           <h2 className={sectionTitle}>Vermieter</h2>
