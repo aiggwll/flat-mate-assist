@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import EmailHistory from "@/components/EmailHistory";
 import {
   FileText,
   Upload,
