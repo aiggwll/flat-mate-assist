@@ -21,6 +21,7 @@ import MarketplacePage from "./pages/MarketplacePage";
 import UtilityBillingPage from "./pages/UtilityBillingPage";
 import TaxFolderPage from "./pages/TaxFolderPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
+import NebenkostenabrechnungPage from "./pages/NebenkostenabrechnungPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
