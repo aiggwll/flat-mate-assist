@@ -1,5 +1,7 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import jsPDF from "jspdf";
+import { useUser } from "@/contexts/UserContext";
+import { supabase } from "@/integrations/supabase/client";
 
 /* ─── Types ─── */
 interface Vermieter {
@@ -27,6 +29,12 @@ interface Position {
   bezeichnung: string;
   gesamtkosten: string;
   schluessel: string;
+}
+
+interface TenantOption {
+  userId: string;
+  name: string;
+  unitId: string | null;
 }
 
 const SCHLUESSEL_OPTIONS = [
@@ -59,6 +67,13 @@ const fmtDate = (iso: string) => {
 
 /* ─── Component ─── */
 const NebenkostenabrechnungPage = () => {
+  const { userName, userProperties, userId } = useUser();
+
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
+  const [tenants, setTenants] = useState<TenantOption[]>([]);
+  const [selectedTenantId, setSelectedTenantId] = useState<string>("");
+  const [tenantsLoading, setTenantsLoading] = useState(false);
+
   const [vermieter, setVermieter] = useState<Vermieter>({ name: "", strasse: "", plz: "", ort: "" });
   const [mieter, setMieter] = useState<Mieter>({ name: "", objektStrasse: "", objektPlzOrt: "", von: "", bis: "" });
   const [flaeche, setFlaeche] = useState<Flaeche>({ gesamt: "", wohnung: "" });
@@ -66,6 +81,102 @@ const NebenkostenabrechnungPage = () => {
     DEFAULT_POSITIONS.map((p) => ({ ...p, id: makeId() }))
   );
   const [vorauszahlung, setVorauszahlung] = useState({ monatlich: "", monate: "12" });
+
+  const currentYear = new Date().getFullYear();
+
+  // Pre-fill Vermieter from logged-in user
+  useEffect(() => {
+    if (!userName) return;
+    setVermieter((prev) => ({
+      ...prev,
+      name: prev.name || userName,
+    }));
+  }, [userName]);
+
+  // Pre-fill Vermieter address from first property (owner's address proxy)
+  useEffect(() => {
+    if (userProperties.length === 0) return;
+    // Auto-select first property if none selected
+    if (!selectedPropertyId) {
+      setSelectedPropertyId(userProperties[0].id);
+    }
+  }, [userProperties]);
+
+  // When property changes, pre-fill object address & load tenants
+  useEffect(() => {
+    if (!selectedPropertyId) return;
+    const prop = userProperties.find((p) => p.id === selectedPropertyId);
+    if (!prop) return;
+
+    // Pre-fill Vermieter address from property data (as a reasonable default)
+    // The owner can always edit these fields
+    setVermieter((prev) => ({
+      ...prev,
+      strasse: prev.strasse || prop.address,
+      plz: prev.plz || prop.zipCode,
+      ort: prev.ort || prop.city,
+    }));
+
+    // Pre-fill Mieter object address
+    setMieter((prev) => ({
+      ...prev,
+      objektStrasse: prop.address,
+      objektPlzOrt: `${prop.zipCode} ${prop.city}`,
+      von: prev.von || `${currentYear}-01-01`,
+      bis: prev.bis || `${currentYear}-12-31`,
+    }));
+
+    // Load tenants for this property
+    const loadTenants = async () => {
+      setTenantsLoading(true);
+      try {
+        const propertyMatch = `${prop.address}, ${prop.city}`;
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, name, unit_id, property_id")
+          .eq("role", "tenant");
+
+        if (profiles) {
+          const matched = profiles.filter(
+            (p) =>
+              p.property_id === selectedPropertyId ||
+              p.property_id === propertyMatch ||
+              (p.property_id && prop.address && p.property_id.includes(prop.address))
+          );
+          const opts: TenantOption[] = matched.map((p) => ({
+            userId: p.user_id,
+            name: p.name || "Unbenannter Mieter",
+            unitId: p.unit_id,
+          }));
+          setTenants(opts);
+          // Auto-select if only one tenant
+          if (opts.length === 1) {
+            setSelectedTenantId(opts[0].userId);
+          } else {
+            setSelectedTenantId("");
+          }
+        }
+      } catch (e) {
+        console.error("Error loading tenants:", e);
+      } finally {
+        setTenantsLoading(false);
+      }
+    };
+    loadTenants();
+  }, [selectedPropertyId, userProperties, currentYear]);
+
+  // When tenant changes, pre-fill Mieter name
+  useEffect(() => {
+    if (!selectedTenantId) return;
+    const tenant = tenants.find((t) => t.userId === selectedTenantId);
+    if (tenant) {
+      setMieter((prev) => ({
+        ...prev,
+        name: tenant.name,
+        objektStrasse: prev.objektStrasse + (tenant.unitId ? `, ${tenant.unitId}` : ""),
+      }));
+    }
+  }, [selectedTenantId]);
 
   const anteilPct = useMemo(() => {
     const g = parseFloat(flaeche.gesamt) || 0;
