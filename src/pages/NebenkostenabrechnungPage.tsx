@@ -2,6 +2,8 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import jsPDF from "jspdf";
 import { useUser } from "@/contexts/UserContext";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Mail, Loader2 } from "lucide-react";
 
 /* ─── Types ─── */
 interface Vermieter {
