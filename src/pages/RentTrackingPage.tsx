@@ -264,6 +264,7 @@ const RentTrackingPage = () => {
   };
 
   const markAsPaid = async (id: string) => {
+    const payment = payments.find(p => p.id === id);
     const { error } = await supabase
       .from("rent_payments")
       .update({ status: "bezahlt", paid_at: new Date().toISOString() })
@@ -273,6 +274,39 @@ const RentTrackingPage = () => {
     } else {
       toast.success("Als bezahlt markiert!");
       loadPayments();
+
+      // Send payment confirmation email to tenant
+      if (payment) {
+        try {
+          // Find tenant profile by name match to get email
+          const { data: tenantProfile } = await supabase
+            .from("profiles")
+            .select("email")
+            .eq("name", payment.tenant_name)
+            .eq("role", "tenant")
+            .maybeSingle();
+
+          if (tenantProfile?.email) {
+            const dueDate = new Date(payment.due_date);
+            const monat = format(dueDate, "MMMM", { locale: de });
+            const jahr = dueDate.getFullYear();
+            await supabase.functions.invoke("send-transactional-email", {
+              body: {
+                templateName: "zahlung-bestaetigung",
+                recipientEmail: tenantProfile.email,
+                idempotencyKey: `zahlung-bestaetigung-${id}`,
+                templateData: {
+                  mietObjekt: payment.unit_id,
+                  zeitraum: `${monat} ${jahr}`,
+                  betrag: formatCurrency(payment.cold_rent + payment.nebenkosten).replace("€", "").trim(),
+                },
+              },
+            });
+          }
+        } catch (err) {
+          console.error("Failed to send payment confirmation email:", err);
+        }
+      }
     }
   };
 
