@@ -151,6 +151,7 @@ const RentTrackingPage = () => {
           paid_at: d.paid_at,
           status: d.status,
           created_at: d.created_at,
+          reminder_sent_at: d.reminder_sent_at || null,
         }))
       );
     }
