@@ -158,6 +158,32 @@ const DashboardPage = () => {
   return (
     <div className="space-y-10">
       <InstallPrompt />
+
+      {/* Welcome card for new registrations */}
+      {showNewUserCard && (
+        <div className="rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-8 text-center space-y-4">
+          <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+            <Building2 className="h-7 w-7 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-xl font-heading font-bold text-foreground">Willkommen bei dwello</h2>
+            <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
+              Fügen Sie jetzt Ihre erste Immobilie hinzu, um loszulegen.
+            </p>
+          </div>
+          <Link to="/properties">
+            <Button className="mt-2">
+              <Building2 className="h-4 w-4 mr-2" /> Immobilie hinzufügen
+            </Button>
+          </Link>
+          <button
+            className="block mx-auto text-xs text-muted-foreground hover:underline mt-2"
+            onClick={() => { setShowNewUserCard(false); setIsNewUser(false); }}
+          >
+            Später
+          </button>
+        </div>
+      )}
       <LandlordOnboarding open={showOnboarding && !showWelcome} onComplete={() => setShowOnboarding(false)} />
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-primary/8 to-primary/3 border p-10">
