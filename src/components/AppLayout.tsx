@@ -1,25 +1,32 @@
-import { Outlet, Navigate } from "react-router-dom";
+import { Outlet, Navigate, useNavigate } from "react-router-dom";
 import AppSidebar from "./AppSidebar";
 import MobileNav from "./MobileNav";
+import DemoBanner from "./DemoBanner";
 import { useUser } from "@/contexts/UserContext";
+import { useDemo } from "@/contexts/DemoContext";
 
 const AppLayout = () => {
   const { user, isLoading } = useUser();
+  const { isDemo } = useDemo();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  // In demo mode, skip auth check
+  if (!isDemo) {
+    if (isLoading) {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      );
+    }
 
-  if (!user) {
-    return <Navigate to="/" replace />;
+    if (!user) {
+      return <Navigate to="/" replace />;
+    }
   }
 
   return (
     <div className="min-h-screen bg-background">
+      <DemoBanner />
       {/* Desktop sidebar */}
       <div className="hidden md:block" aria-hidden="true">
         <AppSidebar />

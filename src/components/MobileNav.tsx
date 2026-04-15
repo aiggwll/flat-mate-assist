@@ -1,5 +1,6 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
+import { useDemo } from "@/contexts/DemoContext";
 import { useState } from "react";
 import {
   LayoutDashboard,
@@ -13,6 +14,7 @@ import {
   Receipt,
   FolderOpen,
   Store,
+  RotateCcw,
 } from "lucide-react";
 import DwelloLogo from "./DwelloLogo";
 import {
@@ -44,8 +46,25 @@ const MobileNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { userName, userRole, gender, signOut } = useUser();
+  const { isDemo, demoName, demoRole, resetDemo } = useDemo();
   const [open, setOpen] = useState(false);
-  const initials = userName ? userName.split(" ").map(n => n[0]).join("").toUpperCase() : "??";
+
+  const displayName = isDemo ? (demoName || "Demo-Nutzer") : (userName || "Eigentümer");
+  const displayRole = isDemo
+    ? (demoRole === "tenant" ? "Mieter" : "Vermieter")
+    : (userRole === "tenant" ? "Mieter" : gender === "Frau" ? "Eigentümerin" : gender === "Herr" ? "Eigentümer" : "Vermieter");
+  const initials = displayName.split(" ").map(n => n[0]).join("").toUpperCase() || "??";
+
+  const handleLogout = async () => {
+    setOpen(false);
+    if (isDemo) {
+      resetDemo();
+      navigate("/");
+    } else {
+      await signOut();
+      navigate("/");
+    }
+  };
 
   return (
     <>
@@ -82,17 +101,24 @@ const MobileNav = () => {
               })}
             </nav>
             <div className="absolute bottom-0 left-0 right-0 p-3 border-t">
+              {isDemo && (
+                <button
+                  onClick={() => { setOpen(false); resetDemo(); navigate("/"); }}
+                  className="flex items-center gap-2 w-full px-3 py-2 mb-2 text-xs text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Demo zurücksetzen
+                </button>
+              )}
               <div className="flex items-center gap-3 px-3 py-2.5">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">
                   {initials}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{userName || "Eigentümer"}</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {userRole === "tenant" ? "Mieter" : gender === "Frau" ? "Eigentümerin" : gender === "Herr" ? "Eigentümer" : "Vermieter"}
-                  </p>
+                  <p className="text-sm font-medium text-foreground truncate">{displayName}</p>
+                  <p className="text-xs text-muted-foreground truncate">{displayRole}</p>
                 </div>
-                <button onClick={async () => { setOpen(false); await signOut(); navigate("/"); }} className="text-muted-foreground hover:text-foreground transition-colors">
+                <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground transition-colors">
                   <LogOut className="h-4 w-4" />
                 </button>
               </div>

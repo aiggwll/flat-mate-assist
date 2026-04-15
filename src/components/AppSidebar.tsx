@@ -1,5 +1,6 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
+import { useDemo } from "@/contexts/DemoContext";
 import { useMessages } from "@/contexts/MessagesContext";
 import {
   LayoutDashboard,
@@ -12,6 +13,7 @@ import {
   FolderOpen,
   Store,
   LogOut,
+  RotateCcw,
 } from "lucide-react";
 import DwelloLogo from "./DwelloLogo";
 
@@ -31,10 +33,25 @@ const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { userName, userRole, gender, signOut } = useUser();
+  const { isDemo, demoName, demoRole, resetDemo } = useDemo();
   const { messages } = useMessages();
-  const initials = userName ? userName.split(" ").map(n => n[0]).join("").toUpperCase() : "??";
 
+  const displayName = isDemo ? (demoName || "Demo-Nutzer") : (userName || "Eigentümer");
+  const displayRole = isDemo
+    ? (demoRole === "tenant" ? "Mieter" : "Vermieter")
+    : (userRole === "tenant" ? "Mieter" : gender === "Frau" ? "Eigentümerin" : gender === "Herr" ? "Eigentümer" : "Vermieter");
+  const initials = displayName.split(" ").map(n => n[0]).join("").toUpperCase() || "??";
   const unreadCount = messages.filter(m => !m.read && m.to === userName).length;
+
+  const handleLogout = async () => {
+    if (isDemo) {
+      resetDemo();
+      navigate("/");
+    } else {
+      await signOut();
+      navigate("/");
+    }
+  };
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-64 bg-sidebar border-r border-sidebar-border flex flex-col z-50">
@@ -69,18 +86,25 @@ const AppSidebar = () => {
         })}
       </nav>
 
-      <div className="p-3 border-t border-sidebar-border">
+      <div className="p-3 border-t border-sidebar-border space-y-2">
+        {isDemo && (
+          <button
+            onClick={() => { resetDemo(); navigate("/"); }}
+            className="flex items-center gap-2 w-full px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Demo zurücksetzen
+          </button>
+        )}
         <div className="flex items-center gap-3 px-3 py-2.5">
           <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">
             {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-sidebar-foreground truncate">{userName || "Eigentümer"}</p>
-            <p className="text-xs text-sidebar-muted truncate">
-              {userRole === "tenant" ? "Mieter" : gender === "Frau" ? "Eigentümerin" : gender === "Herr" ? "Eigentümer" : "Vermieter"}
-            </p>
+            <p className="text-sm font-medium text-sidebar-foreground truncate">{displayName}</p>
+            <p className="text-xs text-sidebar-muted truncate">{displayRole}</p>
           </div>
-          <button onClick={async () => { await signOut(); navigate("/"); }} className="text-sidebar-muted hover:text-sidebar-foreground transition-colors">
+          <button onClick={handleLogout} className="text-sidebar-muted hover:text-sidebar-foreground transition-colors">
             <LogOut className="h-4 w-4" />
           </button>
         </div>
