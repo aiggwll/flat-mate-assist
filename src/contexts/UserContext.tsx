@@ -175,14 +175,15 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         await supabase.auth.signOut();
         if (mounted) {
           localStorage.removeItem("rememberMe");
+          setIsLoading(false);
         }
+        initialSessionHandled = true;
+        return;
       }
 
       const { data: { session } } = await supabase.auth.getSession();
       initialSessionHandled = true;
       await handleAuthUser(session?.user ?? null);
-      // Ensure loading ends even without a session (test phase)
-      if (mounted) setIsLoading(false);
     };
 
     // 2. Listen for subsequent auth changes (sign-in, sign-out, token refresh)

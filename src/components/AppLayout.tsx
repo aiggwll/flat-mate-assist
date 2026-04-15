@@ -14,10 +14,9 @@ const AppLayout = () => {
     );
   }
 
-  // Auth check disabled for test phase
-  // if (!user) {
-  //   return <Navigate to="/" replace />;
-  // }
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
