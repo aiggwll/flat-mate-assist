@@ -66,12 +66,18 @@ const DemoLoginPage = () => {
           Dies ist eine Testversion. Alle Daten sind Beispieldaten.
         </p>
 
-        <div className="mt-6 pt-4 border-t border-border">
+        <div className="mt-6 pt-4 border-t border-border space-y-2">
+          <button
+            onClick={() => navigate("/register")}
+            className="w-full text-sm text-accent font-semibold hover:underline"
+          >
+            Jetzt kostenlos registrieren →
+          </button>
           <button
             onClick={() => navigate("/login")}
-            className="w-full text-sm text-accent font-medium hover:underline"
+            className="w-full text-sm text-muted-foreground hover:underline"
           >
-            Mit bestehendem Konto anmelden →
+            Mit bestehendem Konto anmelden
           </button>
         </div>
       </div>

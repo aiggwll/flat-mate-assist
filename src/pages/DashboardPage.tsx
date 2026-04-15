@@ -31,7 +31,7 @@ interface InvitationInfo {
 }
 
 const DashboardPage = () => {
-  const { userName, userProperties, salutation, userId, setupWizardComplete, gender, lastName } = useUser();
+  const { userName, userProperties, salutation, userId, setupWizardComplete, gender, lastName, isNewUser, setIsNewUser } = useUser();
   const { messages } = useMessages();
   const displayName = userName || "Eigentümer";
   const effectiveSalutation = salutation || "sie";
@@ -46,6 +46,7 @@ const DashboardPage = () => {
   const [showWelcome, setShowWelcome] = useState(
     () => !localStorage.getItem("dwello_welcome_seen") && !setupWizardComplete
   );
+  const [showNewUserCard, setShowNewUserCard] = useState(isNewUser && userProperties.length === 0);
 
   useEffect(() => {
     const loadTenants = async () => {
