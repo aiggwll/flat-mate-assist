@@ -5,7 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { UserProvider } from "./contexts/UserContext";
 import { MessagesProvider } from "./contexts/MessagesContext";
+import { DemoProvider } from "./contexts/DemoContext";
 import AppLayout from "./components/AppLayout";
+import DemoLoginPage from "./pages/DemoLoginPage";
 import LoginPage from "./pages/LoginPage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -30,13 +32,14 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <DemoProvider>
       <UserProvider>
       <MessagesProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<LoginPage />} />
+            <Route path="/" element={<DemoLoginPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
@@ -63,6 +66,7 @@ const App = () => (
         </BrowserRouter>
       </MessagesProvider>
       </UserProvider>
+      </DemoProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
