@@ -30,10 +30,23 @@ const PropertiesPage = () => {
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
   const { userProperties, setUserProperties, salutation } = useUser();
 
+  const isDemo = typeof window !== "undefined" && localStorage.getItem("dwello_demo") === "true";
+
+  const persistDemoProperties = (props: typeof userProperties) => {
+    localStorage.setItem("dwello_demo_properties", JSON.stringify(props));
+  };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setIsDeleting(true);
     try {
+      if (isDemo) {
+        const next = userProperties.filter(p => p.id !== deleteTarget.id);
+        setUserProperties(next);
+        persistDemoProperties(next);
+        toast.success("Immobilie wurde gelöscht");
+        return;
+      }
       // Delete related data in correct order
       // 1. utility_results & utility_costs via utility_periods
       const { data: periods } = await supabase
@@ -68,6 +81,23 @@ const PropertiesPage = () => {
   const handleSubmit = async () => {
     if (!form.address || !form.city || !form.zipCode) {
       toast.error("Bitte füllen Sie mindestens Adresse, Stadt und PLZ aus.");
+      return;
+    }
+    if (isDemo) {
+      const newProp = {
+        id: `demo-${Date.now()}`,
+        address: form.address.trim(),
+        city: form.city.trim(),
+        zipCode: form.zipCode.trim(),
+        yearBuilt: parseInt(form.yearBuilt) || 0,
+        units: parseInt(form.units) || 1,
+      };
+      const next = [...userProperties, newProp];
+      setUserProperties(next);
+      persistDemoProperties(next);
+      toast.success("Immobilie erfolgreich angelegt!");
+      setOpen(false);
+      setForm({ address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "", totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "" });
       return;
     }
     const { data: { user } } = await supabase.auth.getUser();

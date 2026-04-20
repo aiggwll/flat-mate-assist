@@ -138,6 +138,22 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Load demo properties from localStorage if in demo mode
+  useEffect(() => {
+    const isDemo = localStorage.getItem("dwello_demo") === "true";
+    if (!isDemo) return;
+    try {
+      const stored = localStorage.getItem("dwello_demo_properties");
+      if (stored) {
+        const parsed = JSON.parse(stored) as UserProperty[];
+        setUserPropertiesState(parsed);
+      }
+    } catch (e) {
+      console.error("Error loading demo properties:", e);
+    }
+    setIsLoading(false);
+  }, []);
+
   useEffect(() => {
     let mounted = true;
     let initialSessionHandled = false;
