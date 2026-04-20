@@ -191,11 +191,13 @@ const DashboardPage = () => {
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-primary/8 to-primary/3 border p-10">
         <div className="relative z-10">
-          <p className="text-sm text-muted-foreground font-medium">Willkommen zurück</p>
+          <p className="text-sm text-muted-foreground font-medium">
+            {propertyCount === 0 ? "Willkommen" : "Willkommen zurück"}
+          </p>
           <h1 className="text-3xl font-heading font-extrabold text-foreground mt-1">
-            {salutation === "du"
+            {effectiveSalutation === "du"
               ? `Hallo, ${displayName.split(" ")[0]}!`
-              : gender && lastName
+              : gender && lastName && !isDemo
                 ? `Guten Tag, ${gender === "Frau" ? "Frau" : "Herr"} ${lastName}.`
                 : `Guten Tag, ${displayName.split(" ")[0]}.`}
           </h1>

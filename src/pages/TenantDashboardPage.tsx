@@ -53,8 +53,12 @@ const TenantDashboardPage = () => {
   const { addMessage } = useMessages();
   const navigate = useNavigate();
 
+  // Demo name fallback (read directly from localStorage to avoid coupling)
+  const demoName = typeof window !== "undefined" ? localStorage.getItem("dwello_demo_name") || "" : "";
+  const isDemo = typeof window !== "undefined" ? localStorage.getItem("dwello_demo") === "true" : false;
+
   // Load real property info from profile
-  const [propertyAddress, setPropertyAddress] = useState("Wird geladen...");
+  const [propertyAddress, setPropertyAddress] = useState("");
   const [unitLabel, setUnitLabel] = useState("");
   const [ownerName, setOwnerName] = useState("Ihr Vermieter");
   const [profileLoaded, setProfileLoaded] = useState(false);
@@ -119,7 +123,7 @@ const TenantDashboardPage = () => {
     loadProfile();
   }, [userId]);
 
-  const tenantName = userName || "Mieter";
+  const tenantName = userName || demoName || "Mieter";
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
 
