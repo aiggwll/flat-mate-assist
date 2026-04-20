@@ -209,7 +209,13 @@ const DashboardPage = () => {
                 : `Sie verwalten ${propertyCount} ${propertyCount === 1 ? "Immobilie" : "Immobilien"} mit ${totalUnits} ${totalUnits === 1 ? "Wohneinheit" : "Wohneinheiten"}.`)}
           </p>
           <div className="mt-5">
-            <InviteTenantDialog />
+            {propertyCount === 0 ? (
+              <Button disabled title="Bitte zuerst eine Immobilie anlegen" className="cursor-not-allowed opacity-60">
+                <UserPlus className="h-4 w-4 mr-2" /> Mieter einladen
+              </Button>
+            ) : (
+              <InviteTenantDialog />
+            )}
           </div>
         </div>
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/3" />
