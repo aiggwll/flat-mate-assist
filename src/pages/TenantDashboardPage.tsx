@@ -295,9 +295,9 @@ const TenantDashboardPage = () => {
               </div>
             ) : (
               <div>
-                <h2 className="text-lg font-heading font-bold text-foreground">Wohnung wird zugewiesen</h2>
+                <h2 className="text-lg font-heading font-bold text-foreground">Wohnungsdaten noch nicht verfügbar</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Ihre Wohnung wird gerade zugewiesen — bitte kontaktieren Sie Ihren Vermieter.
+                  Wohnungsdaten werden nach der Einladung durch Ihren Vermieter angezeigt.
                 </p>
               </div>
             )}
