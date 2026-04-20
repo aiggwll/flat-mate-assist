@@ -87,13 +87,20 @@ const NebenkostenabrechnungPage = () => {
 
   const currentYear = new Date().getFullYear();
 
-  // Pre-fill Vermieter from logged-in user
+  // Pre-fill Vermieter from logged-in user OR demo localStorage values
   useEffect(() => {
-    if (!userName) return;
-    setVermieter((prev) => ({
-      ...prev,
-      name: prev.name || userName,
-    }));
+    const demoName = typeof window !== "undefined" ? localStorage.getItem("dwello_demo_name") || "" : "";
+    const isDemo = typeof window !== "undefined" ? localStorage.getItem("dwello_demo") === "true" : false;
+
+    setVermieter((prev) => {
+      const next = { ...prev };
+      if (!next.name) next.name = userName || demoName || "";
+      // Demo placeholder address if nothing pre-filled yet (real users get it from property below)
+      if (isDemo && !next.strasse) next.strasse = "Musterstraße 1";
+      if (isDemo && !next.plz) next.plz = "10115";
+      if (isDemo && !next.ort) next.ort = "Berlin";
+      return next;
+    });
   }, [userName]);
 
   // Pre-fill Vermieter address from first property (owner's address proxy)
