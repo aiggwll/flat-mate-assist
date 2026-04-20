@@ -33,11 +33,17 @@ interface InvitationInfo {
 
 const DashboardPage = () => {
   const { userName, userProperties, salutation, userId, setupWizardComplete, gender, lastName, isNewUser, setIsNewUser } = useUser();
-  const { isDemo, demoName, formal } = useDemo();
+  const { isDemo, demoName, formal, onboardingDone } = useDemo();
   const { messages } = useMessages();
-  // Prefer demo name in demo mode, then real user name, then fallback
-  const displayName = (isDemo && demoName) ? demoName : (userName || "Eigentümer");
+  // Live-read from localStorage as fallback to avoid stale context state
+  const lsDemoName = typeof window !== "undefined" ? (localStorage.getItem("dwello_demo_name") || "") : "";
+  const lsOnboarded = typeof window !== "undefined" ? localStorage.getItem("dwello_demo_onboarded") === "true" : false;
+  // Prefer demo name in demo mode (context first, then localStorage), then real user name, then fallback
+  const displayName = isDemo
+    ? (demoName || lsDemoName || "Eigentümer")
+    : (userName || "Eigentümer");
   const effectiveSalutation = isDemo ? (formal ? "sie" : "du") : (salutation || "sie");
+  const isFirstVisit = isDemo ? !lsOnboarded && !onboardingDone : userProperties.length === 0;
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
   const [invitations, setInvitations] = useState<InvitationInfo[]>([]);
   const [resending, setResending] = useState<string | null>(null);
