@@ -401,7 +401,7 @@ const RentTrackingPage = () => {
         </div>
         <div className="bg-card rounded-xl border p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">Offen</p>
-          <p className="text-2xl font-bold text-red-600 mt-1">{formatCurrency(totalOpen)}</p>
+          <p className={`text-2xl font-bold mt-1 ${totalOpen > 0 ? "text-red-600" : "text-foreground"}`}>{formatCurrency(totalOpen)}</p>
         </div>
       </div>
 
