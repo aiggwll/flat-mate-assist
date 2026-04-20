@@ -48,6 +48,7 @@ export const DemoProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("dwello_demo_name");
     localStorage.removeItem("dwello_demo_formal");
     localStorage.removeItem("dwello_demo_onboarded");
+    localStorage.removeItem("dwello_demo_properties");
     setIsDemo(false);
     setDemoRole(null);
     setDemoName("");
