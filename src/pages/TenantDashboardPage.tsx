@@ -66,7 +66,13 @@ const TenantDashboardPage = () => {
 
   useEffect(() => {
     const loadProfile = async () => {
-      if (!userId) return;
+      if (!userId) {
+        // Demo mode or no auth — show neutral fallback immediately
+        setPropertyAddress("");
+        setHasProperty(false);
+        setProfileLoaded(true);
+        return;
+      }
       // Retry up to 3 times to handle race condition after registration
       let attempts = 0;
       let profileData: any = null;
@@ -289,9 +295,9 @@ const TenantDashboardPage = () => {
               </div>
             ) : (
               <div>
-                <h2 className="text-lg font-heading font-bold text-foreground">Wohnung wird zugewiesen</h2>
+                <h2 className="text-lg font-heading font-bold text-foreground">Wohnungsdaten noch nicht verfügbar</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Ihre Wohnung wird gerade zugewiesen — bitte kontaktieren Sie Ihren Vermieter.
+                  Wohnungsdaten werden nach der Einladung durch Ihren Vermieter angezeigt.
                 </p>
               </div>
             )}

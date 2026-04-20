@@ -135,7 +135,12 @@ const RentTrackingPage = () => {
   }, []);
 
   const loadPayments = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      // Demo mode or no auth — show empty state immediately, don't hang
+      setPayments([]);
+      setLoading(false);
+      return;
+    }
     const { data, error } = await supabase
       .from("rent_payments")
       .select("*")
