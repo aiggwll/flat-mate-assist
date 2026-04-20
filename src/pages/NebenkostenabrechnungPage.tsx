@@ -11,6 +11,7 @@ interface Vermieter {
   strasse: string;
   plz: string;
   ort: string;
+  email: string;
 }
 
 interface Mieter {
@@ -76,7 +77,7 @@ const NebenkostenabrechnungPage = () => {
   const [selectedTenantId, setSelectedTenantId] = useState<string>("");
   const [tenantsLoading, setTenantsLoading] = useState(false);
 
-  const [vermieter, setVermieter] = useState<Vermieter>({ name: "", strasse: "", plz: "", ort: "" });
+  const [vermieter, setVermieter] = useState<Vermieter>({ name: "", strasse: "", plz: "", ort: "", email: "" });
   const [mieter, setMieter] = useState<Mieter>({ name: "", objektStrasse: "", objektPlzOrt: "", von: "", bis: "" });
   const [flaeche, setFlaeche] = useState<Flaeche>({ gesamt: "", wohnung: "" });
   const [positionen, setPositionen] = useState<Position[]>(
@@ -87,13 +88,20 @@ const NebenkostenabrechnungPage = () => {
 
   const currentYear = new Date().getFullYear();
 
-  // Pre-fill Vermieter from logged-in user
+  // Pre-fill Vermieter from logged-in user OR demo localStorage values
   useEffect(() => {
-    if (!userName) return;
-    setVermieter((prev) => ({
-      ...prev,
-      name: prev.name || userName,
-    }));
+    const demoName = typeof window !== "undefined" ? localStorage.getItem("dwello_demo_name") || "" : "";
+    const isDemo = typeof window !== "undefined" ? localStorage.getItem("dwello_demo") === "true" : false;
+
+    setVermieter((prev) => {
+      const next = { ...prev };
+      if (!next.name) next.name = userName || demoName || "";
+      // Demo placeholder address if nothing pre-filled yet (real users get it from property below)
+      if (isDemo && !next.strasse) next.strasse = "Musterstraße 1";
+      if (isDemo && !next.plz) next.plz = "10115";
+      if (isDemo && !next.ort) next.ort = "Berlin";
+      return next;
+    });
   }, [userName]);
 
   // Pre-fill Vermieter address from first property (owner's address proxy)
@@ -467,14 +475,14 @@ const NebenkostenabrechnungPage = () => {
   const sectionTitle = "text-base font-semibold text-[#1a1a1a] mb-4";
 
   return (
-    <div className="min-h-screen" style={{ background: "#F5F3EF", fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ fontFamily: "'DM Sans', sans-serif" }}>
       {/* Google Fonts */}
       <link
         href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap"
         rel="stylesheet"
       />
 
-      <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
+      <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">
           <h1
@@ -559,6 +567,10 @@ const NebenkostenabrechnungPage = () => {
             <div>
               <label className={labelCls}>Ort</label>
               <input className={inputCls} value={vermieter.ort} onChange={(e) => setVermieter({ ...vermieter, ort: e.target.value })} placeholder="Berlin" />
+            </div>
+            <div className="md:col-span-2">
+              <label className={labelCls}>E-Mail</label>
+              <input type="email" className={inputCls} value={vermieter.email} onChange={(e) => setVermieter({ ...vermieter, email: e.target.value })} placeholder="vermieter@example.com" />
             </div>
           </div>
         </section>

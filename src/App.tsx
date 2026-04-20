@@ -54,12 +54,11 @@ const App = () => (
               <Route path="/tax-folder" element={<TaxFolderPage />} />
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/damages" element={<DamagesPage />} />
-              
+              <Route path="/nebenkostenabrechnung" element={<NebenkostenabrechnungPage />} />
               <Route path="/marketplace" element={<MarketplacePage />} />
             </Route>
             <Route path="/tenant-dashboard" element={<TenantDashboardPage />} />
             <Route path="/unsubscribe" element={<UnsubscribePage />} />
-            <Route path="/nebenkostenabrechnung" element={<NebenkostenabrechnungPage />} />
             <Route path="/confirm-payment" element={<ConfirmPaymentPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
