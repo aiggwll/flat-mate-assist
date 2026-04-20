@@ -529,20 +529,27 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
               <FileText className="h-7 w-7 text-primary" />
             </div>
             <p className="text-base font-semibold text-foreground">
-              {sal(salutation, "Noch keine Dokumente hochgeladen", "Noch keine Dokumente hochgeladen")}
+              {role === "tenant" ? "Noch keine Dokumente geteilt" : "Noch keine Dokumente hochgeladen"}
             </p>
-            <p className="text-[13px] text-muted-foreground max-w-sm mx-auto">
-              {role === "tenant"
-                ? sal(salutation, "Laden Sie Dokumente hoch oder warten Sie auf Ihren Vermieter.", "Lade Dokumente hoch oder warte auf deinen Vermieter.")
-                : sal(salutation,
+            {role === "owner" && (
+              <>
+                <p className="text-[13px] text-muted-foreground max-w-sm mx-auto">
+                  {sal(salutation,
                     "Laden Sie wichtige Unterlagen hoch — sicher gespeichert und jederzeit abrufbar.",
                     "Lade wichtige Unterlagen hoch — sicher gespeichert und jederzeit abrufbar."
                   )}
-            </p>
-            <Button className="mt-2 max-w-[240px] w-full" onClick={triggerFileInput} disabled={uploading}>
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-              Dokument hochladen
-            </Button>
+                </p>
+                <Button className="mt-2 max-w-[240px] w-full" onClick={triggerFileInput} disabled={uploading}>
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                  Dokument hochladen
+                </Button>
+              </>
+            )}
+            {role === "tenant" && (
+              <p className="text-[13px] text-muted-foreground max-w-sm mx-auto">
+                Sobald Ihr Vermieter Dokumente teilt, erscheinen sie hier.
+              </p>
+            )}
           </div>
         </div>
       ) : role === "tenant" ? (
