@@ -475,14 +475,14 @@ const NebenkostenabrechnungPage = () => {
   const sectionTitle = "text-base font-semibold text-[#1a1a1a] mb-4";
 
   return (
-    <div className="min-h-screen" style={{ background: "#F5F3EF", fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ fontFamily: "'DM Sans', sans-serif" }}>
       {/* Google Fonts */}
       <link
         href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap"
         rel="stylesheet"
       />
 
-      <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
+      <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">
           <h1
@@ -567,6 +567,10 @@ const NebenkostenabrechnungPage = () => {
             <div>
               <label className={labelCls}>Ort</label>
               <input className={inputCls} value={vermieter.ort} onChange={(e) => setVermieter({ ...vermieter, ort: e.target.value })} placeholder="Berlin" />
+            </div>
+            <div className="md:col-span-2">
+              <label className={labelCls}>E-Mail</label>
+              <input type="email" className={inputCls} value={vermieter.email} onChange={(e) => setVermieter({ ...vermieter, email: e.target.value })} placeholder="vermieter@example.com" />
             </div>
           </div>
         </section>
