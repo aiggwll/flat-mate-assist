@@ -8,6 +8,7 @@ import SetupChecklist from "@/components/SetupChecklist";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/contexts/UserContext";
+import { useDemo } from "@/contexts/DemoContext";
 import { useMessages } from "@/contexts/MessagesContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -32,9 +33,11 @@ interface InvitationInfo {
 
 const DashboardPage = () => {
   const { userName, userProperties, salutation, userId, setupWizardComplete, gender, lastName, isNewUser, setIsNewUser } = useUser();
+  const { isDemo, demoName, formal } = useDemo();
   const { messages } = useMessages();
-  const displayName = userName || "Eigentümer";
-  const effectiveSalutation = salutation || "sie";
+  // Prefer demo name in demo mode, then real user name, then fallback
+  const displayName = (isDemo && demoName) ? demoName : (userName || "Eigentümer");
+  const effectiveSalutation = isDemo ? (formal ? "sie" : "du") : (salutation || "sie");
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
   const [invitations, setInvitations] = useState<InvitationInfo[]>([]);
   const [resending, setResending] = useState<string | null>(null);
