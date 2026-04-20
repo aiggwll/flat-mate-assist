@@ -178,8 +178,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setSalutationState("sie");
         setGender(null);
         setLastName(null);
-        setUserProperties([]);
         setSetupWizardComplete(false);
+        // In demo mode, keep properties from localStorage. Otherwise clear.
+        const isDemo = localStorage.getItem("dwello_demo") === "true";
+        if (!isDemo) {
+          setUserProperties([]);
+        } else {
+          try {
+            const stored = localStorage.getItem("dwello_demo_properties");
+            setUserPropertiesState(stored ? (JSON.parse(stored) as UserProperty[]) : []);
+          } catch {
+            setUserPropertiesState([]);
+          }
+        }
       }
       if (mounted) setIsLoading(false);
     };
