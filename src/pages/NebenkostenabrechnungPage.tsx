@@ -11,6 +11,7 @@ interface Vermieter {
   strasse: string;
   plz: string;
   ort: string;
+  email: string;
 }
 
 interface Mieter {
@@ -76,7 +77,7 @@ const NebenkostenabrechnungPage = () => {
   const [selectedTenantId, setSelectedTenantId] = useState<string>("");
   const [tenantsLoading, setTenantsLoading] = useState(false);
 
-  const [vermieter, setVermieter] = useState<Vermieter>({ name: "", strasse: "", plz: "", ort: "" });
+  const [vermieter, setVermieter] = useState<Vermieter>({ name: "", strasse: "", plz: "", ort: "", email: "" });
   const [mieter, setMieter] = useState<Mieter>({ name: "", objektStrasse: "", objektPlzOrt: "", von: "", bis: "" });
   const [flaeche, setFlaeche] = useState<Flaeche>({ gesamt: "", wohnung: "" });
   const [positionen, setPositionen] = useState<Position[]>(
