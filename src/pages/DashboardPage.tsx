@@ -33,11 +33,17 @@ interface InvitationInfo {
 
 const DashboardPage = () => {
   const { userName, userProperties, salutation, userId, setupWizardComplete, gender, lastName, isNewUser, setIsNewUser } = useUser();
-  const { isDemo, demoName, formal } = useDemo();
+  const { isDemo, demoName, formal, onboardingDone } = useDemo();
   const { messages } = useMessages();
-  // Prefer demo name in demo mode, then real user name, then fallback
-  const displayName = (isDemo && demoName) ? demoName : (userName || "Eigentümer");
+  // Live-read from localStorage as fallback to avoid stale context state
+  const lsDemoName = typeof window !== "undefined" ? (localStorage.getItem("dwello_demo_name") || "") : "";
+  const lsOnboarded = typeof window !== "undefined" ? localStorage.getItem("dwello_demo_onboarded") === "true" : false;
+  // Prefer demo name in demo mode (context first, then localStorage), then real user name, then fallback
+  const displayName = isDemo
+    ? (demoName || lsDemoName || "Eigentümer")
+    : (userName || "Eigentümer");
   const effectiveSalutation = isDemo ? (formal ? "sie" : "du") : (salutation || "sie");
+  const isFirstVisit = isDemo ? !lsOnboarded && !onboardingDone : userProperties.length === 0;
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
   const [invitations, setInvitations] = useState<InvitationInfo[]>([]);
   const [resending, setResending] = useState<string | null>(null);
@@ -192,7 +198,7 @@ const DashboardPage = () => {
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-primary/8 to-primary/3 border p-10">
         <div className="relative z-10">
           <p className="text-sm text-muted-foreground font-medium">
-            {propertyCount === 0 ? "Willkommen" : "Willkommen zurück"}
+            {isFirstVisit ? "Willkommen" : "Willkommen zurück"}
           </p>
           <h1 className="text-3xl font-heading font-extrabold text-foreground mt-1">
             {effectiveSalutation === "du"
