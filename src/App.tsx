@@ -52,6 +52,7 @@ const App = () => (
               <Route path="/documents" element={<DocumentsPage />} />
               <Route path="/utility-billing" element={<UtilityBillingPage />} />
               <Route path="/tax-folder" element={<TaxFolderPage />} />
+              <Route path="/steuermappe" element={<Navigate to="/tax-folder" replace />} />
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/damages" element={<DamagesPage />} />
               <Route path="/nebenkostenabrechnung" element={<NebenkostenabrechnungPage />} />
