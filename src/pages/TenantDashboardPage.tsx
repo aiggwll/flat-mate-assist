@@ -66,7 +66,13 @@ const TenantDashboardPage = () => {
 
   useEffect(() => {
     const loadProfile = async () => {
-      if (!userId) return;
+      if (!userId) {
+        // Demo mode or no auth — show neutral fallback immediately
+        setPropertyAddress("");
+        setHasProperty(false);
+        setProfileLoaded(true);
+        return;
+      }
       // Retry up to 3 times to handle race condition after registration
       let attempts = 0;
       let profileData: any = null;
