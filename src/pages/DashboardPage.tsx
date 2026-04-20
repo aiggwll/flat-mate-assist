@@ -8,6 +8,7 @@ import SetupChecklist from "@/components/SetupChecklist";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/contexts/UserContext";
+import { useDemo } from "@/contexts/DemoContext";
 import { useMessages } from "@/contexts/MessagesContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -32,9 +33,11 @@ interface InvitationInfo {
 
 const DashboardPage = () => {
   const { userName, userProperties, salutation, userId, setupWizardComplete, gender, lastName, isNewUser, setIsNewUser } = useUser();
+  const { isDemo, demoName, formal } = useDemo();
   const { messages } = useMessages();
-  const displayName = userName || "Eigentümer";
-  const effectiveSalutation = salutation || "sie";
+  // Prefer demo name in demo mode, then real user name, then fallback
+  const displayName = (isDemo && demoName) ? demoName : (userName || "Eigentümer");
+  const effectiveSalutation = isDemo ? (formal ? "sie" : "du") : (salutation || "sie");
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
   const [invitations, setInvitations] = useState<InvitationInfo[]>([]);
   const [resending, setResending] = useState<string | null>(null);
@@ -188,11 +191,13 @@ const DashboardPage = () => {
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-primary/8 to-primary/3 border p-10">
         <div className="relative z-10">
-          <p className="text-sm text-muted-foreground font-medium">Willkommen zurück</p>
+          <p className="text-sm text-muted-foreground font-medium">
+            {propertyCount === 0 ? "Willkommen" : "Willkommen zurück"}
+          </p>
           <h1 className="text-3xl font-heading font-extrabold text-foreground mt-1">
-            {salutation === "du"
+            {effectiveSalutation === "du"
               ? `Hallo, ${displayName.split(" ")[0]}!`
-              : gender && lastName
+              : gender && lastName && !isDemo
                 ? `Guten Tag, ${gender === "Frau" ? "Frau" : "Herr"} ${lastName}.`
                 : `Guten Tag, ${displayName.split(" ")[0]}.`}
           </h1>
