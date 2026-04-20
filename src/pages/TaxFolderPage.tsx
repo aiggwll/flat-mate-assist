@@ -65,7 +65,17 @@ const TaxFolderPage = () => {
   const [dragOver, setDragOver] = useState(false);
 
   const loadDocuments = useCallback(async () => {
-    if (!userId) return;
+    const isDemo = typeof window !== "undefined" && localStorage.getItem("dwello_demo") === "true";
+    if (isDemo) {
+      setDocuments([]);
+      setLoading(false);
+      return;
+    }
+    if (!userId) {
+      setDocuments([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     let query = supabase
       .from("tax_documents")
