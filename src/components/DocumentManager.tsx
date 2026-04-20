@@ -108,7 +108,12 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
 
   const fetchDocs = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      // Demo mode or no auth — show empty state immediately, don't hang
+      setDocs([]);
+      setLoading(false);
+      return;
+    }
     let query;
     if (role === "tenant" && propertyId) {
       // Tenants see only shared docs for their property
@@ -126,6 +131,12 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
   }, [propertyId, role]);
 
   useEffect(() => { fetchDocs(); }, [fetchDocs]);
+
+  // Safety net: never hang on the loading spinner indefinitely
+  useEffect(() => {
+    const timeout = setTimeout(() => setLoading(false), 3000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   const triggerFileInput = () => fileInputRef.current?.click();
 
