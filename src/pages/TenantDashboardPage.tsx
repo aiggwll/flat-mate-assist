@@ -169,7 +169,12 @@ const TenantDashboardPage = () => {
   }, [userId]);
 
   const handleRundgangUpload = async () => {
-    if (!userId) return;
+    // Demo mode: simulate success without DB write
+    if (!userId) {
+      setRundgangSubmitted(true);
+      toast.success("Ihr Rundgang wurde eingereicht!");
+      return;
+    }
     await supabase.from("cashback_transactions" as any).insert({
       tenant_id: userId,
       amount: 100,
@@ -512,17 +517,31 @@ const TenantDashboardPage = () => {
                         accept="video/*,image/*,.mp4,.mov"
                         multiple
                         className="hidden"
-                        onChange={() => handleRundgangUpload()}
+                        onChange={(e) => {
+                          const files = e.target.files;
+                          if (!files || files.length === 0) return;
+                          handleRundgangUpload();
+                          e.target.value = "";
+                        }}
                       />
                     </label>
-                    <button
-                      onClick={() => handleRundgangUpload()}
-                      className="flex-1 flex flex-col items-center justify-center py-10 border-2 border-dashed border-accent/40 rounded-lg hover:border-accent bg-accent/5 transition-colors"
-                    >
+                    <label className="flex-1 flex flex-col items-center justify-center cursor-pointer py-10 border-2 border-dashed border-accent/40 rounded-lg hover:border-accent bg-accent/5 transition-colors">
                       <Camera className="h-6 w-6 text-accent mb-2" />
                       <span className="text-sm font-medium text-accent">Video aufnehmen</span>
                       <span className="text-xs text-accent/60 mt-1">Direkt mit der Kamera</span>
-                    </button>
+                      <input
+                        type="file"
+                        accept="video/*,image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={(e) => {
+                          const files = e.target.files;
+                          if (!files || files.length === 0) return;
+                          handleRundgangUpload();
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
                   </div>
 
                   {/* Tips */}
