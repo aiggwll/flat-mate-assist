@@ -157,6 +157,10 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
 
   const handleUploadConfirm = async () => {
     if (pendingFiles.length === 0) return;
+    if (role === "tenant" && !propertyId) {
+      toast.error("Noch keine Immobilie zugewiesen – bitte Ihren Vermieter kontaktieren.");
+      return;
+    }
     setUploading(true);
 
     const { data: { user } } = await supabase.auth.getUser();
