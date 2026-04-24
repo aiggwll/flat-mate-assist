@@ -43,6 +43,37 @@ const AppSidebar = () => {
   const initials = displayName.split(" ").map(n => n[0]).join("").toUpperCase() || "??";
   const unreadCount = messages.filter(m => !m.read && m.to === userName).length;
 
+  // Role detection: demo overrides; otherwise use Supabase profile role
+  const effectiveRole: "owner" | "tenant" = isDemo
+    ? (demoRole === "tenant" ? "tenant" : "owner")
+    : (userRole === "tenant" ? "tenant" : "owner");
+  const isTenant = effectiveRole === "tenant";
+
+  // Role-based sidebar theming via CSS variable overrides (HSL, semantic tokens)
+  const sidebarThemeStyle = isTenant
+    ? {
+        // Dunkelblau – Mieter
+        ["--sidebar-background" as any]: "214 50% 18%",
+        ["--sidebar-foreground" as any]: "210 30% 96%",
+        ["--sidebar-muted" as any]: "212 20% 70%",
+        ["--sidebar-accent" as any]: "214 45% 26%",
+        ["--sidebar-accent-foreground" as any]: "0 0% 100%",
+        ["--sidebar-border" as any]: "214 35% 24%",
+      }
+    : {
+        // Dunkelgrün – Vermieter
+        ["--sidebar-background" as any]: "153 35% 16%",
+        ["--sidebar-foreground" as any]: "150 25% 96%",
+        ["--sidebar-muted" as any]: "150 15% 70%",
+        ["--sidebar-accent" as any]: "153 35% 24%",
+        ["--sidebar-accent-foreground" as any]: "0 0% 100%",
+        ["--sidebar-border" as any]: "153 30% 22%",
+      };
+
+  const badgeClass = isTenant
+    ? "bg-blue-500/90 text-white"
+    : "bg-emerald-600/90 text-white";
+
   const handleLogout = async () => {
     if (isDemo) {
       resetDemo();
@@ -54,9 +85,19 @@ const AppSidebar = () => {
   };
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-64 bg-sidebar border-r border-sidebar-border flex flex-col z-50">
-      <div className="p-6 pb-5">
-        <DwelloLogo variant="light" size="md" />
+    <aside
+      className="fixed left-0 top-0 bottom-0 w-64 bg-sidebar border-r border-sidebar-border flex flex-col z-50"
+      style={sidebarThemeStyle}
+      data-role={effectiveRole}
+    >
+      <div className="p-6 pb-4 space-y-3">
+        <DwelloLogo variant="dark" size="md" />
+        <span
+          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide ${badgeClass}`}
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-white/90" />
+          {isTenant ? "Mieter" : "Vermieter"}
+        </span>
       </div>
 
       <nav className="flex-1 px-3 space-y-1">
