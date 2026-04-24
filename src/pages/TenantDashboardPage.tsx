@@ -169,7 +169,12 @@ const TenantDashboardPage = () => {
   }, [userId]);
 
   const handleRundgangUpload = async () => {
-    if (!userId) return;
+    // Demo mode: simulate success without DB write
+    if (!userId) {
+      setRundgangSubmitted(true);
+      toast.success("Ihr Rundgang wurde eingereicht!");
+      return;
+    }
     await supabase.from("cashback_transactions" as any).insert({
       tenant_id: userId,
       amount: 100,
