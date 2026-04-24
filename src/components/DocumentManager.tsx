@@ -430,21 +430,36 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
                 </SelectContent>
               </Select>
             </div>
-            {userProperties.length > 0 && (
+            {role === "tenant" ? (
               <div className="space-y-1.5">
-                <Label className="text-sm">Immobilie (optional)</Label>
-                <Select value={uploadPropertyId} onValueChange={setUploadPropertyId}>
-                  <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="Keine Zuordnung" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Keine Zuordnung</SelectItem>
-                    {userProperties.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.address}, {p.city}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label className="text-sm">Immobilie</Label>
+                {propertyId ? (
+                  <div className="h-9 px-3 flex items-center rounded-md border bg-muted/30 text-sm text-foreground">
+                    {propertyId}
+                  </div>
+                ) : (
+                  <div className="rounded-md border border-dashed bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+                    Noch keine Immobilie zugewiesen – bitte Ihren Vermieter kontaktieren.
+                  </div>
+                )}
               </div>
+            ) : (
+              userProperties.length > 0 && (
+                <div className="space-y-1.5">
+                  <Label className="text-sm">Immobilie (optional)</Label>
+                  <Select value={uploadPropertyId} onValueChange={setUploadPropertyId}>
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue placeholder="Keine Zuordnung" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Keine Zuordnung</SelectItem>
+                      {userProperties.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>{p.address}, {p.city}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )
             )}
             {pendingFiles.length > 1 && (
               <p className="text-xs text-muted-foreground">{pendingFiles.length} Dateien ausgewählt – Kategorie gilt für alle.</p>
