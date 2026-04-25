@@ -1,18 +1,22 @@
 import { useState } from "react";
-import { marketplaceListings, type MarketplaceListing } from "@/lib/dummy-data";
-import { MapPin, TrendingUp, Maximize2, X, Mail } from "lucide-react";
+import { Store, Sparkles, Bell, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { formatCurrency } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 const MarketplacePage = () => {
-  const [selected, setSelected] = useState<MarketplaceListing | null>(null);
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleNotify = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !email.includes("@")) {
+      toast.error("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+      return;
+    }
+    setSubmitted(true);
+    toast.success("Wir benachrichtigen Sie, sobald der Marktplatz live geht.");
+  };
 
   return (
     <div className="space-y-6">
@@ -21,105 +25,52 @@ const MarketplacePage = () => {
         <p className="text-muted-foreground text-sm mt-1">Exklusive Immobilienangebote für registrierte Eigentümer</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {marketplaceListings.map(listing => (
-          <div key={listing.id} className="bg-card rounded-xl border p-5 hover:border-accent/50 hover:shadow-md transition-all">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <MapPin className="h-3.5 w-3.5" />
-                <span className="text-sm">{listing.city}</span>
-              </div>
-              <div className="flex items-center gap-1 text-accent font-semibold text-sm">
-                <TrendingUp className="h-3.5 w-3.5" />
-                {listing.rentYield}% Rendite
-              </div>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="max-w-md w-full text-center space-y-6 bg-card border rounded-2xl p-10 shadow-sm">
+          <div className="relative inline-flex mx-auto">
+            <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Store className="h-10 w-10 text-primary" />
             </div>
-            <h3 className="font-heading font-semibold text-foreground text-lg">{listing.address}</h3>
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{listing.description}</p>
-            <div className="flex items-center justify-between mt-4 pt-3 border-t">
-              <div className="space-y-0.5">
-                <p className="text-xl font-heading font-bold text-foreground">{formatCurrency(listing.price)}</p>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Maximize2 className="h-3 w-3" />
-                  {listing.livingArea} m²
-                </div>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => setSelected(listing)}>Details ansehen</Button>
-            </div>
+            <Sparkles className="h-5 w-5 text-accent absolute -top-1 -right-1" />
           </div>
-        ))}
-      </div>
 
-      {/* Detail Modal */}
-      <Dialog open={!!selected} onOpenChange={(open) => { if (!open) setSelected(null); }}>
-        <DialogContent className="sm:max-w-lg">
-          {selected && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-xl font-heading">{selected.address}</DialogTitle>
-              </DialogHeader>
+          <div className="space-y-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide bg-primary/10 text-primary">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+              Coming Soon
+            </span>
+            <h2 className="text-2xl font-heading font-bold text-foreground pt-2">Off-Market Marktplatz</h2>
+            <p className="text-sm font-medium text-accent">Demnächst verfügbar</p>
+          </div>
 
-              {/* Placeholder image */}
-              <div className="w-full h-48 bg-muted rounded-xl flex items-center justify-center">
-                <MapPin className="h-12 w-12 text-muted-foreground/30" />
-              </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Exklusive Immobilienangebote für registrierte Eigentümer – der Marktplatz wird in Kürze freigeschaltet.
+          </p>
 
-              <div className="space-y-4">
-                {/* Key stats */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-muted/50 rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Kaufpreis</p>
-                    <p className="text-sm font-bold text-foreground mt-0.5">{formatCurrency(selected.price)}</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Wohnfläche</p>
-                    <p className="text-sm font-bold text-foreground mt-0.5">{selected.livingArea} m²</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Rendite</p>
-                    <p className="text-sm font-bold text-accent mt-0.5">{selected.rentYield}%</p>
-                  </div>
-                </div>
-
-                {/* Location */}
-                <div>
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Standort</p>
-                  <div className="flex items-center gap-1.5 text-sm text-foreground">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    {selected.address}, {selected.city}
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Beschreibung</p>
-                  <p className="text-sm text-foreground leading-relaxed">{selected.description}</p>
-                </div>
-
-                {/* Price per sqm */}
-                <div className="bg-muted/30 rounded-lg p-3 flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Preis pro m²</span>
-                  <span className="text-sm font-semibold text-foreground">
-                    {formatCurrency(Math.round(selected.price / selected.livingArea))}
-                  </span>
-                </div>
-
-                {/* CTA */}
-                <Button
-                  className="w-full"
-                  onClick={() => {
-                    toast.success("Ihre Anfrage wurde versendet. Wir melden uns bei Ihnen.");
-                    setSelected(null);
-                  }}
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Interesse bekunden
-                </Button>
-              </div>
-            </>
+          {submitted ? (
+            <div className="flex items-center justify-center gap-2 text-sm text-primary font-medium pt-2">
+              <Check className="h-4 w-4" />
+              Sie werden benachrichtigt
+            </div>
+          ) : (
+            <form onSubmit={handleNotify} className="flex flex-col sm:flex-row gap-2 pt-2">
+              <Input
+                type="email"
+                name="notify-email"
+                id="notify-email"
+                placeholder="Ihre E-Mail-Adresse"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="flex-1"
+              />
+              <Button type="submit" size="default">
+                <Bell className="h-4 w-4" />
+                Benachrichtigen
+              </Button>
+            </form>
           )}
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
     </div>
   );
 };
