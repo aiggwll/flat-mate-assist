@@ -192,6 +192,11 @@ const UtilityBillingPage = () => {
 
   const handleFinalize = async () => {
     if (!selectedPropertyId) return;
+    const hasCostPosition = costs.some(c => (parseFloat(c.amount) || 0) > 0);
+    if (!hasCostPosition) {
+      toast.error("Bitte geben Sie mindestens eine Betriebskostenposition ein.");
+      return;
+    }
     setSaving(true);
     try {
       let periodId = existingPeriodId;
@@ -822,7 +827,7 @@ const UtilityBillingPage = () => {
             </p>
             <Button
               onClick={handleFinalize}
-              disabled={saving || totalCosts === 0}
+              disabled={saving}
               className="rounded-xl h-11 px-8 font-semibold"
             >
               {saving ? "Wird gespeichert..." : "Abrechnung speichern"}
