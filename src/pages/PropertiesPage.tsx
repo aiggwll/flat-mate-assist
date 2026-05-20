@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, MapPin, Plus, Calendar, Layers, Trash2 } from "lucide-react";
+import { Building2, MapPin, Plus, Calendar, Layers, Trash2, Pencil } from "lucide-react";
 import { sal } from "@/lib/salutation";
 import EmptyState from "@/components/EmptyState";
 import { Link } from "react-router-dom";
@@ -183,7 +183,7 @@ const PropertiesPage = () => {
           <h1 className="text-3xl font-heading font-bold text-foreground">Immobilien</h1>
           <p className="text-muted-foreground text-sm mt-1.5">{userProperties.length} {userProperties.length === 1 ? "Immobilie" : "Immobilien"} verwaltet</p>
         </div>
-        <Button onClick={() => setOpen(true)} size="lg">
+          <Button onClick={() => { setEditId(null); setOpen(true); }} size="lg">
           <Plus className="h-4 w-4 mr-2" />
           Neue Immobilie
         </Button>
