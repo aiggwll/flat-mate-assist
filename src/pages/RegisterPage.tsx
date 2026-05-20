@@ -175,7 +175,12 @@ const RegisterPage = () => {
   const handlePropertySubmit = async () => {
     const incomplete = properties.some(p => !p.address.trim() || !p.city.trim() || !p.zipCode.trim());
     if (incomplete) {
-      toast.error("Bitte füllen Sie mindestens Adresse, Stadt und PLZ aus.");
+      toast.error("Bitte füllen Sie Adresse, PLZ und Stadt vollständig aus.");
+      return;
+    }
+    const invalidZip = properties.some(p => !/^\d{5}$/.test(p.zipCode.trim()));
+    if (invalidZip) {
+      toast.error("Die PLZ muss genau 5 Ziffern enthalten (keine Buchstaben oder Sonderzeichen).");
       return;
     }
 
@@ -407,7 +412,7 @@ const RegisterPage = () => {
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1.5">
                       <Label className="text-xs">PLZ *</Label>
-                      <Input placeholder="10115" value={prop.zipCode} onChange={e => updateProperty(index, "zipCode", e.target.value)} className="h-9 text-sm" maxLength={5} />
+                      <Input placeholder="10115" value={prop.zipCode} onChange={e => updateProperty(index, "zipCode", e.target.value)} className="h-9 text-sm" />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs">Stadt *</Label>
