@@ -75,6 +75,28 @@ const InviteTenantDialog = ({ onSuccess, trigger }: InviteTenantDialogProps) => 
       toast.error("Bitte geben Sie die E-Mail-Adresse des Mieters ein.");
       return;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(tenantEmail.trim())) {
+      toast.error("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+      return;
+    }
+    // Duplicate check (Supabase mode only)
+    if (userId) {
+      try {
+        const { data: existing } = await supabase
+          .from("invitations" as any)
+          .select("id,status")
+          .eq("invited_by", userId)
+          .eq("email", tenantEmail.trim().toLowerCase())
+          .limit(1);
+        if (existing && existing.length > 0) {
+          toast.error(`Diese E-Mail-Adresse wurde bereits eingeladen.`);
+          return;
+        }
+      } catch (e) {
+        console.error("Duplicate check failed:", e);
+      }
+    }
     setSending(true);
     setLinkGenerated(true);
 
