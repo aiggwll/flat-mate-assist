@@ -239,7 +239,7 @@ const InviteTenantDialog = ({ onSuccess, trigger }: InviteTenantDialogProps) => 
             <Button
               onClick={handleGenerateLink}
               className="w-full gap-2"
-              disabled={!selectedProperty || !selectedUnit || !tenantName.trim() || !tenantEmail.trim() || sending}
+              disabled={sending}
             >
               {sending ? (
                 <>
