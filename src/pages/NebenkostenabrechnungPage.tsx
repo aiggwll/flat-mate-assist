@@ -228,6 +228,13 @@ const NebenkostenabrechnungPage = () => {
 
   /* ─── PDF ─── */
   const generatePDF = () => {
+    const validPositions = positionen.filter(
+      (p) => p.bezeichnung.trim() !== "" && (parseFloat(p.gesamtkosten) || 0) > 0
+    );
+    if (validPositions.length === 0) {
+      toast.error("Bitte fügen Sie mindestens eine Position mit Bezeichnung und Betrag hinzu.");
+      return;
+    }
     const doc = new jsPDF({ unit: "mm", format: "a4" });
     const W = 210;
     const ML = 25;
@@ -419,6 +426,13 @@ const NebenkostenabrechnungPage = () => {
 
   /* ─── Send via Email ─── */
   const sendAbrechnungEmail = async () => {
+    const validPositions = positionen.filter(
+      (p) => p.bezeichnung.trim() !== "" && (parseFloat(p.gesamtkosten) || 0) > 0
+    );
+    if (validPositions.length === 0) {
+      toast.error("Bitte fügen Sie mindestens eine Position mit Bezeichnung und Betrag hinzu.");
+      return;
+    }
     if (!selectedTenantId) {
       toast.error("Bitte wählen Sie zuerst einen Mieter aus.");
       return;

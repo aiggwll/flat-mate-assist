@@ -146,6 +146,18 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     const fileList = Array.from(files);
+    const allowedExt = ["pdf", "jpg", "jpeg", "png", "webp"];
+    const invalid = fileList.find((f) => {
+      const ext = f.name.split(".").pop()?.toLowerCase() || "";
+      return !allowedExt.includes(ext);
+    });
+    if (invalid) {
+      toast.error(
+        `Ungültiger Dateityp: "${invalid.name}". Erlaubt sind nur PDF, JPG, JPEG, PNG und WEBP.`
+      );
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
     setPendingFiles(fileList);
     setUploadFilename(fileList[0].name);
     if (!pendingCategoryRef.current) setUploadCategory("Sonstige Dokumente");
