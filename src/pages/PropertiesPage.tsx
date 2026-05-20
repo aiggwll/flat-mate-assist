@@ -195,7 +195,7 @@ const PropertiesPage = () => {
           headline={sal(salutation || "sie", "Legen Sie Ihre erste Immobilie an", "Leg deine erste Immobilie an")}
           subtext="Adresse, Mieter und Dokumente — alles an einem Ort."
           buttonLabel="Immobilie hinzufügen"
-          onAction={() => setOpen(true)}
+          onAction={() => { setEditId(null); setOpen(true); }}
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -352,7 +352,7 @@ const PropertiesPage = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>Abbrechen</Button>
-            <Button onClick={handleSubmit}>Immobilie anlegen</Button>
+            <Button onClick={handleSubmit}>{editId ? "Änderungen speichern" : "Immobilie anlegen"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
