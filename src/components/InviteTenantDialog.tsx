@@ -49,7 +49,7 @@ const InviteTenantDialog = ({ onSuccess, trigger }: InviteTenantDialogProps) => 
     if (!userId) return;
     try {
       await supabase.from("invitations" as any).insert({
-        email: tenantEmail.trim(),
+        email: tenantEmail.trim().toLowerCase(),
         tenant_name: tenantName.trim(),
         property_id: selectedProperty,
         unit_id: selectedUnit,
