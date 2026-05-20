@@ -1,4 +1,5 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useUser } from "@/contexts/UserContext";
 import { useDemo } from "@/contexts/DemoContext";
 import { useMessages } from "@/contexts/MessagesContext";
@@ -26,7 +27,7 @@ const navItems = [
   { to: "/documents", label: "Dokumente", icon: FileText },
   { to: "/chat", label: "Nachrichten", icon: MessageSquare },
   { to: "/damages", label: "Schäden", icon: AlertTriangle },
-  { to: "/marketplace", label: "Marktplatz", icon: Store },
+  { to: "/marketplace", label: "Marktplatz", icon: Store, comingSoon: true },
 ];
 
 const AppSidebar = () => {
@@ -101,9 +102,29 @@ const AppSidebar = () => {
       </div>
 
       <nav className="flex-1 px-3 space-y-1">
-        {navItems.map(({ to, label, icon: Icon }) => {
+        {navItems.map(({ to, label, icon: Icon, comingSoon }) => {
           const isActive = location.pathname.startsWith(to);
           const badge = to === "/chat" && unreadCount > 0 ? unreadCount : null;
+          if (comingSoon) {
+            return (
+              <button
+                key={to}
+                type="button"
+                onClick={() => toast("Marktplatz kommt bald. Wir arbeiten daran.")}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-sidebar-muted hover:text-sidebar-foreground hover:bg-muted/50 border-l-[3px] border-transparent transition-all opacity-50 text-left"
+                style={{ fontSize: '14px', fontWeight: 500 }}
+              >
+                <Icon className="h-[18px] w-[18px]" />
+                <span>{label}</span>
+                <span
+                  className="ml-auto text-white font-semibold"
+                  style={{ backgroundColor: '#2D5A3D', fontSize: '10px', borderRadius: '99px', padding: '2px 8px' }}
+                >
+                  Bald
+                </span>
+              </button>
+            );
+          }
           return (
             <NavLink
               key={to}
