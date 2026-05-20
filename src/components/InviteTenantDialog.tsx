@@ -45,6 +45,8 @@ const InviteTenantDialog = ({ onSuccess, trigger }: InviteTenantDialogProps) => 
     ? `${window.location.origin}/register?role=tenant&property=${encodeURIComponent(selectedProp?.label || "")}&unit=${encodeURIComponent(selectedUnitObj?.number || "")}&owner=${encodeURIComponent(ownerDisplayName)}&property_id=${encodeURIComponent(selectedProperty)}`
     : "";
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   const saveInvitation = async (link: string) => {
     if (!userId) return;
     try {
@@ -75,7 +77,6 @@ const InviteTenantDialog = ({ onSuccess, trigger }: InviteTenantDialogProps) => 
       toast.error("Bitte geben Sie die E-Mail-Adresse des Mieters ein.");
       return;
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(tenantEmail.trim())) {
       toast.error("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
       return;
@@ -139,8 +140,12 @@ const InviteTenantDialog = ({ onSuccess, trigger }: InviteTenantDialogProps) => 
   };
 
   const handleSendEmail = () => {
-    if (!tenantEmail) {
+    if (!tenantEmail.trim()) {
       toast.error("Bitte geben Sie eine E-Mail-Adresse ein.");
+      return;
+    }
+    if (!emailRegex.test(tenantEmail.trim())) {
+      toast.error("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
       return;
     }
     const subject = encodeURIComponent("Einladung zu Dwello");
