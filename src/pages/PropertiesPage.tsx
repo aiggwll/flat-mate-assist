@@ -18,6 +18,7 @@ import { useUser } from "@/contexts/UserContext";
 
 const PropertiesPage = () => {
   const [open, setOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({
     address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "",
     totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "",
@@ -79,44 +80,100 @@ const PropertiesPage = () => {
   };
 
   const handleSubmit = async () => {
-    if (!form.address || !form.city || !form.zipCode) {
-      toast.error("Bitte füllen Sie mindestens Adresse, Stadt und PLZ aus.");
+    if (!form.address.trim()) {
+      toast.error("Bitte geben Sie eine Adresse (Straße & Hausnummer) ein.");
+      return;
+    }
+    if (!form.zipCode.trim()) {
+      toast.error("Bitte geben Sie eine PLZ ein.");
+      return;
+    }
+    if (!/^\d{5}$/.test(form.zipCode.trim())) {
+      toast.error("Die PLZ muss genau 5 Ziffern enthalten (keine Buchstaben oder Sonderzeichen).");
+      return;
+    }
+    if (!form.city.trim()) {
+      toast.error("Bitte geben Sie eine Stadt ein.");
       return;
     }
     if (isDemo) {
-      const newProp = {
-        id: `demo-${Date.now()}`,
-        address: form.address.trim(),
-        city: form.city.trim(),
-        zipCode: form.zipCode.trim(),
-        yearBuilt: parseInt(form.yearBuilt) || 0,
-        units: parseInt(form.units) || 1,
-      };
-      const next = [...userProperties, newProp];
+      let next;
+      if (editId) {
+        next = userProperties.map(p => p.id === editId ? {
+          ...p,
+          address: form.address.trim(),
+          city: form.city.trim(),
+          zipCode: form.zipCode.trim(),
+          yearBuilt: parseInt(form.yearBuilt) || 0,
+          units: parseInt(form.units) || 1,
+        } : p);
+      } else {
+        const newProp = {
+          id: `demo-${Date.now()}`,
+          address: form.address.trim(),
+          city: form.city.trim(),
+          zipCode: form.zipCode.trim(),
+          yearBuilt: parseInt(form.yearBuilt) || 0,
+          units: parseInt(form.units) || 1,
+        };
+        next = [...userProperties, newProp];
+      }
       setUserProperties(next);
       persistDemoProperties(next);
-      toast.success("Immobilie erfolgreich angelegt!");
+      toast.success(editId ? "Immobilie aktualisiert!" : "Immobilie erfolgreich angelegt!");
       setOpen(false);
+      setEditId(null);
       setForm({ address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "", totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "" });
       return;
     }
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { toast.error("Nicht eingeloggt."); return; }
-    const { data: inserted, error } = await supabase.from("properties").insert({
-      user_id: user.id, address: form.address.trim(), city: form.city.trim(),
-      zip_code: form.zipCode.trim(), year_built: parseInt(form.yearBuilt) || 0,
-      units: parseInt(form.units) || 1,
-    }).select().single();
-    if (error) { toast.error("Fehler: " + error.message); return; }
-    if (inserted) {
-      setUserProperties([...userProperties, {
-        id: inserted.id, address: inserted.address, city: inserted.city,
-        zipCode: inserted.zip_code, yearBuilt: inserted.year_built ?? 0, units: inserted.units ?? 1,
-      }]);
+    if (editId) {
+      const { error } = await supabase.from("properties").update({
+        address: form.address.trim(), city: form.city.trim(),
+        zip_code: form.zipCode.trim(), year_built: parseInt(form.yearBuilt) || 0,
+        units: parseInt(form.units) || 1,
+      }).eq("id", editId);
+      if (error) { toast.error("Fehler: " + error.message); return; }
+      setUserProperties(userProperties.map(p => p.id === editId ? {
+        ...p,
+        address: form.address.trim(), city: form.city.trim(),
+        zipCode: form.zipCode.trim(),
+        yearBuilt: parseInt(form.yearBuilt) || 0,
+        units: parseInt(form.units) || 1,
+      } : p));
+      toast.success("Immobilie aktualisiert!");
+    } else {
+      const { data: inserted, error } = await supabase.from("properties").insert({
+        user_id: user.id, address: form.address.trim(), city: form.city.trim(),
+        zip_code: form.zipCode.trim(), year_built: parseInt(form.yearBuilt) || 0,
+        units: parseInt(form.units) || 1,
+      }).select().single();
+      if (error) { toast.error("Fehler: " + error.message); return; }
+      if (inserted) {
+        setUserProperties([...userProperties, {
+          id: inserted.id, address: inserted.address, city: inserted.city,
+          zipCode: inserted.zip_code, yearBuilt: inserted.year_built ?? 0, units: inserted.units ?? 1,
+        }]);
+      }
+      toast.success("Immobilie erfolgreich angelegt!");
     }
-    toast.success("Immobilie erfolgreich angelegt!");
     setOpen(false);
+    setEditId(null);
     setForm({ address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "", totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "" });
+  };
+
+  const openEdit = (p: typeof userProperties[number]) => {
+    setEditId(p.id);
+    setForm({
+      address: p.address || "",
+      city: p.city || "",
+      zipCode: p.zipCode || "",
+      yearBuilt: p.yearBuilt ? String(p.yearBuilt) : "",
+      units: p.units ? String(p.units) : "",
+      type: "", floors: "", totalArea: "", plotSize: "", parking: "", heating: "", energyClass: "", notes: "",
+    });
+    setOpen(true);
   };
 
   return (
@@ -178,6 +235,9 @@ const PropertiesPage = () => {
 
                 <div className="flex items-center gap-3 pt-3 border-t">
                   <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/properties/${p.id}`)}>Details</Button>
+                  <Button variant="outline" size="sm" onClick={() => openEdit(p)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                   <InviteTenantDialog />
                   <Button
                     variant="ghost"
@@ -194,10 +254,10 @@ const PropertiesPage = () => {
         </div>
       )}
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); setForm({ address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "", totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "" }); } }}>
         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Neue Immobilie anlegen</DialogTitle>
+            <DialogTitle>{editId ? "Immobilie bearbeiten" : "Neue Immobilie anlegen"}</DialogTitle>
             <DialogDescription>Geben Sie die Details der Immobilie ein.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-2">
