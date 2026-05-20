@@ -19,6 +19,7 @@ import RentTrackingPage from "./pages/RentTrackingPage";
 import ChatPage from "./pages/ChatPage";
 import DamagesPage from "./pages/DamagesPage";
 import DocumentsPage from "./pages/DocumentsPage";
+import MarketplacePage from "./pages/MarketplacePage";
 import UtilityBillingPage from "./pages/UtilityBillingPage";
 import TaxFolderPage from "./pages/TaxFolderPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/damages" element={<DamagesPage />} />
               <Route path="/nebenkostenabrechnung" element={<NebenkostenabrechnungPage />} />
+              <Route path="/marketplace" element={<MarketplacePage />} />
             </Route>
             <Route path="/tenant-dashboard" element={<TenantDashboardPage />} />
             <Route path="/unsubscribe" element={<UnsubscribePage />} />
