@@ -4,6 +4,7 @@ import type { User } from "@supabase/supabase-js";
 
 interface UserProperty {
   id: string;
+  name: string;
   address: string;
   city: string;
   zipCode: string;
@@ -100,6 +101,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       if (props) {
         setUserPropertiesState(props.map(p => ({
           id: p.id,
+          name: (p as any).name || p.address,
           address: p.address,
           city: p.city,
           zipCode: p.zip_code,
@@ -115,7 +117,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const pending = localStorage.getItem("pendingProperties");
     if (pending) {
       try {
-        const pendingRows = JSON.parse(pending) as Array<{ address: string; city: string; zip_code: string; year_built: number; units: number }>;
+        const pendingRows = JSON.parse(pending) as Array<{ name?: string; address: string; city: string; zip_code: string; year_built: number; units: number }>;
         const insertRows = pendingRows.map(r => ({ ...r, user_id: currentUser.id }));
         const { data: synced } = await supabase.from("properties").insert(insertRows).select();
         if (synced) {
@@ -124,6 +126,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             ...prev,
             ...synced.map(p => ({
               id: p.id,
+              name: (p as any).name || p.address,
               address: p.address,
               city: p.city,
               zipCode: p.zip_code,
