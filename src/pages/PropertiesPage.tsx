@@ -262,7 +262,7 @@ const PropertiesPage = () => {
         </div>
       )}
 
-      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); setForm({ address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "", totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "" }); } }}>
+      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); resetForm(); } }}>
         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editId ? "Immobilie bearbeiten" : "Neue Immobilie anlegen"}</DialogTitle>
@@ -271,6 +271,10 @@ const PropertiesPage = () => {
           <div className="grid gap-4 py-2">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Adresse</h3>
             <div className="grid gap-3">
+              <div>
+                <Label htmlFor="name">Name der Immobilie *</Label>
+                <Input id="name" placeholder="z.B. Mehrfamilienhaus Mitte" value={form.name} onChange={e => update("name", e.target.value)} />
+              </div>
               <div>
                 <Label htmlFor="address">Straße & Hausnummer *</Label>
                 <Input id="address" placeholder="z.B. Berliner Str. 42" value={form.address} onChange={e => update("address", e.target.value)} />
