@@ -190,13 +190,19 @@ const UtilityBillingPage = () => {
     setTenantRows(prev => prev.map((t, i) => i === idx ? { ...t, [field]: value } : t));
   };
 
+  const hasCostPosition = () => costs.some(c => (parseFloat(c.amount) || 0) > 0);
+
+  const validateCostPositions = () => {
+    if (!hasCostPosition()) {
+      toast.error("Bitte geben Sie mindestens eine Betriebskostenposition ein.");
+      return false;
+    }
+    return true;
+  };
+
   const handleFinalize = async () => {
     if (!selectedPropertyId) return;
-    const hasCostPosition = costs.some(c => (parseFloat(c.amount) || 0) > 0);
-    if (!hasCostPosition) {
-      toast.error("Bitte geben Sie mindestens eine Betriebskostenposition ein.");
-      return;
-    }
+    if (!validateCostPositions()) return;
     setSaving(true);
     try {
       let periodId = existingPeriodId;
@@ -449,6 +455,7 @@ const UtilityBillingPage = () => {
   }, [selectedYear, selectedProperty, costs, totalCosts, tenantResults, totalSqm, totalUnits, userName]);
 
   const handlePdfExport = useCallback(async () => {
+    if (!validateCostPositions()) return;
     const blob = await generatePdfBlob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -456,11 +463,12 @@ const UtilityBillingPage = () => {
     a.download = `Nebenkostenabrechnung_${selectedYear}.pdf`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [generatePdfBlob, selectedYear]);
+  }, [generatePdfBlob, selectedYear, costs]);
 
   // Save PDF to documents
   const handleSaveToDocuments = useCallback(async () => {
     if (!userId) return;
+    if (!validateCostPositions()) return;
     setSavingToDocuments(true);
     try {
       const blob = await generatePdfBlob();
