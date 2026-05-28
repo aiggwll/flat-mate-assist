@@ -24,6 +24,7 @@ const InviteTenantDialog = ({ onSuccess, trigger }: InviteTenantDialogProps) => 
   const [copied, setCopied] = useState(false);
   const [linkGenerated, setLinkGenerated] = useState(false);
   const [sending, setSending] = useState(false);
+  const [errors, setErrors] = useState<{ tenantName?: string; tenantEmail?: string }>({});
 
   const propertyList = userProperties.map(p => ({
     id: p.id,
@@ -65,20 +66,22 @@ const InviteTenantDialog = ({ onSuccess, trigger }: InviteTenantDialogProps) => 
   };
 
   const handleGenerateLink = async () => {
+    const nextErrors: typeof errors = {};
     if (!selectedProperty || !selectedUnit) {
       toast.error("Bitte wählen Sie eine Immobilie und Wohnung aus.");
       return;
     }
     if (!tenantName.trim()) {
-      toast.error("Bitte geben Sie den Namen des Mieters ein.");
-      return;
+      nextErrors.tenantName = "Dieses Feld ist erforderlich";
     }
     if (!tenantEmail.trim()) {
-      toast.error("Bitte geben Sie die E-Mail-Adresse des Mieters ein.");
-      return;
+      nextErrors.tenantEmail = "Dieses Feld ist erforderlich";
+    } else if (!emailRegex.test(tenantEmail.trim())) {
+      nextErrors.tenantEmail = "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
     }
-    if (!emailRegex.test(tenantEmail.trim())) {
-      toast.error("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      toast.error("Bitte prüfen Sie die markierten Felder.");
       return;
     }
     // Duplicate check (Supabase mode only)
@@ -91,7 +94,8 @@ const InviteTenantDialog = ({ onSuccess, trigger }: InviteTenantDialogProps) => 
           .eq("email", tenantEmail.trim().toLowerCase())
           .limit(1);
         if (existing && existing.length > 0) {
-          toast.error(`Diese E-Mail-Adresse wurde bereits eingeladen.`);
+          setErrors(prev => ({ ...prev, tenantEmail: "Diese E-Mail wurde bereits eingeladen" }));
+          toast.error("Diese E-Mail wurde bereits eingeladen");
           return;
         }
       } catch (e) {
@@ -161,6 +165,7 @@ const InviteTenantDialog = ({ onSuccess, trigger }: InviteTenantDialogProps) => 
     setSelectedUnit("");
     setTenantName("");
     setTenantEmail("");
+    setErrors({});
     setLinkGenerated(false);
     setCopied(false);
     setSending(false);
@@ -221,8 +226,10 @@ const InviteTenantDialog = ({ onSuccess, trigger }: InviteTenantDialogProps) => 
             <Input
               placeholder="Max Mustermann"
               value={tenantName}
-              onChange={(e) => { setTenantName(e.target.value); setLinkGenerated(false); }}
+              aria-invalid={!!errors.tenantName}
+              onChange={(e) => { setTenantName(e.target.value); setErrors(prev => ({ ...prev, tenantName: undefined })); setLinkGenerated(false); }}
             />
+            {errors.tenantName && <p className="text-xs font-medium text-destructive">{errors.tenantName}</p>}
           </div>
 
           <div className="space-y-2">
@@ -231,8 +238,10 @@ const InviteTenantDialog = ({ onSuccess, trigger }: InviteTenantDialogProps) => 
               type="email"
               placeholder="mieter@beispiel.de"
               value={tenantEmail}
-              onChange={(e) => { setTenantEmail(e.target.value); setLinkGenerated(false); }}
+              aria-invalid={!!errors.tenantEmail}
+              onChange={(e) => { setTenantEmail(e.target.value); setErrors(prev => ({ ...prev, tenantEmail: undefined })); setLinkGenerated(false); }}
             />
+            {errors.tenantEmail && <p className="text-xs font-medium text-destructive">{errors.tenantEmail}</p>}
           </div>
 
           {!linkGenerated ? (
