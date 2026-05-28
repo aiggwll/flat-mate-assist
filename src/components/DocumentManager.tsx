@@ -176,7 +176,11 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
     setUploading(true);
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setUploading(false); return; }
+    if (!user) {
+      toast.error("Upload fehlgeschlagen: Bitte melden Sie sich erneut an.");
+      setUploading(false);
+      return;
+    }
 
     try {
       for (const file of pendingFiles) {
@@ -186,7 +190,7 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
           .upload(filePath, file);
         if (uploadError) throw uploadError;
 
-        await supabase.from("documents").insert({
+        const { error: dbError } = await supabase.from("documents").insert({
           user_id: user.id,
           filename: pendingFiles.length === 1 ? uploadFilename : file.name,
           file_url: filePath,
@@ -194,13 +198,17 @@ const DocumentManager = ({ role, propertyId }: DocumentManagerProps) => {
           file_size: file.size,
           property_id: uploadPropertyId === "none" ? null : uploadPropertyId,
         });
+        if (dbError) {
+          await supabase.storage.from("documents").remove([filePath]);
+          throw dbError;
+        }
       }
       toast.success("Dokument erfolgreich hochgeladen");
       setShowUploadDialog(false);
       setPendingFiles([]);
       await fetchDocs();
     } catch (err: any) {
-      toast.error(err.message || "Upload fehlgeschlagen");
+      toast.error("Upload fehlgeschlagen: " + (err.message || "Bitte versuchen Sie es erneut."));
     } finally {
       setUploading(false);
     }
