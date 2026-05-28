@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Building2, MapPin, ArrowLeft, AlertTriangle, Plus, Camera, X, FileText, Video, Upload, Download, Eye, FolderOpen } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Building2, MapPin, ArrowLeft, Plus, Camera, X, FileText, Video, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useUser } from "@/contexts/UserContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Damage {
   id: string;
@@ -31,24 +33,43 @@ const statusColor: Record<string, string> = {
 
 const PropertyDetailPage = () => {
   const { id } = useParams();
-  const { userProperties } = useUser();
+  const navigate = useNavigate();
+  const { userProperties, setUserProperties } = useUser();
   const property = userProperties.find(p => p.id === id);
 
   const [damages, setDamages] = useState<Damage[]>([]);
   const [open, setOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [hasActiveTenants, setHasActiveTenants] = useState(false);
   const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({ title: "", description: "", category: "" as Damage["category"] | "" });
 
-  if (!property) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Immobilie nicht gefunden.</p>
-      </div>
-    );
-  }
-
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
+
+  useEffect(() => {
+    if (!property) return;
+    const loadActiveTenants = async () => {
+      try {
+        const propertyMatch = `${property.address}, ${property.city}`;
+        const { data } = await supabase
+          .from("profiles")
+          .select("user_id, property_id")
+          .eq("role", "tenant");
+        const active = (data || []).some(
+          (profile) =>
+            profile.property_id === property.id ||
+            profile.property_id === propertyMatch ||
+            (profile.property_id && property.address && profile.property_id.includes(property.address))
+        );
+        setHasActiveTenants(active);
+      } catch (e) {
+        console.error("Error checking active tenants:", e);
+      }
+    };
+    loadActiveTenants();
+  }, [property]);
 
   const handlePhotos = (files: FileList | null) => {
     if (!files) return;
@@ -89,6 +110,39 @@ const PropertyDetailPage = () => {
     setForm({ title: "", description: "", category: "" });
     setPhotos([]);
   };
+
+  const handleDeleteProperty = async () => {
+    if (!property) return;
+    setIsDeleting(true);
+    try {
+      const isDemo = typeof window !== "undefined" && localStorage.getItem("dwello_demo") === "true";
+      const next = userProperties.filter(p => p.id !== property.id);
+      if (isDemo) {
+        setUserProperties(next);
+        localStorage.setItem("dwello_demo_properties", JSON.stringify(next));
+      } else {
+        await supabase.from("profiles").update({ property_id: null, unit_id: null }).eq("property_id", property.id);
+        const { error } = await supabase.from("properties").delete().eq("id", property.id);
+        if (error) throw error;
+        setUserProperties(next);
+      }
+      toast.success("Immobilie wurde gelöscht");
+      navigate("/properties");
+    } catch (e: any) {
+      toast.error("Immobilie konnte nicht gelöscht werden: " + (e.message || "Unbekannter Fehler"));
+    } finally {
+      setIsDeleting(false);
+      setDeleteOpen(false);
+    }
+  };
+
+  if (!property) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">Immobilie nicht gefunden.</p>
+      </div>
+    );
+  }
 
   const openDamages = damages.filter(d => d.status !== "erledigt");
   const unitCount = property.units ?? 1;
@@ -163,6 +217,17 @@ const PropertyDetailPage = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      <div className="border-t pt-6">
+        <Button
+          variant="destructive"
+          className="w-full sm:w-auto gap-2"
+          onClick={() => setDeleteOpen(true)}
+        >
+          <Trash2 className="h-4 w-4" />
+          Immobilie löschen
+        </Button>
+      </div>
 
       {/* Report Damage Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
@@ -242,6 +307,29 @@ const PropertyDetailPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Immobilie löschen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {hasActiveTenants
+                ? "Diese Immobilie hat noch aktive Mieter. Trotzdem löschen?"
+                : `Möchten Sie „${property.name || property.address}“ wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteProperty}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Wird gelöscht…" : "Trotzdem löschen"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

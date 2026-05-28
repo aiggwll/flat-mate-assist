@@ -23,12 +23,18 @@ const PropertiesPage = () => {
     name: "", address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "",
     totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "",
   });
+  const [errors, setErrors] = useState<{ name?: string; address?: string; zipCode?: string; city?: string }>({});
 
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; address: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const navigate = useNavigate();
-  const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key: string, value: string) => {
+    setForm(prev => ({ ...prev, [key]: value }));
+    if (["name", "address", "zipCode", "city"].includes(key)) {
+      setErrors(prev => ({ ...prev, [key]: undefined }));
+    }
+  };
   const { userProperties, setUserProperties, salutation } = useUser();
   const resetForm = () => setForm({ name: "", address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "", totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "" });
 
@@ -81,24 +87,15 @@ const PropertiesPage = () => {
   };
 
   const handleSubmit = async () => {
-    if (!form.name.trim()) {
-      toast.error("Bitte geben Sie einen Namen für die Immobilie ein.");
-      return;
-    }
-    if (!form.address.trim()) {
-      toast.error("Bitte geben Sie eine Adresse (Straße & Hausnummer) ein.");
-      return;
-    }
-    if (!form.zipCode.trim()) {
-      toast.error("Bitte geben Sie eine PLZ ein.");
-      return;
-    }
-    if (!/^\d{5}$/.test(form.zipCode.trim())) {
-      toast.error("Die PLZ muss genau 5 Ziffern enthalten (keine Buchstaben oder Sonderzeichen).");
-      return;
-    }
-    if (!form.city.trim()) {
-      toast.error("Bitte geben Sie eine Stadt ein.");
+    const nextErrors: typeof errors = {};
+    if (!form.name.trim()) nextErrors.name = "Dieses Feld ist erforderlich";
+    if (!form.address.trim()) nextErrors.address = "Dieses Feld ist erforderlich";
+    if (!form.zipCode.trim()) nextErrors.zipCode = "Dieses Feld ist erforderlich";
+    else if (!/^\d{5}$/.test(form.zipCode.trim())) nextErrors.zipCode = "PLZ muss genau 5 Ziffern enthalten";
+    if (!form.city.trim()) nextErrors.city = "Dieses Feld ist erforderlich";
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      toast.error("Bitte prüfen Sie die markierten Pflichtfelder.");
       return;
     }
     if (isDemo) {
@@ -130,6 +127,7 @@ const PropertiesPage = () => {
       toast.success(editId ? "Immobilie aktualisiert!" : "Immobilie erfolgreich angelegt!");
       setOpen(false);
       setEditId(null);
+      setErrors({});
       resetForm();
       return;
     }
@@ -167,11 +165,13 @@ const PropertiesPage = () => {
     }
     setOpen(false);
     setEditId(null);
+    setErrors({});
     resetForm();
   };
 
   const openEdit = (p: typeof userProperties[number]) => {
     setEditId(p.id);
+    setErrors({});
     setForm({
       name: p.name || p.address || "",
       address: p.address || "",
@@ -184,6 +184,9 @@ const PropertiesPage = () => {
     setOpen(true);
   };
 
+  const FieldError = ({ message }: { message?: string }) =>
+    message ? <p className="mt-1 text-xs font-medium text-destructive">{message}</p> : null;
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -191,7 +194,7 @@ const PropertiesPage = () => {
           <h1 className="text-3xl font-heading font-bold text-foreground">Immobilien</h1>
           <p className="text-muted-foreground text-sm mt-1.5">{userProperties.length} {userProperties.length === 1 ? "Immobilie" : "Immobilien"} verwaltet</p>
         </div>
-          <Button onClick={() => { setEditId(null); setOpen(true); }} size="lg">
+          <Button onClick={() => { setEditId(null); setErrors({}); setOpen(true); }} size="lg">
           <Plus className="h-4 w-4 mr-2" />
           Neue Immobilie
         </Button>
@@ -203,7 +206,7 @@ const PropertiesPage = () => {
           headline={sal(salutation || "sie", "Legen Sie Ihre erste Immobilie an", "Leg deine erste Immobilie an")}
           subtext="Adresse, Mieter und Dokumente — alles an einem Ort."
           buttonLabel="Immobilie hinzufügen"
-          onAction={() => { setEditId(null); setOpen(true); }}
+          onAction={() => { setEditId(null); setErrors({}); setOpen(true); }}
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -263,7 +266,7 @@ const PropertiesPage = () => {
         </div>
       )}
 
-      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); resetForm(); } }}>
+      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); setErrors({}); resetForm(); } }}>
         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editId ? "Immobilie bearbeiten" : "Neue Immobilie anlegen"}</DialogTitle>
@@ -274,20 +277,24 @@ const PropertiesPage = () => {
             <div className="grid gap-3">
               <div>
                 <Label htmlFor="name">Name der Immobilie *</Label>
-                <Input id="name" placeholder="z.B. Mehrfamilienhaus Mitte" value={form.name} onChange={e => update("name", e.target.value)} />
+                <Input id="name" aria-invalid={!!errors.name} placeholder="z.B. Mehrfamilienhaus Mitte" value={form.name} onChange={e => update("name", e.target.value)} />
+                <FieldError message={errors.name} />
               </div>
               <div>
                 <Label htmlFor="address">Straße & Hausnummer *</Label>
-                <Input id="address" placeholder="z.B. Berliner Str. 42" value={form.address} onChange={e => update("address", e.target.value)} />
+                <Input id="address" aria-invalid={!!errors.address} placeholder="z.B. Berliner Str. 42" value={form.address} onChange={e => update("address", e.target.value)} />
+                <FieldError message={errors.address} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="zipCode">PLZ *</Label>
-                  <Input id="zipCode" placeholder="z.B. 10115" value={form.zipCode} onChange={e => update("zipCode", e.target.value)} />
+                  <Input id="zipCode" aria-invalid={!!errors.zipCode} placeholder="z.B. 10115" value={form.zipCode} onChange={e => update("zipCode", e.target.value)} />
+                  <FieldError message={errors.zipCode} />
                 </div>
                 <div>
                   <Label htmlFor="city">Stadt *</Label>
-                  <Input id="city" placeholder="z.B. Berlin" value={form.city} onChange={e => update("city", e.target.value)} />
+                  <Input id="city" aria-invalid={!!errors.city} placeholder="z.B. Berlin" value={form.city} onChange={e => update("city", e.target.value)} />
+                  <FieldError message={errors.city} />
                 </div>
               </div>
             </div>

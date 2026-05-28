@@ -232,7 +232,7 @@ const NebenkostenabrechnungPage = () => {
       (p) => p.bezeichnung.trim() !== "" && (parseFloat(p.gesamtkosten) || 0) > 0
     );
     if (validPositions.length === 0) {
-      toast.error("Bitte fügen Sie mindestens eine Position mit Bezeichnung und Betrag hinzu.");
+      toast.error("Bitte fügen Sie mindestens eine Betriebskostenposition hinzu");
       return;
     }
     const doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -430,7 +430,7 @@ const NebenkostenabrechnungPage = () => {
       (p) => p.bezeichnung.trim() !== "" && (parseFloat(p.gesamtkosten) || 0) > 0
     );
     if (validPositions.length === 0) {
-      toast.error("Bitte fügen Sie mindestens eine Position mit Bezeichnung und Betrag hinzu.");
+      toast.error("Bitte fügen Sie mindestens eine Betriebskostenposition hinzu");
       return;
     }
     if (!selectedTenantId) {
