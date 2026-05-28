@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Building2, MapPin, ArrowLeft, AlertTriangle, Plus, Camera, X, FileText, Video, Upload, Download, Eye, FolderOpen } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Building2, MapPin, ArrowLeft, Plus, Camera, X, FileText, Video, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useUser } from "@/contexts/UserContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Damage {
   id: string;
@@ -31,11 +33,14 @@ const statusColor: Record<string, string> = {
 
 const PropertyDetailPage = () => {
   const { id } = useParams();
-  const { userProperties } = useUser();
+  const navigate = useNavigate();
+  const { userProperties, setUserProperties } = useUser();
   const property = userProperties.find(p => p.id === id);
 
   const [damages, setDamages] = useState<Damage[]>([]);
   const [open, setOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({ title: "", description: "", category: "" as Damage["category"] | "" });
@@ -90,9 +95,34 @@ const PropertyDetailPage = () => {
     setPhotos([]);
   };
 
+  const handleDeleteProperty = async () => {
+    if (!property) return;
+    setIsDeleting(true);
+    try {
+      const isDemo = typeof window !== "undefined" && localStorage.getItem("dwello_demo") === "true";
+      const next = userProperties.filter(p => p.id !== property.id);
+      if (isDemo) {
+        setUserProperties(next);
+        localStorage.setItem("dwello_demo_properties", JSON.stringify(next));
+      } else {
+        const { error } = await supabase.from("properties").delete().eq("id", property.id);
+        if (error) throw error;
+        setUserProperties(next);
+      }
+      toast.success("Immobilie wurde gelöscht");
+      navigate("/properties");
+    } catch (e: any) {
+      toast.error("Immobilie konnte nicht gelöscht werden: " + (e.message || "Unbekannter Fehler"));
+    } finally {
+      setIsDeleting(false);
+      setDeleteOpen(false);
+    }
+  };
+
   const openDamages = damages.filter(d => d.status !== "erledigt");
   const unitCount = property.units ?? 1;
   const units = Array.from({ length: unitCount }, (_, i) => ({ id: `${i + 1}`, number: `${i + 1}` }));
+  const hasActiveTenants = false;
 
   return (
     <div className="space-y-6">
