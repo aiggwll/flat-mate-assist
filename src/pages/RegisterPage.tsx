@@ -410,6 +410,10 @@ const RegisterPage = () => {
                     </div>
                   )}
                   <div className="space-y-1.5">
+                    <Label className="text-xs">Name *</Label>
+                    <Input placeholder="z.B. Mehrfamilienhaus Mitte" value={prop.name} onChange={e => updateProperty(index, "name", e.target.value)} className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
                     <Label className="text-xs">Adresse *</Label>
                     <Input placeholder="z.B. Berliner Str. 42" value={prop.address} onChange={e => updateProperty(index, "address", e.target.value)} className="h-9 text-sm" />
                   </div>
