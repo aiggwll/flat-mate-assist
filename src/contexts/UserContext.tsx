@@ -118,7 +118,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     if (pending) {
       try {
         const pendingRows = JSON.parse(pending) as Array<{ name?: string; address: string; city: string; zip_code: string; year_built: number; units: number }>;
-        const insertRows = pendingRows.map(r => ({ ...r, user_id: currentUser.id }));
+        const insertRows = pendingRows.map(r => ({ ...r, name: r.name?.trim() || r.address, user_id: currentUser.id }));
         const { data: synced } = await supabase.from("properties").insert(insertRows).select();
         if (synced) {
           localStorage.removeItem("pendingProperties");
@@ -148,8 +148,16 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     try {
       const stored = localStorage.getItem("dwello_demo_properties");
       if (stored) {
-        const parsed = JSON.parse(stored) as UserProperty[];
-        setUserPropertiesState(parsed);
+        const parsed = JSON.parse(stored) as Partial<UserProperty>[];
+        setUserPropertiesState(parsed.map(p => ({
+          id: p.id || `demo-${Date.now()}`,
+          name: p.name || p.address || "Immobilie",
+          address: p.address || "",
+          city: p.city || "",
+          zipCode: p.zipCode || "",
+          yearBuilt: p.yearBuilt ?? 0,
+          units: p.units ?? 1,
+        })));
       }
     } catch (e) {
       console.error("Error loading demo properties:", e);
@@ -189,7 +197,16 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         } else {
           try {
             const stored = localStorage.getItem("dwello_demo_properties");
-            setUserPropertiesState(stored ? (JSON.parse(stored) as UserProperty[]) : []);
+            const parsed = stored ? (JSON.parse(stored) as Partial<UserProperty>[]) : [];
+            setUserPropertiesState(parsed.map(p => ({
+              id: p.id || `demo-${Date.now()}`,
+              name: p.name || p.address || "Immobilie",
+              address: p.address || "",
+              city: p.city || "",
+              zipCode: p.zipCode || "",
+              yearBuilt: p.yearBuilt ?? 0,
+              units: p.units ?? 1,
+            })));
           } catch {
             setUserPropertiesState([]);
           }
