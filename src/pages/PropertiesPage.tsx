@@ -217,7 +217,7 @@ const PropertiesPage = () => {
                       <Building2 className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-heading font-semibold text-foreground">{p.address}</h3>
+                      <h3 className="text-lg font-heading font-semibold text-foreground">{p.name || p.address}</h3>
                       <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
                         <MapPin className="h-3 w-3" />
                         <span className="text-xs">{p.zipCode} {p.city}</span>
