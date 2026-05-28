@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 type Role = "owner" | "tenant";
 
 interface PropertyForm {
+  name: string;
   address: string;
   city: string;
   zipCode: string;
@@ -20,7 +21,7 @@ interface PropertyForm {
   units: string;
 }
 
-const emptyProperty: PropertyForm = { address: "", city: "", zipCode: "", yearBuilt: "", units: "1" };
+const emptyProperty: PropertyForm = { name: "", address: "", city: "", zipCode: "", yearBuilt: "", units: "1" };
 
 const RegisterPage = () => {
   const [searchParams] = useSearchParams();
@@ -173,9 +174,9 @@ const RegisterPage = () => {
   };
 
   const handlePropertySubmit = async () => {
-    const incomplete = properties.some(p => !p.address.trim() || !p.city.trim() || !p.zipCode.trim());
+    const incomplete = properties.some(p => !p.name.trim() || !p.address.trim() || !p.city.trim() || !p.zipCode.trim());
     if (incomplete) {
-      toast.error("Bitte füllen Sie Adresse, PLZ und Stadt vollständig aus.");
+      toast.error("Bitte füllen Sie Name, Adresse, PLZ und Stadt vollständig aus.");
       return;
     }
     const invalidZip = properties.some(p => !/^\d{5}$/.test(p.zipCode.trim()));
@@ -195,6 +196,7 @@ const RegisterPage = () => {
     }
 
     const rows = properties.map(p => ({
+      name: p.name.trim(),
       address: p.address.trim(),
       city: p.city.trim(),
       zip_code: p.zipCode.trim(),
@@ -207,6 +209,7 @@ const RegisterPage = () => {
       toast.info("Immobilien werden nach dem nächsten Login synchronisiert.");
       setUserProperties(rows.map((r, i) => ({
         id: `pending-${i}`,
+        name: r.name,
         address: r.address,
         city: r.city,
         zipCode: r.zip_code,
@@ -226,6 +229,7 @@ const RegisterPage = () => {
     if (inserted) {
       setUserProperties(inserted.map(p => ({
         id: p.id,
+        name: (p as any).name || p.address,
         address: p.address,
         city: p.city,
         zipCode: p.zip_code,
