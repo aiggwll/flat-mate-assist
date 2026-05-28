@@ -221,7 +221,7 @@ const RegisterPage = () => {
     }
 
     const insertRows = rows.map(r => ({ ...r, user_id: currentUser!.id }));
-    const { data: inserted, error } = await supabase.from("properties").insert(insertRows).select();
+    const { data: inserted, error } = await supabase.from("properties").insert(insertRows as any).select();
     if (error) {
       toast.error("Fehler beim Speichern: " + error.message);
       return;
