@@ -23,12 +23,18 @@ const PropertiesPage = () => {
     name: "", address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "",
     totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "",
   });
+  const [errors, setErrors] = useState<{ name?: string; address?: string; zipCode?: string; city?: string }>({});
 
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; address: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const navigate = useNavigate();
-  const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key: string, value: string) => {
+    setForm(prev => ({ ...prev, [key]: value }));
+    if (["name", "address", "zipCode", "city"].includes(key)) {
+      setErrors(prev => ({ ...prev, [key]: undefined }));
+    }
+  };
   const { userProperties, setUserProperties, salutation } = useUser();
   const resetForm = () => setForm({ name: "", address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "", totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "" });
 
@@ -81,24 +87,15 @@ const PropertiesPage = () => {
   };
 
   const handleSubmit = async () => {
-    if (!form.name.trim()) {
-      toast.error("Bitte geben Sie einen Namen für die Immobilie ein.");
-      return;
-    }
-    if (!form.address.trim()) {
-      toast.error("Bitte geben Sie eine Adresse (Straße & Hausnummer) ein.");
-      return;
-    }
-    if (!form.zipCode.trim()) {
-      toast.error("Bitte geben Sie eine PLZ ein.");
-      return;
-    }
-    if (!/^\d{5}$/.test(form.zipCode.trim())) {
-      toast.error("Die PLZ muss genau 5 Ziffern enthalten (keine Buchstaben oder Sonderzeichen).");
-      return;
-    }
-    if (!form.city.trim()) {
-      toast.error("Bitte geben Sie eine Stadt ein.");
+    const nextErrors: typeof errors = {};
+    if (!form.name.trim()) nextErrors.name = "Dieses Feld ist erforderlich";
+    if (!form.address.trim()) nextErrors.address = "Dieses Feld ist erforderlich";
+    if (!form.zipCode.trim()) nextErrors.zipCode = "Dieses Feld ist erforderlich";
+    else if (!/^\d{5}$/.test(form.zipCode.trim())) nextErrors.zipCode = "PLZ muss genau 5 Ziffern enthalten";
+    if (!form.city.trim()) nextErrors.city = "Dieses Feld ist erforderlich";
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      toast.error("Bitte prüfen Sie die markierten Pflichtfelder.");
       return;
     }
     if (isDemo) {
