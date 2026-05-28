@@ -46,14 +46,6 @@ const PropertyDetailPage = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({ title: "", description: "", category: "" as Damage["category"] | "" });
 
-  if (!property) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Immobilie nicht gefunden.</p>
-      </div>
-    );
-  }
-
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
 
   useEffect(() => {
@@ -129,6 +121,7 @@ const PropertyDetailPage = () => {
         setUserProperties(next);
         localStorage.setItem("dwello_demo_properties", JSON.stringify(next));
       } else {
+        await supabase.from("profiles").update({ property_id: null, unit_id: null }).eq("property_id", property.id);
         const { error } = await supabase.from("properties").delete().eq("id", property.id);
         if (error) throw error;
         setUserProperties(next);
@@ -142,6 +135,14 @@ const PropertyDetailPage = () => {
       setDeleteOpen(false);
     }
   };
+
+  if (!property) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">Immobilie nicht gefunden.</p>
+      </div>
+    );
+  }
 
   const openDamages = damages.filter(d => d.status !== "erledigt");
   const unitCount = property.units ?? 1;
