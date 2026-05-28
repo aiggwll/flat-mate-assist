@@ -218,6 +218,17 @@ const PropertyDetailPage = () => {
         </TabsContent>
       </Tabs>
 
+      <div className="border-t pt-6">
+        <Button
+          variant="destructive"
+          className="w-full sm:w-auto gap-2"
+          onClick={() => setDeleteOpen(true)}
+        >
+          <Trash2 className="h-4 w-4" />
+          Immobilie löschen
+        </Button>
+      </div>
+
       {/* Report Damage Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
@@ -296,6 +307,29 @@ const PropertyDetailPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Immobilie löschen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {hasActiveTenants
+                ? "Diese Immobilie hat noch aktive Mieter. Trotzdem löschen?"
+                : `Möchten Sie „${property.name || property.address}“ wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteProperty}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Wird gelöscht…" : "Trotzdem löschen"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
