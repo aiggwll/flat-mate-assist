@@ -243,8 +243,9 @@ const PropertiesPage = () => {
 
                 <div className="flex items-center gap-3 pt-3 border-t">
                   <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/properties/${p.id}`)}>Details</Button>
-                  <Button variant="outline" size="sm" onClick={() => openEdit(p)}>
+                  <Button variant="outline" size="sm" className="gap-1.5" onClick={() => openEdit(p)}>
                     <Pencil className="h-4 w-4" />
+                    Bearbeiten
                   </Button>
                   <InviteTenantDialog />
                   <Button
