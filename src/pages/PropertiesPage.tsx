@@ -20,7 +20,7 @@ const PropertiesPage = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({
-    address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "",
+    name: "", address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "",
     totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "",
   });
 
@@ -30,6 +30,7 @@ const PropertiesPage = () => {
   const navigate = useNavigate();
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
   const { userProperties, setUserProperties, salutation } = useUser();
+  const resetForm = () => setForm({ name: "", address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "", totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "" });
 
   const isDemo = typeof window !== "undefined" && localStorage.getItem("dwello_demo") === "true";
 
@@ -80,6 +81,10 @@ const PropertiesPage = () => {
   };
 
   const handleSubmit = async () => {
+    if (!form.name.trim()) {
+      toast.error("Bitte geben Sie einen Namen für die Immobilie ein.");
+      return;
+    }
     if (!form.address.trim()) {
       toast.error("Bitte geben Sie eine Adresse (Straße & Hausnummer) ein.");
       return;
@@ -101,6 +106,7 @@ const PropertiesPage = () => {
       if (editId) {
         next = userProperties.map(p => p.id === editId ? {
           ...p,
+          name: form.name.trim(),
           address: form.address.trim(),
           city: form.city.trim(),
           zipCode: form.zipCode.trim(),
@@ -110,6 +116,7 @@ const PropertiesPage = () => {
       } else {
         const newProp = {
           id: `demo-${Date.now()}`,
+          name: form.name.trim(),
           address: form.address.trim(),
           city: form.city.trim(),
           zipCode: form.zipCode.trim(),
@@ -123,21 +130,21 @@ const PropertiesPage = () => {
       toast.success(editId ? "Immobilie aktualisiert!" : "Immobilie erfolgreich angelegt!");
       setOpen(false);
       setEditId(null);
-      setForm({ address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "", totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "" });
+      resetForm();
       return;
     }
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { toast.error("Nicht eingeloggt."); return; }
     if (editId) {
       const { error } = await supabase.from("properties").update({
-        address: form.address.trim(), city: form.city.trim(),
+        name: form.name.trim(), address: form.address.trim(), city: form.city.trim(),
         zip_code: form.zipCode.trim(), year_built: parseInt(form.yearBuilt) || 0,
         units: parseInt(form.units) || 1,
-      }).eq("id", editId);
+      } as any).eq("id", editId);
       if (error) { toast.error("Fehler: " + error.message); return; }
       setUserProperties(userProperties.map(p => p.id === editId ? {
         ...p,
-        address: form.address.trim(), city: form.city.trim(),
+        name: form.name.trim(), address: form.address.trim(), city: form.city.trim(),
         zipCode: form.zipCode.trim(),
         yearBuilt: parseInt(form.yearBuilt) || 0,
         units: parseInt(form.units) || 1,
@@ -145,14 +152,14 @@ const PropertiesPage = () => {
       toast.success("Immobilie aktualisiert!");
     } else {
       const { data: inserted, error } = await supabase.from("properties").insert({
-        user_id: user.id, address: form.address.trim(), city: form.city.trim(),
+        user_id: user.id, name: form.name.trim(), address: form.address.trim(), city: form.city.trim(),
         zip_code: form.zipCode.trim(), year_built: parseInt(form.yearBuilt) || 0,
         units: parseInt(form.units) || 1,
-      }).select().single();
+      } as any).select().single();
       if (error) { toast.error("Fehler: " + error.message); return; }
       if (inserted) {
         setUserProperties([...userProperties, {
-          id: inserted.id, address: inserted.address, city: inserted.city,
+          id: inserted.id, name: (inserted as any).name || inserted.address, address: inserted.address, city: inserted.city,
           zipCode: inserted.zip_code, yearBuilt: inserted.year_built ?? 0, units: inserted.units ?? 1,
         }]);
       }
@@ -160,12 +167,13 @@ const PropertiesPage = () => {
     }
     setOpen(false);
     setEditId(null);
-    setForm({ address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "", totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "" });
+    resetForm();
   };
 
   const openEdit = (p: typeof userProperties[number]) => {
     setEditId(p.id);
     setForm({
+      name: p.name || p.address || "",
       address: p.address || "",
       city: p.city || "",
       zipCode: p.zipCode || "",
@@ -209,7 +217,7 @@ const PropertiesPage = () => {
                       <Building2 className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-heading font-semibold text-foreground">{p.address}</h3>
+                      <h3 className="text-lg font-heading font-semibold text-foreground">{p.name || p.address}</h3>
                       <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
                         <MapPin className="h-3 w-3" />
                         <span className="text-xs">{p.zipCode} {p.city}</span>
@@ -235,8 +243,9 @@ const PropertiesPage = () => {
 
                 <div className="flex items-center gap-3 pt-3 border-t">
                   <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/properties/${p.id}`)}>Details</Button>
-                  <Button variant="outline" size="sm" onClick={() => openEdit(p)}>
+                  <Button variant="outline" size="sm" className="gap-1.5" onClick={() => openEdit(p)}>
                     <Pencil className="h-4 w-4" />
+                    Bearbeiten
                   </Button>
                   <InviteTenantDialog />
                   <Button
@@ -254,7 +263,7 @@ const PropertiesPage = () => {
         </div>
       )}
 
-      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); setForm({ address: "", city: "", zipCode: "", yearBuilt: "", type: "", floors: "", totalArea: "", plotSize: "", units: "", parking: "", heating: "", energyClass: "", notes: "" }); } }}>
+      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); resetForm(); } }}>
         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editId ? "Immobilie bearbeiten" : "Neue Immobilie anlegen"}</DialogTitle>
@@ -263,6 +272,10 @@ const PropertiesPage = () => {
           <div className="grid gap-4 py-2">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Adresse</h3>
             <div className="grid gap-3">
+              <div>
+                <Label htmlFor="name">Name der Immobilie *</Label>
+                <Input id="name" placeholder="z.B. Mehrfamilienhaus Mitte" value={form.name} onChange={e => update("name", e.target.value)} />
+              </div>
               <div>
                 <Label htmlFor="address">Straße & Hausnummer *</Label>
                 <Input id="address" placeholder="z.B. Berliner Str. 42" value={form.address} onChange={e => update("address", e.target.value)} />

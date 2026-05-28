@@ -337,6 +337,7 @@ export type Database = {
           city: string
           created_at: string
           id: string
+          name: string
           units: number | null
           user_id: string
           year_built: number | null
@@ -347,6 +348,7 @@ export type Database = {
           city: string
           created_at?: string
           id?: string
+          name?: string
           units?: number | null
           user_id: string
           year_built?: number | null
@@ -357,6 +359,7 @@ export type Database = {
           city?: string
           created_at?: string
           id?: string
+          name?: string
           units?: number | null
           user_id?: string
           year_built?: number | null

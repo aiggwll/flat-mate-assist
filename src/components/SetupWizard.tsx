@@ -61,13 +61,14 @@ const SetupWizard = () => {
         const city = parts[1] || "";
         const { data } = await supabase
           .from("properties")
-          .insert({ user_id: user.id, address: addr, city, zip_code: "", units: 1 })
+          .insert({ user_id: user.id, name: addr, address: addr, city, zip_code: "00000", units: 1 } as any)
           .select();
         if (data?.length) {
           setUserProperties([
             ...userProperties,
             ...data.map((p) => ({
               id: p.id,
+              name: (p as any).name || p.address,
               address: p.address,
               city: p.city,
               zipCode: p.zip_code,
