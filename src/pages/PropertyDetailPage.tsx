@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Building2, MapPin, ArrowLeft, Plus, Camera, X, FileText, Video, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +41,7 @@ const PropertyDetailPage = () => {
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [hasActiveTenants, setHasActiveTenants] = useState(false);
   const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({ title: "", description: "", category: "" as Damage["category"] | "" });
@@ -54,6 +55,29 @@ const PropertyDetailPage = () => {
   }
 
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
+
+  useEffect(() => {
+    if (!property) return;
+    const loadActiveTenants = async () => {
+      try {
+        const propertyMatch = `${property.address}, ${property.city}`;
+        const { data } = await supabase
+          .from("profiles")
+          .select("user_id, property_id")
+          .eq("role", "tenant");
+        const active = (data || []).some(
+          (profile) =>
+            profile.property_id === property.id ||
+            profile.property_id === propertyMatch ||
+            (profile.property_id && property.address && profile.property_id.includes(property.address))
+        );
+        setHasActiveTenants(active);
+      } catch (e) {
+        console.error("Error checking active tenants:", e);
+      }
+    };
+    loadActiveTenants();
+  }, [property]);
 
   const handlePhotos = (files: FileList | null) => {
     if (!files) return;
@@ -122,7 +146,6 @@ const PropertyDetailPage = () => {
   const openDamages = damages.filter(d => d.status !== "erledigt");
   const unitCount = property.units ?? 1;
   const units = Array.from({ length: unitCount }, (_, i) => ({ id: `${i + 1}`, number: `${i + 1}` }));
-  const hasActiveTenants = false;
 
   return (
     <div className="space-y-6">
