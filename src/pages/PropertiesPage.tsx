@@ -127,6 +127,7 @@ const PropertiesPage = () => {
       toast.success(editId ? "Immobilie aktualisiert!" : "Immobilie erfolgreich angelegt!");
       setOpen(false);
       setEditId(null);
+      setErrors({});
       resetForm();
       return;
     }
@@ -164,11 +165,13 @@ const PropertiesPage = () => {
     }
     setOpen(false);
     setEditId(null);
+    setErrors({});
     resetForm();
   };
 
   const openEdit = (p: typeof userProperties[number]) => {
     setEditId(p.id);
+    setErrors({});
     setForm({
       name: p.name || p.address || "",
       address: p.address || "",
@@ -191,7 +194,7 @@ const PropertiesPage = () => {
           <h1 className="text-3xl font-heading font-bold text-foreground">Immobilien</h1>
           <p className="text-muted-foreground text-sm mt-1.5">{userProperties.length} {userProperties.length === 1 ? "Immobilie" : "Immobilien"} verwaltet</p>
         </div>
-          <Button onClick={() => { setEditId(null); setOpen(true); }} size="lg">
+          <Button onClick={() => { setEditId(null); setErrors({}); setOpen(true); }} size="lg">
           <Plus className="h-4 w-4 mr-2" />
           Neue Immobilie
         </Button>
@@ -203,7 +206,7 @@ const PropertiesPage = () => {
           headline={sal(salutation || "sie", "Legen Sie Ihre erste Immobilie an", "Leg deine erste Immobilie an")}
           subtext="Adresse, Mieter und Dokumente — alles an einem Ort."
           buttonLabel="Immobilie hinzufügen"
-          onAction={() => { setEditId(null); setOpen(true); }}
+          onAction={() => { setEditId(null); setErrors({}); setOpen(true); }}
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -263,7 +266,7 @@ const PropertiesPage = () => {
         </div>
       )}
 
-      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); resetForm(); } }}>
+      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); setErrors({}); resetForm(); } }}>
         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editId ? "Immobilie bearbeiten" : "Neue Immobilie anlegen"}</DialogTitle>
