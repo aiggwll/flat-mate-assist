@@ -119,7 +119,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       try {
         const pendingRows = JSON.parse(pending) as Array<{ name?: string; address: string; city: string; zip_code: string; year_built: number; units: number }>;
         const insertRows = pendingRows.map(r => ({ ...r, name: r.name?.trim() || r.address, user_id: currentUser.id }));
-        const { data: synced } = await supabase.from("properties").insert(insertRows).select();
+        const { data: synced } = await supabase.from("properties").insert(insertRows as any).select();
         if (synced) {
           localStorage.removeItem("pendingProperties");
           setUserPropertiesState(prev => [
