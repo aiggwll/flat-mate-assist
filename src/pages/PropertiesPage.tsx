@@ -181,6 +181,9 @@ const PropertiesPage = () => {
     setOpen(true);
   };
 
+  const FieldError = ({ message }: { message?: string }) =>
+    message ? <p className="mt-1 text-xs font-medium text-destructive">{message}</p> : null;
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -271,20 +274,24 @@ const PropertiesPage = () => {
             <div className="grid gap-3">
               <div>
                 <Label htmlFor="name">Name der Immobilie *</Label>
-                <Input id="name" placeholder="z.B. Mehrfamilienhaus Mitte" value={form.name} onChange={e => update("name", e.target.value)} />
+                <Input id="name" aria-invalid={!!errors.name} placeholder="z.B. Mehrfamilienhaus Mitte" value={form.name} onChange={e => update("name", e.target.value)} />
+                <FieldError message={errors.name} />
               </div>
               <div>
                 <Label htmlFor="address">Straße & Hausnummer *</Label>
-                <Input id="address" placeholder="z.B. Berliner Str. 42" value={form.address} onChange={e => update("address", e.target.value)} />
+                <Input id="address" aria-invalid={!!errors.address} placeholder="z.B. Berliner Str. 42" value={form.address} onChange={e => update("address", e.target.value)} />
+                <FieldError message={errors.address} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="zipCode">PLZ *</Label>
-                  <Input id="zipCode" placeholder="z.B. 10115" value={form.zipCode} onChange={e => update("zipCode", e.target.value)} />
+                  <Input id="zipCode" aria-invalid={!!errors.zipCode} placeholder="z.B. 10115" value={form.zipCode} onChange={e => update("zipCode", e.target.value)} />
+                  <FieldError message={errors.zipCode} />
                 </div>
                 <div>
                   <Label htmlFor="city">Stadt *</Label>
-                  <Input id="city" placeholder="z.B. Berlin" value={form.city} onChange={e => update("city", e.target.value)} />
+                  <Input id="city" aria-invalid={!!errors.city} placeholder="z.B. Berlin" value={form.city} onChange={e => update("city", e.target.value)} />
+                  <FieldError message={errors.city} />
                 </div>
               </div>
             </div>
