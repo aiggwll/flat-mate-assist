@@ -137,8 +137,7 @@ const RegisterPage = () => {
               },
             });
 
-            // Die Willkommensmail wird erst nach bestätigter E-Mail-Adresse verschickt,
-            // damit neue Nutzer zuerst eindeutig den Bestätigungslink erhalten.
+            // Neue Nutzer sollen zuerst eindeutig den Bestätigungslink erhalten.
           } catch (err) {
             console.error("Email sending failed (non-blocking):", err);
           }
