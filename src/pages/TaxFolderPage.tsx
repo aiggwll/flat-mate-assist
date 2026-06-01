@@ -183,15 +183,12 @@ const TaxFolderPage = () => {
         .upload(path, uploadFile);
       if (storageError) throw storageError;
 
-      const { data: urlData } = supabase.storage
-        .from("tax-documents")
-        .getPublicUrl(path);
-
       const { error: dbError } = await supabase.from("tax_documents").insert({
         user_id: userId,
         property_id: formPropertyId || null,
         filename: uploadFile.name,
-        file_url: urlData.publicUrl,
+        // Bucket is private — store the storage path; signed URL is generated on view
+        file_url: path,
         category: formCategory,
         amount: parseFloat(formAmount) || 0,
         document_date: formDate ? format(formDate, "yyyy-MM-dd") : null,
@@ -212,13 +209,32 @@ const TaxFolderPage = () => {
   };
 
   const handleDelete = async (doc: TaxDoc) => {
-    const pathMatch = doc.file_url.match(/tax-documents\/(.+)$/);
-    if (pathMatch) {
-      await supabase.storage.from("tax-documents").remove([pathMatch[1]]);
+    // file_url is either a storage path (new) or a legacy public URL containing "tax-documents/<path>"
+    const legacyMatch = doc.file_url.match(/tax-documents\/(.+)$/);
+    const storagePath = legacyMatch ? legacyMatch[1] : doc.file_url;
+    if (storagePath) {
+      await supabase.storage.from("tax-documents").remove([storagePath]);
     }
     await supabase.from("tax_documents").delete().eq("id", doc.id);
     toast.success("Beleg gelöscht.");
     loadDocuments();
+  };
+
+  const handleOpenDoc = async (doc: TaxDoc) => {
+    const legacyMatch = doc.file_url.match(/tax-documents\/(.+)$/);
+    const storagePath = legacyMatch ? legacyMatch[1] : doc.file_url;
+    if (!storagePath) {
+      toast.error("Datei nicht gefunden.");
+      return;
+    }
+    const { data, error } = await supabase.storage
+      .from("tax-documents")
+      .createSignedUrl(storagePath, 60);
+    if (error || !data?.signedUrl) {
+      toast.error("Datei konnte nicht geöffnet werden.");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   };
 
   // Summary calculations
@@ -461,9 +477,13 @@ const TaxFolderPage = () => {
                 <div key={doc.id} className="flex items-center gap-3 px-5 py-3">
                   <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-foreground hover:text-primary truncate block">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenDoc(doc)}
+                      className="text-sm font-medium text-foreground hover:text-primary truncate block text-left w-full"
+                    >
                       {doc.filename}
-                    </a>
+                    </button>
                     <div className="flex items-center gap-2 mt-0.5">
                       {cat && <span className="text-xs text-muted-foreground">{cat.label}</span>}
                       {doc.document_date && <span className="text-xs text-muted-foreground">• {format(new Date(doc.document_date), "dd.MM.yyyy")}</span>}
