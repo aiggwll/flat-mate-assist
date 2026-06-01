@@ -133,6 +133,8 @@ const LoginPage = () => {
                 required
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                onFocus={(e) => { e.currentTarget.dataset.ph = e.currentTarget.placeholder; e.currentTarget.placeholder = ""; }}
+                onBlur={(e) => { if (e.currentTarget.dataset.ph) e.currentTarget.placeholder = e.currentTarget.dataset.ph; }}
               />
             </div>
 
@@ -149,6 +151,8 @@ const LoginPage = () => {
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); setError(""); }}
                   className="pr-10"
+                  onFocus={(e) => { e.currentTarget.dataset.ph = e.currentTarget.placeholder; e.currentTarget.placeholder = ""; }}
+                  onBlur={(e) => { if (e.currentTarget.dataset.ph) e.currentTarget.placeholder = e.currentTarget.dataset.ph; }}
                 />
                 <button
                   type="button"
