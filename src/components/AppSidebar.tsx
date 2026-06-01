@@ -128,15 +128,6 @@ const AppSidebar = () => {
       </nav>
 
       <div className="p-3 border-t border-sidebar-border space-y-2">
-        {isDemo && (
-          <button
-            onClick={() => { resetDemo(); navigate("/"); }}
-            className="flex items-center gap-2 w-full px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Demo zurücksetzen
-          </button>
-        )}
         <div className="flex items-center gap-3 px-3 py-2.5">
           <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">
             {initials}

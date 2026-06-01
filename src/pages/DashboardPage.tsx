@@ -8,7 +8,6 @@ import SetupChecklist from "@/components/SetupChecklist";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/contexts/UserContext";
-import { useDemo } from "@/contexts/DemoContext";
 import { useMessages } from "@/contexts/MessagesContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -32,18 +31,18 @@ interface InvitationInfo {
 }
 
 const DashboardPage = () => {
-  const { userName, userProperties, salutation, userId, setupWizardComplete, gender, lastName, isNewUser, setIsNewUser } = useUser();
-  const { isDemo, demoName, formal, onboardingDone } = useDemo();
+  const { userName, userProperties, salutation, userId, setupWizardComplete, isNewUser, setIsNewUser } = useUser();
   const { messages } = useMessages();
-  // Live-read from localStorage as fallback to avoid stale context state
-  const lsDemoName = typeof window !== "undefined" ? (localStorage.getItem("dwello_demo_name") || "") : "";
-  const lsOnboarded = typeof window !== "undefined" ? localStorage.getItem("dwello_demo_onboarded") === "true" : false;
-  // Prefer demo name in demo mode (context first, then localStorage), then real user name, then fallback
-  const displayName = isDemo
-    ? (demoName || lsDemoName || "Eigentümer")
-    : (userName || "Eigentümer");
-  const effectiveSalutation = isDemo ? (formal ? "sie" : "du") : (salutation || "sie");
-  const isFirstVisit = isDemo ? !lsOnboarded && !onboardingDone : userProperties.length === 0;
+  const firstName = (userName || "").trim().split(/\s+/)[0] || "";
+  const displayName = firstName || "Eigentümer";
+  const effectiveSalutation = salutation || "sie";
+  const isFirstVisit = userProperties.length === 0;
+  const getTimeGreeting = () => {
+    const h = new Date().getHours();
+    if (h >= 5 && h < 12) return "Guten Morgen";
+    if (h >= 12 && h < 18) return "Guten Tag";
+    return "Guten Abend";
+  };
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
   const [invitations, setInvitations] = useState<InvitationInfo[]>([]);
   const [resending, setResending] = useState<string | null>(null);
@@ -175,14 +174,16 @@ const DashboardPage = () => {
             <Building2 className="h-7 w-7 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-heading font-bold text-foreground">Willkommen bei dwello</h2>
+            <h2 className="text-xl font-heading font-bold text-foreground">
+              {firstName ? `Willkommen bei dwello, ${firstName}.` : "Willkommen bei dwello."}
+            </h2>
             <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-              Fügen Sie jetzt Ihre erste Immobilie hinzu, um loszulegen.
+              Fügen Sie jetzt Ihre erste Immobilie hinzu — kostenlos und ohne Abo.
             </p>
           </div>
           <Link to="/properties">
             <Button className="mt-2">
-              <Building2 className="h-4 w-4 mr-2" /> Immobilie hinzufügen
+              <Building2 className="h-4 w-4 mr-2" /> Erste Immobilie anlegen
             </Button>
           </Link>
           <button
@@ -201,11 +202,7 @@ const DashboardPage = () => {
             {isFirstVisit ? "Willkommen" : "Willkommen zurück"}
           </p>
           <h1 className="text-3xl font-heading font-extrabold text-foreground mt-1">
-            {effectiveSalutation === "du"
-              ? `Hallo, ${displayName.split(" ")[0]}!`
-              : gender && lastName && !isDemo
-                ? `Guten Tag, ${gender === "Frau" ? "Frau" : "Herr"} ${lastName}.`
-                : `Guten Tag, ${displayName.split(" ")[0]}.`}
+            {firstName ? `${getTimeGreeting()}, ${firstName}.` : "Willkommen bei dwello."}
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-md">
             {propertyCount === 0

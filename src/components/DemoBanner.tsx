@@ -1,24 +1,5 @@
-const DemoBanner = () => {
-  return (
-    <div
-      className="w-full flex items-center justify-center gap-4 px-4 text-[13px] border-b"
-      style={{
-        height: 36,
-        backgroundColor: "#FFF8E7",
-        borderBottomColor: "#F0D080",
-        color: "#8B6914",
-      }}
-    >
-      <span>Testversion – Registrierung und Immobilien hinzufügen bereits möglich</span>
-      <a
-        href="mailto:hallo@dwello.pro?subject=dwello%20Testversion%20Feedback"
-        className="font-medium underline hover:no-underline"
-        style={{ color: "#8B6914" }}
-      >
-        Feedback geben
-      </a>
-    </div>
-  );
-};
+// Testversion banner removed for production. Component kept as a no-op
+// so any lingering imports continue to compile.
+const DemoBanner = () => null;
 
 export default DemoBanner;
