@@ -8,7 +8,6 @@ import SetupChecklist from "@/components/SetupChecklist";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/contexts/UserContext";
-import { useDemo } from "@/contexts/DemoContext";
 import { useMessages } from "@/contexts/MessagesContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
