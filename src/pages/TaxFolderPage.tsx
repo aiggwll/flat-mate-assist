@@ -220,6 +220,23 @@ const TaxFolderPage = () => {
     loadDocuments();
   };
 
+  const handleOpenDoc = async (doc: TaxDoc) => {
+    const legacyMatch = doc.file_url.match(/tax-documents\/(.+)$/);
+    const storagePath = legacyMatch ? legacyMatch[1] : doc.file_url;
+    if (!storagePath) {
+      toast.error("Datei nicht gefunden.");
+      return;
+    }
+    const { data, error } = await supabase.storage
+      .from("tax-documents")
+      .createSignedUrl(storagePath, 60);
+    if (error || !data?.signedUrl) {
+      toast.error("Datei konnte nicht geöffnet werden.");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  };
+
   // Summary calculations
   const summary = useMemo(() => {
     const docIncome = documents
