@@ -478,6 +478,71 @@ const RegisterPage = () => {
     );
   }
 
+  // ── Step: Verify email ──
+  if (step === "verify-email") {
+    const handleResend = async () => {
+      if (resendCooldown > 0 || resendLoading) return;
+      setResendLoading(true);
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      });
+      setResendLoading(false);
+      if (error) {
+        toast.error("E-Mail konnte nicht erneut gesendet werden. Bitte versuchen Sie es später.");
+      } else {
+        toast.success("Bestätigungslink erneut gesendet.");
+        setResendCooldown(60);
+        const t = setInterval(() => {
+          setResendCooldown(c => {
+            if (c <= 1) { clearInterval(t); return 0; }
+            return c - 1;
+          });
+        }, 1000);
+      }
+    };
+    return (
+      <div className="min-h-screen bg-primary flex">
+        <BrandingPanel subtitle="Nur noch ein Schritt — bestätigen Sie Ihre E-Mail, um Ihr Konto zu aktivieren." />
+        <div className="flex-1 flex items-center justify-center p-8 bg-background rounded-l-3xl lg:max-w-lg">
+          <div className="w-full max-w-sm text-center">
+            <div className="lg:hidden mb-6 flex justify-center"><DwelloLogo variant="light" size="lg" showIcon={false} /></div>
+            <div className="mx-auto mb-6 h-16 w-16 rounded-full bg-accent/10 flex items-center justify-center">
+              <Mail className="h-8 w-8 text-accent" />
+            </div>
+            <h2 className="text-2xl font-heading font-bold text-foreground">Bestätigen Sie Ihre E-Mail</h2>
+            <p className="text-muted-foreground text-sm mt-3">
+              Wir haben einen Bestätigungslink an <span className="font-medium text-foreground">{email}</span> gesendet.
+              Bitte öffnen Sie Ihr Postfach und klicken Sie auf den Link, um Ihr Konto zu aktivieren.
+            </p>
+            <div className="mt-6 p-4 rounded-xl bg-muted/50 text-left text-xs text-muted-foreground space-y-1">
+              <p>• Keine E-Mail erhalten? Schauen Sie bitte im Spam-Ordner nach.</p>
+              <p>• Der Link ist 24 Stunden gültig.</p>
+              <p>• Nach der Bestätigung können Sie sich anmelden.</p>
+            </div>
+            <div className="mt-6 space-y-3">
+              <Button className="w-full" onClick={() => navigate("/login")}>
+                Zur Anmeldung
+              </Button>
+              <button
+                onClick={handleResend}
+                disabled={resendCooldown > 0 || resendLoading}
+                className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+              >
+                {resendLoading
+                  ? "Wird gesendet..."
+                  : resendCooldown > 0
+                    ? `Erneut senden in ${resendCooldown}s`
+                    : "Bestätigungslink erneut senden"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── Step: Registration form ──
   const passwordScore = [hasLen, hasUpper, hasNum].filter(Boolean).length;
   const strengthLabel = passwordScore <= 1 ? "Schwach" : passwordScore === 2 ? "Mittel" : "Stark";
