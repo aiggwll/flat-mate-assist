@@ -19,7 +19,7 @@ const AuthCallbackPage = () => {
         const code = url.searchParams.get("code");
 
         if (errorDescription) {
-          setErrorMsg(decodeURIComponent(errorDescription));
+          setErrorMsg(errorDescription);
           setStatus("error");
           return;
         }
