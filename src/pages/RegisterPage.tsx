@@ -372,7 +372,14 @@ const RegisterPage = () => {
               </div>
             </div>
             <div className="mt-6 space-y-3">
-              <Button className="w-full" onClick={() => navigate("/tenant-dashboard")}>
+              <Button className="w-full" onClick={async () => {
+                const { data: { user: u } } = await supabase.auth.getUser();
+                if (u && !u.email_confirmed_at) {
+                  setStep("verify-email");
+                } else {
+                  navigate("/tenant-dashboard");
+                }
+              }}>
                 Zum Mieterportal →
               </Button>
               <p className="text-xs text-center text-muted-foreground">
