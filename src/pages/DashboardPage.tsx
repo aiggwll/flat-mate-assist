@@ -175,14 +175,16 @@ const DashboardPage = () => {
             <Building2 className="h-7 w-7 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-heading font-bold text-foreground">Willkommen bei dwello</h2>
+            <h2 className="text-xl font-heading font-bold text-foreground">
+              {firstName ? `Willkommen bei dwello, ${firstName}.` : "Willkommen bei dwello."}
+            </h2>
             <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-              Fügen Sie jetzt Ihre erste Immobilie hinzu, um loszulegen.
+              Fügen Sie jetzt Ihre erste Immobilie hinzu — kostenlos und ohne Abo.
             </p>
           </div>
           <Link to="/properties">
             <Button className="mt-2">
-              <Building2 className="h-4 w-4 mr-2" /> Immobilie hinzufügen
+              <Building2 className="h-4 w-4 mr-2" /> Erste Immobilie anlegen
             </Button>
           </Link>
           <button
