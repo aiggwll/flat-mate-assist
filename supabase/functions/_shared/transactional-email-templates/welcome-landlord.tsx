@@ -21,15 +21,15 @@ const WelcomeLandlordEmail = ({ name }: WelcomeLandlordProps) => (
         <div style={logoWrap}><span style={logo}>{SITE_NAME}</span></div>
         <Heading style={h1}>Schön, dass Sie dabei sind.</Heading>
         <Text style={text}>
-          {name ? `Hallo ${name}, ` : ''}Ihr {SITE_NAME}-Konto ist bereit. Fügen Sie jetzt Ihre erste Immobilie hinzu und laden Sie Ihre Mieter ein.
+          {name ? `Hallo ${name}, ` : ''}Ihr {SITE_NAME}-Konto ist bereit und Ihre erste Immobilie ist bereits angelegt. Jetzt können Sie Ihre Mieter einladen und Ihre Verwaltung starten.
         </Text>
         <Text style={steps}>
-          1. Immobilie anlegen{'\n'}
-          2. Mieter einladen{'\n'}
-          3. Miete verwalten
+          1. Mieter einladen{'\n'}
+          2. Mietzahlungen verwalten{'\n'}
+          3. Dokumente & Nebenkosten organisieren
         </Text>
-        <Button style={button} href={`${APP_URL}/immobilien`}>
-          Erste Immobilie anlegen
+        <Button style={button} href={`${APP_URL}/dashboard`}>
+          Zum Dashboard
         </Button>
         <Hr style={hr} />
         <Text style={footer}>{SITE_NAME} Immobilienverwaltung · dwello.de</Text>
