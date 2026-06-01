@@ -477,9 +477,13 @@ const TaxFolderPage = () => {
                 <div key={doc.id} className="flex items-center gap-3 px-5 py-3">
                   <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-foreground hover:text-primary truncate block">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenDoc(doc)}
+                      className="text-sm font-medium text-foreground hover:text-primary truncate block text-left w-full"
+                    >
                       {doc.filename}
-                    </a>
+                    </button>
                     <div className="flex items-center gap-2 mt-0.5">
                       {cat && <span className="text-xs text-muted-foreground">{cat.label}</span>}
                       {doc.document_date && <span className="text-xs text-muted-foreground">• {format(new Date(doc.document_date), "dd.MM.yyyy")}</span>}
