@@ -137,14 +137,8 @@ const RegisterPage = () => {
               },
             });
 
-            await supabase.functions.invoke("send-transactional-email", {
-              body: {
-                templateName: "welcome-landlord",
-                recipientEmail: email,
-                idempotencyKey: `welcome-landlord-${registrationId}`,
-                templateData: { name: fullName },
-              },
-            });
+            // Die Willkommensmail wird erst nach bestätigter E-Mail-Adresse verschickt,
+            // damit neue Nutzer zuerst eindeutig den Bestätigungslink erhalten.
           } catch (err) {
             console.error("Email sending failed (non-blocking):", err);
           }
