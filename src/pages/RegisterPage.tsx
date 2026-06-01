@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, Home, Plus, X, CheckCircle2, AlertCircle, Check, Eye, EyeOff } from "lucide-react";
+import { Building2, Home, Plus, X, CheckCircle2, AlertCircle, Check, Eye, EyeOff, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@/contexts/UserContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +28,9 @@ const RegisterPage = () => {
   const inviteRole = searchParams.get("role") as Role | null;
   const inviteProperty = searchParams.get("property");
 
-  const [step, setStep] = useState<"role" | "form" | "property-setup" | "tenant-info">(inviteRole ? "form" : "role");
+  const [step, setStep] = useState<"role" | "form" | "property-setup" | "tenant-info" | "verify-email">(inviteRole ? "form" : "role");
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [selectedRole, setSelectedRole] = useState<Role | null>(inviteRole);
 
   const [firstName, setFirstName] = useState("");
