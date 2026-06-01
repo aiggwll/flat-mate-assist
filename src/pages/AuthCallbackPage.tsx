@@ -13,7 +13,27 @@ const AuthCallbackPage = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Supabase JS client automatically exchanges the token fragment on load
+        const url = new URL(window.location.href);
+        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+        const errorDescription = url.searchParams.get("error_description") || hashParams.get("error_description");
+        const code = url.searchParams.get("code");
+
+        if (errorDescription) {
+          setErrorMsg(decodeURIComponent(errorDescription));
+          setStatus("error");
+          return;
+        }
+
+        if (code) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError) {
+            console.error("Auth code exchange error:", exchangeError);
+            setErrorMsg(exchangeError.message);
+            setStatus("error");
+            return;
+          }
+        }
+
         const { data: { session }, error } = await supabase.auth.getSession();
 
         if (error) {
@@ -38,10 +58,8 @@ const AuthCallbackPage = () => {
 
           setTimeout(() => navigate(target, { replace: true }), 2000);
         } else {
-          // No session yet — might be a confirmation-only flow
-          // Try to detect if URL hash contains confirmation tokens
           const hash = window.location.hash;
-          if (hash.includes("type=signup") || hash.includes("type=email")) {
+          if (hash.includes("type=signup") || hash.includes("type=email") || url.searchParams.get("type") === "signup") {
             setStatus("success");
             setTimeout(() => navigate("/login", { replace: true }), 2500);
           } else {
