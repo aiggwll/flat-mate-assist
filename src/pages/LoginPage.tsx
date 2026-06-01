@@ -44,7 +44,9 @@ const LoginPage = () => {
       const { data: signInData, error: signInError } = signInResult;
       if (signInError) {
         if (signInError.message === "Invalid login credentials") {
-          setError("Ungültige E-Mail oder Passwort.");
+          // Supabase returns this both for wrong credentials AND unconfirmed emails.
+          // Show the confirmation hint so users who just registered see what to do.
+          setError("INVALID_OR_UNCONFIRMED");
         } else if (signInError.message === "Email not confirmed") {
           setError("EMAIL_NOT_CONFIRMED");
         } else {
@@ -165,21 +167,33 @@ const LoginPage = () => {
               </div>
             </div>
 
-            {error && error !== "EMAIL_NOT_CONFIRMED" && (
+            {error && error !== "EMAIL_NOT_CONFIRMED" && error !== "INVALID_OR_UNCONFIRMED" && (
               <p className="text-sm text-destructive">{error}</p>
             )}
 
-            {error === "EMAIL_NOT_CONFIRMED" && (
+            {(error === "EMAIL_NOT_CONFIRMED" || error === "INVALID_OR_UNCONFIRMED") && (
               <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 space-y-2">
-                <p className="text-sm text-destructive">
-                  Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Den Link finden Sie in Ihrer Posteingangsmappe — prüfen Sie auch den Spam-Ordner.
+                <p className="text-sm text-destructive font-medium">
+                  Anmeldung fehlgeschlagen
+                </p>
+                <p className="text-sm text-destructive/90">
+                  {error === "EMAIL_NOT_CONFIRMED"
+                    ? "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Den Link finden Sie in Ihrem Posteingang — prüfen Sie auch den Spam-Ordner."
+                    : "E-Mail oder Passwort sind falsch — oder Ihre E-Mail-Adresse wurde noch nicht bestätigt. Bitte prüfen Sie Ihren Posteingang (auch Spam-Ordner) auf den Bestätigungslink."}
                 </p>
                 <button
                   type="button"
                   className="text-sm text-accent font-medium hover:underline"
                   onClick={async () => {
-                    if (!email) return;
-                    const { error: resendErr } = await supabase.auth.resend({ type: "signup", email });
+                    if (!email) {
+                      toast.error("Bitte geben Sie Ihre E-Mail-Adresse ein.");
+                      return;
+                    }
+                    const { error: resendErr } = await supabase.auth.resend({
+                      type: "signup",
+                      email,
+                      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+                    });
                     if (resendErr) {
                       toast.error(`Fehler: ${resendErr.message}`);
                     } else {
