@@ -464,7 +464,11 @@ const RegisterPage = () => {
               <Button className="w-full" onClick={handlePropertySubmit}>
                 {properties.length === 1 ? "Immobilie anlegen & starten" : `${properties.length} Immobilien anlegen & starten`}
               </Button>
-              <button onClick={() => navigate("/dashboard")} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <button onClick={async () => {
+                const { data: { user: u } } = await supabase.auth.getUser();
+                if (u && !u.email_confirmed_at) setStep("verify-email");
+                else navigate("/dashboard");
+              }} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Später einrichten →
               </button>
             </div>
