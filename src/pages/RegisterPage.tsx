@@ -113,37 +113,6 @@ const RegisterPage = () => {
       }
 
       if (role === "owner") {
-        // Send emails asynchronously
-        const sendEmails = async () => {
-          try {
-            const { count } = await supabase
-              .from("profiles")
-              .select("id", { count: "exact", head: true })
-              .eq("role", "owner");
-
-            const registrationId = crypto.randomUUID();
-
-            await supabase.functions.invoke("send-transactional-email", {
-              body: {
-                templateName: "new-landlord-notification",
-                recipientEmail: "gina2406@hotmail.de",
-                idempotencyKey: `new-landlord-notify-${registrationId}`,
-                templateData: {
-                  name: fullName,
-                  email,
-                  createdAt: new Date().toLocaleDateString("de-DE"),
-                  totalOwners: count ?? 1,
-                },
-              },
-            });
-
-            // Neue Nutzer sollen zuerst eindeutig den Bestätigungslink erhalten.
-          } catch (err) {
-            console.error("Email sending failed (non-blocking):", err);
-          }
-        };
-        sendEmails();
-
         setStep("property-setup");
       } else {
         setStep("tenant-info");
