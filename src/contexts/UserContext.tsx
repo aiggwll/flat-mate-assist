@@ -141,28 +141,20 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Load demo properties from localStorage if in demo mode
+  // Demo mode removed: clear any legacy demo-mode storage on mount.
   useEffect(() => {
-    const isDemo = localStorage.getItem("dwello_demo") === "true";
-    if (!isDemo) return;
     try {
-      const stored = localStorage.getItem("dwello_demo_properties");
-      if (stored) {
-        const parsed = JSON.parse(stored) as Partial<UserProperty>[];
-        setUserPropertiesState(parsed.map(p => ({
-          id: p.id || `demo-${Date.now()}`,
-          name: p.name || p.address || "Immobilie",
-          address: p.address || "",
-          city: p.city || "",
-          zipCode: p.zipCode || "",
-          yearBuilt: p.yearBuilt ?? 0,
-          units: p.units ?? 1,
-        })));
-      }
-    } catch (e) {
-      console.error("Error loading demo properties:", e);
+      [
+        "dwello_demo",
+        "dwello_demo_role",
+        "dwello_demo_name",
+        "dwello_demo_formal",
+        "dwello_demo_onboarded",
+        "dwello_demo_properties",
+      ].forEach(k => localStorage.removeItem(k));
+    } catch {
+      // ignore
     }
-    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -190,27 +182,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setGender(null);
         setLastName(null);
         setSetupWizardComplete(false);
-        // In demo mode, keep properties from localStorage. Otherwise clear.
-        const isDemo = localStorage.getItem("dwello_demo") === "true";
-        if (!isDemo) {
-          setUserProperties([]);
-        } else {
-          try {
-            const stored = localStorage.getItem("dwello_demo_properties");
-            const parsed = stored ? (JSON.parse(stored) as Partial<UserProperty>[]) : [];
-            setUserPropertiesState(parsed.map(p => ({
-              id: p.id || `demo-${Date.now()}`,
-              name: p.name || p.address || "Immobilie",
-              address: p.address || "",
-              city: p.city || "",
-              zipCode: p.zipCode || "",
-              yearBuilt: p.yearBuilt ?? 0,
-              units: p.units ?? 1,
-            })));
-          } catch {
-            setUserPropertiesState([]);
-          }
-        }
+        setUserProperties([]);
       }
       if (mounted) setIsLoading(false);
     };
