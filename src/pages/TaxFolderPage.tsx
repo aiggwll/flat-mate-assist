@@ -183,15 +183,12 @@ const TaxFolderPage = () => {
         .upload(path, uploadFile);
       if (storageError) throw storageError;
 
-      const { data: urlData } = supabase.storage
-        .from("tax-documents")
-        .getPublicUrl(path);
-
       const { error: dbError } = await supabase.from("tax_documents").insert({
         user_id: userId,
         property_id: formPropertyId || null,
         filename: uploadFile.name,
-        file_url: urlData.publicUrl,
+        // Bucket is private — store the storage path; signed URL is generated on view
+        file_url: path,
         category: formCategory,
         amount: parseFloat(formAmount) || 0,
         document_date: formDate ? format(formDate, "yyyy-MM-dd") : null,
@@ -212,9 +209,11 @@ const TaxFolderPage = () => {
   };
 
   const handleDelete = async (doc: TaxDoc) => {
-    const pathMatch = doc.file_url.match(/tax-documents\/(.+)$/);
-    if (pathMatch) {
-      await supabase.storage.from("tax-documents").remove([pathMatch[1]]);
+    // file_url is either a storage path (new) or a legacy public URL containing "tax-documents/<path>"
+    const legacyMatch = doc.file_url.match(/tax-documents\/(.+)$/);
+    const storagePath = legacyMatch ? legacyMatch[1] : doc.file_url;
+    if (storagePath) {
+      await supabase.storage.from("tax-documents").remove([storagePath]);
     }
     await supabase.from("tax_documents").delete().eq("id", doc.id);
     toast.success("Beleg gelöscht.");
