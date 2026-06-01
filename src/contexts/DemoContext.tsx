@@ -1,80 +1,58 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+
+// Demo mode has been removed for production. This module keeps the
+// `useDemo()` / `DemoProvider` API intact so existing call sites compile,
+// but it always reports `isDemo: false` and performs no demo behaviour.
+// Any legacy demo data left in localStorage is cleared on mount.
 
 interface DemoContextType {
-  isDemo: boolean;
-  demoRole: "owner" | "tenant" | null;
-  demoName: string;
-  formal: boolean;
-  enterDemo: (role: "owner" | "tenant") => void;
-  setDemoOnboarding: (name: string, formal: boolean) => void;
-  onboardingDone: boolean;
+  isDemo: false;
+  demoRole: null;
+  demoName: "";
+  formal: false;
+  onboardingDone: true;
+  enterDemo: (role?: "owner" | "tenant") => void;
+  setDemoOnboarding: (name?: string, isFormal?: boolean) => void;
   resetDemo: () => void;
   greet: () => string;
   address: (sieText: string, duText: string) => string;
 }
 
-const DemoContext = createContext<DemoContextType | null>(null);
+const noop = () => {};
+
+const stub: DemoContextType = {
+  isDemo: false,
+  demoRole: null,
+  demoName: "",
+  formal: false,
+  onboardingDone: true,
+  enterDemo: noop,
+  setDemoOnboarding: noop,
+  resetDemo: noop,
+  greet: () => "",
+  address: (sieText: string) => sieText,
+};
+
+const clearLegacyDemoStorage = () => {
+  try {
+    [
+      "dwello_demo",
+      "dwello_demo_role",
+      "dwello_demo_name",
+      "dwello_demo_formal",
+      "dwello_demo_onboarded",
+      "dwello_demo_properties",
+    ].forEach(k => localStorage.removeItem(k));
+  } catch {
+    // ignore
+  }
+};
 
 export const DemoProvider = ({ children }: { children: ReactNode }) => {
-  const [isDemo, setIsDemo] = useState(() => localStorage.getItem("dwello_demo") === "true");
-  const [demoRole, setDemoRole] = useState<"owner" | "tenant" | null>(
-    () => (localStorage.getItem("dwello_demo_role") as "owner" | "tenant") || null
-  );
-  const [demoName, setDemoName] = useState(() => localStorage.getItem("dwello_demo_name") || "");
-  const [formal, setFormal] = useState(() => localStorage.getItem("dwello_demo_formal") !== "false");
-  const [onboardingDone, setOnboardingDone] = useState(
-    () => localStorage.getItem("dwello_demo_onboarded") === "true"
-  );
-
-  const enterDemo = (role: "owner" | "tenant") => {
-    setIsDemo(true);
-    setDemoRole(role);
-    localStorage.setItem("dwello_demo", "true");
-    localStorage.setItem("dwello_demo_role", role);
-  };
-
-  const setDemoOnboarding = (name: string, isFormal: boolean) => {
-    setDemoName(name);
-    setFormal(isFormal);
-    setOnboardingDone(true);
-    localStorage.setItem("dwello_demo_name", name);
-    localStorage.setItem("dwello_demo_formal", isFormal ? "true" : "false");
-    localStorage.setItem("dwello_demo_onboarded", "true");
-  };
-
-  const resetDemo = () => {
-    localStorage.removeItem("dwello_demo");
-    localStorage.removeItem("dwello_demo_role");
-    localStorage.removeItem("dwello_demo_name");
-    localStorage.removeItem("dwello_demo_formal");
-    localStorage.removeItem("dwello_demo_onboarded");
-    localStorage.removeItem("dwello_demo_properties");
-    setIsDemo(false);
-    setDemoRole(null);
-    setDemoName("");
-    setFormal(true);
-    setOnboardingDone(false);
-  };
-
-  const greet = () => {
-    const name = demoName || "Nutzer";
-    return formal ? `Guten Tag, ${name}` : `Hallo ${name}`;
-  };
-
-  const address = (sieText: string, duText: string) => (formal ? sieText : duText);
-
-  return (
-    <DemoContext.Provider value={{
-      isDemo, demoRole, demoName, formal, enterDemo,
-      setDemoOnboarding, onboardingDone, resetDemo, greet, address,
-    }}>
-      {children}
-    </DemoContext.Provider>
-  );
+  useEffect(() => {
+    clearLegacyDemoStorage();
+  }, []);
+  return <>{children}</>;
 };
 
-export const useDemo = () => {
-  const ctx = useContext(DemoContext);
-  if (!ctx) throw new Error("useDemo must be used within DemoProvider");
-  return ctx;
-};
+export const useDemo = (): DemoContextType => stub;
