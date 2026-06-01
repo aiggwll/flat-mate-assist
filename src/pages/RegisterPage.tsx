@@ -500,11 +500,11 @@ const RegisterPage = () => {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="reg-firstname">Vorname</Label>
-                <Input id="reg-firstname" name="given-name" autoComplete="given-name" placeholder="Max" required value={firstName} onChange={e => setFirstName(e.target.value)} />
+                <Input id="reg-firstname" name="given-name" autoComplete="given-name" placeholder="Max" required value={firstName} onChange={e => setFirstName(e.target.value)} onFocus={(e) => { e.currentTarget.dataset.ph = e.currentTarget.placeholder; e.currentTarget.placeholder = ""; }} onBlur={(e) => { if (e.currentTarget.dataset.ph) e.currentTarget.placeholder = e.currentTarget.dataset.ph; }} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="reg-lastname">Nachname</Label>
-                <Input id="reg-lastname" name="family-name" autoComplete="family-name" placeholder="Mustermann" required value={lastName} onChange={e => setLastName(e.target.value)} />
+                <Input id="reg-lastname" name="family-name" autoComplete="family-name" placeholder="Mustermann" required value={lastName} onChange={e => setLastName(e.target.value)} onFocus={(e) => { e.currentTarget.dataset.ph = e.currentTarget.placeholder; e.currentTarget.placeholder = ""; }} onBlur={(e) => { if (e.currentTarget.dataset.ph) e.currentTarget.placeholder = e.currentTarget.dataset.ph; }} />
               </div>
             </div>
 
@@ -543,6 +543,7 @@ const RegisterPage = () => {
                   onChange={e => setEmail(e.target.value)}
                   onBlur={() => setEmailTouched(true)}
                   className={cn(emailTouched && email && (emailValid ? "border-green-500" : "border-destructive"))}
+                  onFocus={(e) => { e.currentTarget.dataset.ph = e.currentTarget.placeholder; e.currentTarget.placeholder = ""; }}
                 />
                 {emailTouched && email && (
                   emailValid
@@ -574,6 +575,8 @@ const RegisterPage = () => {
                   value={password}
                   onChange={e => { setPassword(e.target.value); setPasswordError(""); }}
                   className="pr-10"
+                  onFocus={(e) => { e.currentTarget.dataset.ph = e.currentTarget.placeholder; e.currentTarget.placeholder = ""; }}
+                  onBlur={(e) => { if (e.currentTarget.dataset.ph) e.currentTarget.placeholder = e.currentTarget.dataset.ph; }}
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -617,6 +620,8 @@ const RegisterPage = () => {
                   value={passwordConfirm}
                   onChange={e => { setPasswordConfirm(e.target.value); setPasswordError(""); }}
                   className={cn("pr-10", passwordConfirm && (passwordsMatch ? "border-green-500" : "border-destructive"))}
+                  onFocus={(e) => { e.currentTarget.dataset.ph = e.currentTarget.placeholder; e.currentTarget.placeholder = ""; }}
+                  onBlur={(e) => { if (e.currentTarget.dataset.ph) e.currentTarget.placeholder = e.currentTarget.dataset.ph; }}
                 />
                 <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
