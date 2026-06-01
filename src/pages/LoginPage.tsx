@@ -174,12 +174,12 @@ const LoginPage = () => {
             {(error === "EMAIL_NOT_CONFIRMED" || error === "INVALID_OR_UNCONFIRMED") && (
               <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 space-y-2">
                 <p className="text-sm text-destructive font-medium">
-                  Anmeldung fehlgeschlagen
+                  E-Mail-Adresse noch nicht bestätigt?
                 </p>
                 <p className="text-sm text-destructive/90">
                   {error === "EMAIL_NOT_CONFIRMED"
                     ? "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Den Link finden Sie in Ihrem Posteingang — prüfen Sie auch den Spam-Ordner."
-                    : "E-Mail oder Passwort sind falsch — oder Ihre E-Mail-Adresse wurde noch nicht bestätigt. Bitte prüfen Sie Ihren Posteingang (auch Spam-Ordner) auf den Bestätigungslink."}
+                    : "Falls Sie sich gerade registriert haben, ist Ihr Konto vermutlich noch nicht aktiviert. Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse oder senden Sie sich den Bestätigungslink erneut zu."}
                 </p>
                 <button
                   type="button"
