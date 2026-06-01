@@ -240,7 +240,13 @@ const RegisterPage = () => {
       })));
     }
     toast.success(`${properties.length} ${properties.length === 1 ? "Immobilie" : "Immobilien"} angelegt!`);
-    navigate("/dashboard");
+    // After signup, email is typically not yet confirmed → show verify-email step
+    const { data: { user: u } } = await supabase.auth.getUser();
+    if (u && !u.email_confirmed_at) {
+      setStep("verify-email");
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   // Left branding panel (reused across steps)
