@@ -17,12 +17,12 @@ const corsHeaders = {
 }
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'Confirm your email',
-  invite: "You've been invited",
-  magiclink: 'Your login link',
-  recovery: 'Reset your password',
-  email_change: 'Confirm your new email',
-  reauthentication: 'Your verification code',
+  signup: 'Bitte bestätigen Sie Ihre E-Mail-Adresse für dwello',
+  invite: 'Sie wurden eingeladen',
+  magiclink: 'Ihr Anmeldelink',
+  recovery: 'Passwort zurücksetzen',
+  email_change: 'Neue E-Mail-Adresse bestätigen',
+  reauthentication: 'Ihr Bestätigungscode',
 }
 
 // Template mapping
@@ -36,7 +36,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "dwello-app"
+const SITE_NAME = "dwello"
 const SENDER_DOMAIN = "notify.dwello.pro"
 const ROOT_DOMAIN = "dwello.pro"
 const FROM_DOMAIN = "dwello.pro" // Domain shown in From address (may be root or sender subdomain)
