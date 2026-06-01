@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, Home, Plus, X, CheckCircle2, AlertCircle, Check, Eye, EyeOff } from "lucide-react";
+import { Building2, Home, Plus, X, CheckCircle2, AlertCircle, Check, Eye, EyeOff, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@/contexts/UserContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +28,9 @@ const RegisterPage = () => {
   const inviteRole = searchParams.get("role") as Role | null;
   const inviteProperty = searchParams.get("property");
 
-  const [step, setStep] = useState<"role" | "form" | "property-setup" | "tenant-info">(inviteRole ? "form" : "role");
+  const [step, setStep] = useState<"role" | "form" | "property-setup" | "tenant-info" | "verify-email">(inviteRole ? "form" : "role");
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [selectedRole, setSelectedRole] = useState<Role | null>(inviteRole);
 
   const [firstName, setFirstName] = useState("");
@@ -238,7 +240,13 @@ const RegisterPage = () => {
       })));
     }
     toast.success(`${properties.length} ${properties.length === 1 ? "Immobilie" : "Immobilien"} angelegt!`);
-    navigate("/dashboard");
+    // After signup, email is typically not yet confirmed → show verify-email step
+    const { data: { user: u } } = await supabase.auth.getUser();
+    if (u && !u.email_confirmed_at) {
+      setStep("verify-email");
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   // Left branding panel (reused across steps)
@@ -364,7 +372,14 @@ const RegisterPage = () => {
               </div>
             </div>
             <div className="mt-6 space-y-3">
-              <Button className="w-full" onClick={() => navigate("/tenant-dashboard")}>
+              <Button className="w-full" onClick={async () => {
+                const { data: { user: u } } = await supabase.auth.getUser();
+                if (u && !u.email_confirmed_at) {
+                  setStep("verify-email");
+                } else {
+                  navigate("/tenant-dashboard");
+                }
+              }}>
                 Zum Mieterportal →
               </Button>
               <p className="text-xs text-center text-muted-foreground">
@@ -449,8 +464,77 @@ const RegisterPage = () => {
               <Button className="w-full" onClick={handlePropertySubmit}>
                 {properties.length === 1 ? "Immobilie anlegen & starten" : `${properties.length} Immobilien anlegen & starten`}
               </Button>
-              <button onClick={() => navigate("/dashboard")} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <button onClick={async () => {
+                const { data: { user: u } } = await supabase.auth.getUser();
+                if (u && !u.email_confirmed_at) setStep("verify-email");
+                else navigate("/dashboard");
+              }} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Später einrichten →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Step: Verify email ──
+  if (step === "verify-email") {
+    const handleResend = async () => {
+      if (resendCooldown > 0 || resendLoading) return;
+      setResendLoading(true);
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      });
+      setResendLoading(false);
+      if (error) {
+        toast.error("E-Mail konnte nicht erneut gesendet werden. Bitte versuchen Sie es später.");
+      } else {
+        toast.success("Bestätigungslink erneut gesendet.");
+        setResendCooldown(60);
+        const t = setInterval(() => {
+          setResendCooldown(c => {
+            if (c <= 1) { clearInterval(t); return 0; }
+            return c - 1;
+          });
+        }, 1000);
+      }
+    };
+    return (
+      <div className="min-h-screen bg-primary flex">
+        <BrandingPanel subtitle="Nur noch ein Schritt — bestätigen Sie Ihre E-Mail, um Ihr Konto zu aktivieren." />
+        <div className="flex-1 flex items-center justify-center p-8 bg-background rounded-l-3xl lg:max-w-lg">
+          <div className="w-full max-w-sm text-center">
+            <div className="lg:hidden mb-6 flex justify-center"><DwelloLogo variant="light" size="lg" showIcon={false} /></div>
+            <div className="mx-auto mb-6 h-16 w-16 rounded-full bg-accent/10 flex items-center justify-center">
+              <Mail className="h-8 w-8 text-accent" />
+            </div>
+            <h2 className="text-2xl font-heading font-bold text-foreground">Bestätigen Sie Ihre E-Mail</h2>
+            <p className="text-muted-foreground text-sm mt-3">
+              Wir haben einen Bestätigungslink an <span className="font-medium text-foreground">{email}</span> gesendet.
+              Bitte öffnen Sie Ihr Postfach und klicken Sie auf den Link, um Ihr Konto zu aktivieren.
+            </p>
+            <div className="mt-6 p-4 rounded-xl bg-muted/50 text-left text-xs text-muted-foreground space-y-1">
+              <p>• Keine E-Mail erhalten? Schauen Sie bitte im Spam-Ordner nach.</p>
+              <p>• Der Link ist 24 Stunden gültig.</p>
+              <p>• Nach der Bestätigung können Sie sich anmelden.</p>
+            </div>
+            <div className="mt-6 space-y-3">
+              <Button className="w-full" onClick={() => navigate("/login")}>
+                Zur Anmeldung
+              </Button>
+              <button
+                onClick={handleResend}
+                disabled={resendCooldown > 0 || resendLoading}
+                className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+              >
+                {resendLoading
+                  ? "Wird gesendet..."
+                  : resendCooldown > 0
+                    ? `Erneut senden in ${resendCooldown}s`
+                    : "Bestätigungslink erneut senden"}
               </button>
             </div>
           </div>
