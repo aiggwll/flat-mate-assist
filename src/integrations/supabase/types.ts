@@ -608,6 +608,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_view_profile: { Args: { _target: string }; Returns: boolean }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
