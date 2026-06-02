@@ -17,6 +17,8 @@ const AuthCallbackPage = () => {
         const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
         const errorDescription = url.searchParams.get("error_description") || hashParams.get("error_description");
         const code = url.searchParams.get("code");
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
 
         if (errorDescription) {
           setErrorMsg(errorDescription);
@@ -32,8 +34,21 @@ const AuthCallbackPage = () => {
             setStatus("error");
             return;
           }
+        } else if (accessToken && refreshToken) {
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (sessionError) {
+            console.error("Auth token session error:", sessionError);
+            setErrorMsg(sessionError.message);
+            setStatus("error");
+            return;
+          }
         }
 
+        localStorage.setItem("rememberMe", "true");
+        sessionStorage.setItem("activeSession", "true");
         const { data: { session }, error } = await supabase.auth.getSession();
 
         if (error) {
