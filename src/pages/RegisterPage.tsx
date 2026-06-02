@@ -69,7 +69,7 @@ const RegisterPage = () => {
 
     try {
       const role = selectedRole;
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -92,6 +92,12 @@ const RegisterPage = () => {
       setUserRole(role);
       setSalutation(salutationField);
       setIsNewUser(true);
+
+      if (!data.session || !data.user?.email_confirmed_at) {
+        setStep("verify-email");
+        setLoading(false);
+        return;
+      }
 
       // For tenants: save invite property info
       if (role === "tenant" && inviteProperty) {
@@ -473,10 +479,10 @@ const RegisterPage = () => {
             <div className="mx-auto mb-6 h-16 w-16 rounded-full bg-accent/10 flex items-center justify-center">
               <Mail className="h-8 w-8 text-accent" />
             </div>
-            <h2 className="text-2xl font-heading font-bold text-foreground">Bestätigen Sie Ihre E-Mail</h2>
+            <h2 className="text-2xl font-heading font-bold text-foreground">Bitte schauen Sie in Ihre E-Mail</h2>
             <p className="text-muted-foreground text-sm mt-3">
               Wir haben einen Bestätigungslink an <span className="font-medium text-foreground">{email}</span> gesendet.
-              Bitte öffnen Sie Ihr Postfach und klicken Sie auf den Link, um Ihr Konto zu aktivieren.
+              Bitte bestätigen Sie Ihre E-Mail-Adresse, um Ihr Konto zu aktivieren.
             </p>
             <div className="mt-6 p-4 rounded-xl bg-muted/50 text-left text-xs text-muted-foreground space-y-1">
               <p>• Keine E-Mail erhalten? Schauen Sie bitte im Spam-Ordner nach.</p>
