@@ -194,10 +194,12 @@ const PropertiesPage = () => {
           <h1 className="text-3xl font-heading font-bold text-foreground">Immobilien</h1>
           <p className="text-muted-foreground text-sm mt-1.5">{userProperties.length} {userProperties.length === 1 ? "Immobilie" : "Immobilien"} verwaltet</p>
         </div>
-          <Button onClick={() => { setEditId(null); setErrors({}); setOpen(true); }} size="lg">
-          <Plus className="h-4 w-4 mr-2" />
-          Neue Immobilie
-        </Button>
+          {userProperties.length === 0 && (
+            <Button onClick={() => { setEditId(null); setErrors({}); setOpen(true); }} size="lg">
+              <Plus className="h-4 w-4 mr-2" />
+              Neue Immobilie
+            </Button>
+          )}
       </div>
 
       {userProperties.length === 0 ? (
@@ -263,6 +265,15 @@ const PropertiesPage = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {userProperties.length > 0 && (
+        <div className="flex justify-center pt-2">
+          <Button onClick={() => { setEditId(null); setErrors({}); setOpen(true); }} size="lg">
+            <Plus className="h-4 w-4 mr-2" />
+            Eine weitere Immobilie hinzufügen
+          </Button>
         </div>
       )}
 
